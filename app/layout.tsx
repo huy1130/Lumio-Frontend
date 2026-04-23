@@ -15,7 +15,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
+          {/* Fixed gradient layer — swaps automatically via --page-gradient CSS var */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 0,
+              background: "var(--page-gradient)",
+              pointerEvents: "none",
+            }}
+          />
+          {/* Content layer — always above the gradient */}
+          <div style={{ position: "relative", zIndex: 1 }}>
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>

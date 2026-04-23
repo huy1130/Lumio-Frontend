@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 
 interface NavItem {
@@ -44,17 +43,17 @@ const navigation: NavSection[] = [
     title: "Admin",
     items: [
       { title: "Subscriptions", href: "/admin/subscriptions", icon: Tag },
-      { title: "Products", href: "/admin/products", icon: Package },
-      { title: "Inventory", href: "/admin/inventory", icon: Warehouse },
-      { title: "Merchandises", href: "/admin/merchandises", icon: Store },
-      { title: "Orders", href: "/admin/orders", icon: BarChart3 },
+      { title: "Products",      href: "/admin/products",      icon: Package },
+      { title: "Inventory",     href: "/admin/inventory",     icon: Warehouse },
+      { title: "Merchandises",  href: "/admin/merchandises",  icon: Store },
+      { title: "Orders",        href: "/admin/orders",        icon: BarChart3 },
     ],
   },
   {
     title: "Operations",
     items: [
-      { title: "Create Orders", href: "/staff/orders", icon: ShoppingCart },
-      { title: "Payments", href: "/cashier/payments", icon: CreditCard },
+      { title: "Create Orders", href: "/staff/orders",      icon: ShoppingCart },
+      { title: "Payments",      href: "/cashier/payments",  icon: CreditCard },
     ],
   },
   {
@@ -66,56 +65,81 @@ const navigation: NavSection[] = [
 ];
 
 export function Sidebar() {
-  const pathname = usePathname();
+  const pathname  = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
     <aside
       className={cn(
-        "relative flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out",
+        // ── Structure ────────────────────────────────────────────────────
+        "relative flex flex-col transition-all duration-300 ease-in-out",
+        // ── Light / dark backgrounds ──────────────────────────────────────
+        "bg-white dark:bg-gray-900",
+        // ── Border ───────────────────────────────────────────────────────
+        "border-r border-gray-200 dark:border-gray-700",
         collapsed ? "w-16" : "w-64"
       )}
     >
-      {/* Logo */}
-      <div className={cn("flex items-center h-16 border-b border-sidebar-border px-4", collapsed ? "justify-center" : "gap-3")}>
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary">
-          <Layers className="h-5 w-5 text-sidebar-primary-foreground" />
+      {/* ── Logo ──────────────────────────────────────────────────────── */}
+      <div
+        className={cn(
+          "flex items-center h-16 border-b border-gray-200 dark:border-gray-700 px-4",
+          collapsed ? "justify-center" : "gap-3"
+        )}
+      >
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 dark:bg-indigo-500">
+          <Layers className="h-5 w-5 text-white" />
         </div>
         {!collapsed && (
           <div>
-            <p className="text-sm font-bold text-sidebar-foreground">POS System</p>
-            <p className="text-xs text-sidebar-foreground/60">Management Suite</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+              POS System
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Management Suite
+            </p>
           </div>
         )}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-6">
+      {/* ── Navigation ────────────────────────────────────────────────── */}
+      <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-5">
         {navigation.map((section) => (
           <div key={section.title}>
             {!collapsed && (
-              <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+              <p className="mb-1.5 px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                 {section.title}
               </p>
             )}
-            <ul className="space-y-1">
+            <ul className="space-y-0.5">
               {section.items.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                const isActive =
+                  pathname === item.href ||
+                  pathname.startsWith(item.href + "/");
                 const Icon = item.icon;
                 return (
                   <li key={item.href}>
                     <Link
                       href={item.href}
+                      title={collapsed ? item.title : undefined}
                       className={cn(
                         "group flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors",
+                        collapsed && "justify-center",
                         isActive
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                        collapsed && "justify-center"
+                          ? // ── active ──────────────────────────────────
+                            "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
+                          : // ── idle + hover ─────────────────────────────
+                            "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
                       )}
-                      title={collapsed ? item.title : undefined}
                     >
-                      <Icon className="h-4 w-4 shrink-0" />
+                      <Icon
+                        className={cn(
+                          "h-4 w-4 shrink-0",
+                          isActive
+                            ? "text-indigo-600 dark:text-indigo-400"
+                            : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                        )}
+                      />
                       {!collapsed && (
                         <>
                           <span className="flex-1">{item.title}</span>
@@ -131,17 +155,30 @@ export function Sidebar() {
                 );
               })}
             </ul>
-            {!collapsed && <Separator className="mt-4 bg-sidebar-border" />}
+
+            {/* section divider */}
+            {!collapsed && (
+              <div className="mt-4 border-t border-gray-200 dark:border-gray-700" />
+            )}
           </div>
         ))}
       </nav>
 
-      {/* Collapse toggle */}
+      {/* ── Collapse toggle ───────────────────────────────────────────── */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border border-sidebar-border bg-background text-muted-foreground shadow-sm hover:bg-accent transition-colors z-10"
+        className={cn(
+          "absolute -right-3 top-20 z-10",
+          "flex h-6 w-6 items-center justify-center rounded-full shadow-sm transition-colors",
+          "border border-gray-200 dark:border-gray-700",
+          "bg-white dark:bg-gray-900",
+          "text-gray-500 dark:text-gray-400",
+          "hover:bg-gray-100 dark:hover:bg-gray-800"
+        )}
       >
-        {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+        {collapsed
+          ? <ChevronRight className="h-3 w-3" />
+          : <ChevronLeft  className="h-3 w-3" />}
       </button>
     </aside>
   );
