@@ -40,7 +40,7 @@ export default function InventoryPage() {
 
   return (
     <div>
-      <Header title="Inventory" breadcrumbs={[{ label: "Admin" }, { label: "Inventory" }]} />
+      <Header />
       <div className="p-6 space-y-6">
 
         {/* Stats */}

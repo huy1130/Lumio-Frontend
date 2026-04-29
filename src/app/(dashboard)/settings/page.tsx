@@ -24,7 +24,7 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <Header title="Settings" breadcrumbs={[{ label: "Settings" }]} />
+      <Header />
       <div className="p-6">
         <div className="flex gap-6">
           {/* Settings sidebar */}

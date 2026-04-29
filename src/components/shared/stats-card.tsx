@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TrendingUp, TrendingDown } from "lucide-react";
@@ -7,7 +8,7 @@ interface StatsCardProps {
   value: string | number;
   change?: number;
   changeLabel?: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   iconClassName?: string;
 }
 

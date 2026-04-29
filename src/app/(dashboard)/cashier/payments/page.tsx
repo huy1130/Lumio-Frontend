@@ -42,7 +42,7 @@ export default function CashierPaymentsPage() {
 
   return (
     <div>
-      <Header title="Payments" breadcrumbs={[{ label: "Cashier" }, { label: "Payments" }]} />
+      <Header />
       <div className="p-6 space-y-6">
 
         <div className="grid gap-4 sm:grid-cols-3">

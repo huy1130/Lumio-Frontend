@@ -29,7 +29,7 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
-      <Header title="Orders" breadcrumbs={[{ label: "Admin" }, { label: "Orders" }]} />
+      <Header />
       <div className="p-6 space-y-6">
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

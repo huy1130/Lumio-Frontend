@@ -194,10 +194,7 @@ export default function ProductsPage() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {/* Sticky header (per-page Header component) */}
-        <Header
-          title="Manage Products"
-          breadcrumbs={[{ label: "Admin" }, { label: "Products" }]}
-        />
+        <Header />
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-5">

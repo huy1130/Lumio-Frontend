@@ -1,5 +1,7 @@
-export type Role = "manager" | "admin" | "staff" | "cashier" | "guest";
+// ── Roles ─────────────────────────────────────────────────────────────────────
+export type Role = "manager" | "admin" | "shop_owner" | "staff" | "cashier";
 
+// ── User ──────────────────────────────────────────────────────────────────────
 export interface User {
   id: string;
   name: string;
@@ -9,6 +11,7 @@ export interface User {
   createdAt: string;
 }
 
+// ── Product ───────────────────────────────────────────────────────────────────
 export interface Product {
   id: string;
   name: string;
@@ -24,6 +27,7 @@ export interface Product {
   createdAt: string;
 }
 
+// ── Merchandise ───────────────────────────────────────────────────────────────
 export interface Merchandise {
   id: string;
   name: string;
@@ -34,6 +38,7 @@ export interface Merchandise {
   status: "active" | "inactive";
 }
 
+// ── Inventory ─────────────────────────────────────────────────────────────────
 export interface InventoryItem {
   id: string;
   productId: string;
@@ -48,6 +53,7 @@ export interface InventoryItem {
   status: "in_stock" | "low_stock" | "out_of_stock";
 }
 
+// ── Order ─────────────────────────────────────────────────────────────────────
 export interface OrderItem {
   productId: string;
   productName: string;
@@ -73,6 +79,7 @@ export interface Order {
   createdAt: string;
 }
 
+// ── Payment ───────────────────────────────────────────────────────────────────
 export interface Payment {
   id: string;
   orderId: string;
@@ -85,6 +92,7 @@ export interface Payment {
   processedBy: string;
 }
 
+// ── Subscription ──────────────────────────────────────────────────────────────
 export interface Subscription {
   id: string;
   planName: string;
@@ -96,14 +104,21 @@ export interface Subscription {
   status: "active" | "inactive";
 }
 
+// ── Navigation ────────────────────────────────────────────────────────────────
 export interface NavItem {
   title: string;
   href: string;
-  icon: string;
-  roles: Role[];
-  children?: NavItem[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: React.ComponentType<any>;
+  badge?: string | number;
 }
 
+export interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
+// ── Stats card ────────────────────────────────────────────────────────────────
 export interface StatCard {
   title: string;
   value: string | number;

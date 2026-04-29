@@ -16,10 +16,7 @@ export default function SubscriptionsPage() {
 
   return (
     <div>
-      <Header
-        title="Subscriptions"
-        breadcrumbs={[{ label: "Admin" }, { label: "Subscriptions" }]}
-      />
+      <Header />
       <div className="p-6 space-y-6">
 
         {/* Plan cards */}

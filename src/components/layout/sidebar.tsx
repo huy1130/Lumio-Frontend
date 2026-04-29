@@ -1,185 +1,177 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
-  Warehouse,
-  CreditCard,
-  Settings,
-  Tag,
-  BarChart3,
-  Store,
-  ChevronLeft,
-  ChevronRight,
-  Layers,
-} from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ChevronLeft, ChevronRight, Layers, LogOut, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
-
-interface NavItem {
-  title: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  badge?: string;
-}
-
-interface NavSection {
-  title: string;
-  items: NavItem[];
-}
-
-const navigation: NavSection[] = [
-  {
-    title: "Overview",
-    items: [
-      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    ],
-  },
-  {
-    title: "Admin",
-    items: [
-      { title: "Subscriptions", href: "/admin/subscriptions", icon: Tag },
-      { title: "Products",      href: "/admin/products",      icon: Package },
-      { title: "Inventory",     href: "/admin/inventory",     icon: Warehouse },
-      { title: "Merchandises",  href: "/admin/merchandises",  icon: Store },
-      { title: "Orders",        href: "/admin/orders",        icon: BarChart3 },
-    ],
-  },
-  {
-    title: "Operations",
-    items: [
-      { title: "Create Orders", href: "/staff/orders",      icon: ShoppingCart },
-      { title: "Payments",      href: "/cashier/payments",  icon: CreditCard },
-    ],
-  },
-  {
-    title: "System",
-    items: [
-      { title: "Settings", href: "/settings", icon: Settings },
-    ],
-  },
-];
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { ROLE_LABELS, ROLE_COLORS } from "@/config/roles";
+import { getNavigationByRole } from "@/config/navigation";
 
 export function Sidebar() {
-  const pathname  = usePathname();
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, role } = useAuth();
+
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navigation = getNavigationByRole(role);
+
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
+
+  function handleLogout() {
+    router.push("/login");
+  }
+
+  const roleBadgeClass = cn("mt-1 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold", ROLE_COLORS[role]);
+  const avatarClass = cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold", ROLE_COLORS[role]);
+
+  function NavContent({ isCollapsed }: { isCollapsed: boolean }) {
+    return (
+      <div className="flex h-full flex-col">
+        {/* Logo */}
+        <div className={cn("flex h-16 shrink-0 items-center border-b border-gray-200 dark:border-gray-700 px-4", isCollapsed ? "justify-center" : "gap-3")}>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600">
+            <Layers className="h-5 w-5 text-white" />
+          </div>
+          {!isCollapsed && (
+            <div>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">POS System</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Management Suite</p>
+            </div>
+          )}
+        </div>
+
+        {/* Role badge */}
+        {!isCollapsed && (
+          <div className="border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+            <p className="truncate text-xs text-gray-500 dark:text-gray-400">{user.name}</p>
+            <span className={roleBadgeClass}>{ROLE_LABELS[role]}</span>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-5">
+          {navigation.map((section) => (
+            <div key={section.title}>
+              {!isCollapsed && (
+                <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                  {section.title}
+                </p>
+              )}
+              <ul className="space-y-0.5">
+                {section.items.map((item) => {
+                  const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
+                  const Icon = item.icon;
+                  const linkClass = cn(
+                    "group flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all",
+                    isCollapsed && "justify-center",
+                    isActive
+                      ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+                  );
+                  const iconClass = cn(
+                    "h-4 w-4 shrink-0 transition-colors",
+                    isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 group-hover:text-gray-600 dark:text-gray-500"
+                  );
+                  return (
+                    <li key={item.href}>
+                      <Link href={item.href} title={isCollapsed ? item.title : undefined} className={linkClass}>
+                        <Icon className={iconClass} />
+                        {!isCollapsed && (
+                          <>
+                            <span className="flex-1 truncate">{item.title}</span>
+                            {item.badge !== undefined && (
+                              <Badge variant="secondary" className="shrink-0 text-xs">{item.badge}</Badge>
+                            )}
+                          </>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+              {!isCollapsed && <div className="mt-4 border-t border-gray-100 dark:border-gray-800" />}
+            </div>
+          ))}
+        </nav>
+
+        {/* User card */}
+        <div className={cn("shrink-0 border-t border-gray-200 dark:border-gray-700 p-3", isCollapsed ? "flex justify-center" : "space-y-2")}>
+          {isCollapsed ? (
+            <button onClick={handleLogout} title="Log out" className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">
+              <LogOut className="h-4 w-4" />
+            </button>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 px-1">
+                <div className={avatarClass}>{user.avatar}</div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-gray-900 dark:text-gray-100">{user.name}</p>
+                  <p className="truncate text-[10px] text-gray-400 dark:text-gray-500">{user.email}</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 w-full justify-start gap-2 text-xs text-gray-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400">
+                <LogOut className="h-3.5 w-3.5" />
+                Log out
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const desktopClass = cn(
+    "relative hidden flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out dark:border-gray-700 dark:bg-gray-900 lg:flex",
+    collapsed ? "w-[68px]" : "w-64"
+  );
+  const drawerClass = cn(
+    "fixed inset-y-0 left-0 z-50 w-72 transform border-r border-gray-200 bg-white shadow-xl transition-transform duration-300 dark:border-gray-700 dark:bg-gray-900 lg:hidden",
+    mobileOpen ? "translate-x-0" : "-translate-x-full"
+  );
 
   return (
-    <aside
-      className={cn(
-        // ── Structure ────────────────────────────────────────────────────
-        "relative flex flex-col transition-all duration-300 ease-in-out",
-        // ── Light / dark backgrounds ──────────────────────────────────────
-        "bg-white dark:bg-gray-900",
-        // ── Border ───────────────────────────────────────────────────────
-        "border-r border-gray-200 dark:border-gray-700",
-        collapsed ? "w-16" : "w-64"
-      )}
-    >
-      {/* ── Logo ──────────────────────────────────────────────────────── */}
-      <div
-        className={cn(
-          "flex items-center h-16 border-b border-gray-200 dark:border-gray-700 px-4",
-          collapsed ? "justify-center" : "gap-3"
-        )}
-      >
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 dark:bg-indigo-500">
-          <Layers className="h-5 w-5 text-white" />
-        </div>
-        {!collapsed && (
-          <div>
-            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
-              POS System
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Management Suite
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* ── Navigation ────────────────────────────────────────────────── */}
-      <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-5">
-        {navigation.map((section) => (
-          <div key={section.title}>
-            {!collapsed && (
-              <p className="mb-1.5 px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                {section.title}
-              </p>
-            )}
-            <ul className="space-y-0.5">
-              {section.items.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  pathname.startsWith(item.href + "/");
-                const Icon = item.icon;
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      title={collapsed ? item.title : undefined}
-                      className={cn(
-                        "group flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors",
-                        collapsed && "justify-center",
-                        isActive
-                          ? // ── active ──────────────────────────────────
-                            "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
-                          : // ── idle + hover ─────────────────────────────
-                            "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
-                      )}
-                    >
-                      <Icon
-                        className={cn(
-                          "h-4 w-4 shrink-0",
-                          isActive
-                            ? "text-indigo-600 dark:text-indigo-400"
-                            : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
-                        )}
-                      />
-                      {!collapsed && (
-                        <>
-                          <span className="flex-1">{item.title}</span>
-                          {item.badge && (
-                            <Badge variant="secondary" className="text-xs">
-                              {item.badge}
-                            </Badge>
-                          )}
-                        </>
-                      )}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-
-            {/* section divider */}
-            {!collapsed && (
-              <div className="mt-4 border-t border-gray-200 dark:border-gray-700" />
-            )}
-          </div>
-        ))}
-      </nav>
-
-      {/* ── Collapse toggle ───────────────────────────────────────────── */}
+    <>
+      {/* Mobile hamburger */}
       <button
-        onClick={() => setCollapsed(!collapsed)}
-        className={cn(
-          "absolute -right-3 top-20 z-10",
-          "flex h-6 w-6 items-center justify-center rounded-full shadow-sm transition-colors",
-          "border border-gray-200 dark:border-gray-700",
-          "bg-white dark:bg-gray-900",
-          "text-gray-500 dark:text-gray-400",
-          "hover:bg-gray-100 dark:hover:bg-gray-800"
-        )}
+        onClick={() => setMobileOpen(true)}
+        className="fixed left-4 top-4 z-50 flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900 lg:hidden"
       >
-        {collapsed
-          ? <ChevronRight className="h-3 w-3" />
-          : <ChevronLeft  className="h-3 w-3" />}
+        <Menu className="h-4 w-4 text-gray-600 dark:text-gray-300" />
       </button>
-    </aside>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)} />
+      )}
+
+      {/* Mobile drawer */}
+      <aside className={drawerClass}>
+        <button onClick={() => setMobileOpen(false)} className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+          <X className="h-4 w-4" />
+        </button>
+        <NavContent isCollapsed={false} />
+      </aside>
+
+      {/* Desktop sidebar */}
+      <aside className={desktopClass}>
+        <NavContent isCollapsed={collapsed} />
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="absolute -right-3 top-[4.5rem] z-10 flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
+        >
+          {collapsed ? (
+            <ChevronRight className="h-3 w-3 text-gray-500" />
+          ) : (
+            <ChevronLeft className="h-3 w-3 text-gray-500" />
+          )}
+        </button>
+      </aside>
+    </>
   );
 }

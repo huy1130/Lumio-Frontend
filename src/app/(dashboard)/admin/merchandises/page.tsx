@@ -24,7 +24,7 @@ export default function MerchandisesPage() {
 
   return (
     <div>
-      <Header title="Merchandises" breadcrumbs={[{ label: "Admin" }, { label: "Merchandises" }]} />
+      <Header />
       <div className="p-6 space-y-6">
 
         {/* Card grid */}

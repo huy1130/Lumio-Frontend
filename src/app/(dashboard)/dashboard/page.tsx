@@ -27,7 +27,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <Header title="Dashboard" breadcrumbs={[{ label: "Home" }, { label: "Dashboard" }]} />
+      <Header />
       <div className="p-6 space-y-6">
 
         {/* Stats */}

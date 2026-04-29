@@ -1,68 +1,84 @@
-import Link from "next/link";
-import { Layers } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { ChevronRight, Layers } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { ALL_ROLES, ROLE_LABELS, ROLE_COLORS, MOCK_USERS, REDIRECT_MAP } from "@/config/roles";
+import { cn } from "@/lib/utils";
+import type { Role } from "@/config/roles";
 
 export default function LoginPage() {
+  const { setRole } = useAuth();
+  const router = useRouter();
+
+  function handleSelect(role: Role) {
+    setRole(role);
+    router.push(REDIRECT_MAP[role]);
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
+    <div
+      className="flex min-h-screen items-center justify-center p-4"
+      style={{
+        background: "radial-gradient(125% 125% at 50% 90%, #fff 40%, #6366f1 100%)",
+      }}
+    >
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary mb-3">
-            <Layers className="h-7 w-7 text-primary-foreground" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-200">
+            <Layers className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">POS System</h1>
-          <p className="text-slate-400 text-sm mt-1">Management Suite</p>
+          <h1 className="text-3xl font-bold text-gray-900">POS System</h1>
+          <p className="mt-1 text-gray-500">Chọn role để xem demo giao diện</p>
         </div>
 
-        <Card className="border-0 shadow-2xl">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl">Welcome back</CardTitle>
-            <CardDescription>Sign in to your account to continue</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
-              <Input id="email" type="email" placeholder="you@company.com" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link href="#" className="text-xs text-primary hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
-              <Input id="password" type="password" placeholder="••••••••" />
-            </div>
+        {/* Role cards */}
+        <div className="overflow-hidden rounded-2xl bg-white shadow-xl shadow-indigo-100">
+          {ALL_ROLES.map((role, idx) => {
+            const user = MOCK_USERS[role];
+            return (
+              <button
+                key={role}
+                onClick={() => handleSelect(role)}
+                className={cn(
+                  "flex w-full items-center gap-4 px-5 py-4 transition-all hover:bg-gray-50 active:scale-[0.99]",
+                  idx < ALL_ROLES.length - 1 && "border-b border-gray-100"
+                )}
+              >
+                {/* Avatar */}
+                <div className={cn(
+                  "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold",
+                  ROLE_COLORS[role]
+                )}>
+                  {user.avatar}
+                </div>
 
-            {/* Demo accounts */}
-            <div className="rounded-lg border bg-muted/40 p-3 space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Demo accounts</p>
-              <div className="flex flex-wrap gap-2">
-                {["Manager", "Admin", "Staff", "Cashier"].map((role) => (
-                  <Badge key={role} variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors text-xs">
-                    {role}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3">
-            <Link href="/dashboard" className="w-full">
-              <Button className="w-full">Sign in</Button>
-            </Link>
-            <p className="text-sm text-center text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-primary font-medium hover:underline">
-                Create one
-              </Link>
-            </p>
-          </CardFooter>
-        </Card>
+                {/* Info */}
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="text-sm font-semibold text-gray-900">{user.name}</p>
+                  <p className="truncate text-xs text-gray-400">{user.email}</p>
+                </div>
+
+                {/* Role badge */}
+                <span className={cn(
+                  "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                  ROLE_COLORS[role]
+                )}>
+                  {ROLE_LABELS[role]}
+                </span>
+
+                {/* Arrow */}
+                <ChevronRight className="h-4 w-4 shrink-0 text-gray-300" />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Demo note */}
+        <p className="mt-6 text-center text-sm text-gray-400">
+          🚀 Demo mode — không cần password
+        </p>
       </div>
     </div>
   );

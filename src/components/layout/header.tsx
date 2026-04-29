@@ -1,11 +1,10 @@
 "use client";
 
-import { Bell, Moon, Sun, Search, LogOut, User, Settings } from "lucide-react";
-import { useTheme } from "next-themes";
+import { usePathname, useRouter } from "next/navigation";
+import { Bell, LogOut, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,92 +13,75 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { RoleSwitcher } from "@/components/layout/RoleSwitcher";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { useAuth } from "@/context/AuthContext";
+import { ROLE_LABELS, ROLE_COLORS } from "@/config/roles";
+import { cn } from "@/lib/utils";
 
-interface HeaderProps {
-  title?: string;
-  breadcrumbs?: { label: string; href?: string }[];
+function pathToBreadcrumb(path: string): string {
+  const parts = path.split("/").filter(Boolean);
+  if (parts.length === 0) return "Home";
+  return parts
+    .map((p) => p.replace(/-/g, " ").split(" ").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" "))
+    .join(" / ");
 }
 
-export function Header({ title, breadcrumbs }: HeaderProps) {
-  const { theme, setTheme } = useTheme();
+export function Header() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, role } = useAuth();
+
+  const breadcrumb = pathToBreadcrumb(pathname);
+  const avatarClass = cn("flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold", ROLE_COLORS[role]);
+  const spanClass = cn("mt-1 inline-block w-fit rounded-full px-2.5 py-0.5 text-[11px] font-semibold", ROLE_COLORS[role]);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 px-6 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md text-gray-900 dark:text-gray-100">
-      {/* Title / breadcrumbs */}
-      <div className="flex-1">
-        {breadcrumbs ? (
-          <nav className="flex items-center gap-1 text-sm text-muted-foreground">
-            {breadcrumbs.map((crumb, i) => (
-              <span key={i} className="flex items-center gap-1">
-                {i > 0 && <span>/</span>}
-                <span className={i === breadcrumbs.length - 1 ? "text-foreground font-medium" : ""}>
-                  {crumb.label}
-                </span>
-              </span>
-            ))}
-          </nav>
-        ) : (
-          <h1 className="text-xl font-semibold">{title}</h1>
-        )}
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-gray-200 bg-white/80 px-4 backdrop-blur-md dark:border-gray-700 dark:bg-gray-900/80 sm:px-6">
+      <div className="w-8 shrink-0 lg:hidden" />
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-300">
+          {breadcrumb}
+        </p>
       </div>
 
-      {/* Search */}
-      <div className="hidden md:flex relative w-64">
+      <div className="relative hidden w-52 md:flex lg:w-64">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search..." className="pl-9 h-9" />
+        <Input placeholder="Search..." className="h-9 pl-9 text-sm" />
       </div>
 
-      {/* Dark mode toggle */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        className="text-muted-foreground"
-      >
-        <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-        <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-        <span className="sr-only">Toggle theme</span>
-      </Button>
+      <RoleSwitcher />
+      <ThemeToggle />
 
-      {/* Notifications */}
-      <Button variant="ghost" size="icon" className="relative text-muted-foreground">
+      <Button variant="ghost" size="icon" className="relative shrink-0 text-muted-foreground">
         <Bell className="h-4 w-4" />
-        <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]">
+        <Badge className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center p-0 text-[9px]">
           3
         </Badge>
       </Button>
 
-      {/* User menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-            <Avatar className="h-9 w-9">
-              <AvatarImage src="" alt="User" />
-              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                AM
-              </AvatarFallback>
-            </Avatar>
+          <Button variant="ghost" className="h-9 w-9 shrink-0 rounded-full p-0">
+            <div className={avatarClass}>
+              {user.avatar}
+            </div>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">Alice Manager</p>
-              <p className="text-xs leading-none text-muted-foreground">manager@pos.com</p>
-              <Badge variant="secondary" className="w-fit mt-1 text-xs">Manager</Badge>
+              <p className="text-sm font-semibold">{user.name}</p>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
+              <span className={spanClass}>{ROLE_LABELS[role]}</span>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            Profile
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive focus:text-destructive">
+          <DropdownMenuItem
+            className="cursor-pointer text-destructive focus:text-destructive"
+            onClick={() => router.push("/login")}
+          >
             <LogOut className="mr-2 h-4 w-4" />
             Log out
           </DropdownMenuItem>
