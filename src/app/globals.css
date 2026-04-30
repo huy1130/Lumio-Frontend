@@ -76,9 +76,13 @@
     @apply border-border;
   }
 
+  html {
+    overflow-x: hidden;
+  }
+
   body {
     @apply text-foreground;
-    /* Transparent so the fixed gradient layer shows through everywhere */
+    overflow-x: hidden;
     background: transparent;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
