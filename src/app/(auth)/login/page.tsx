@@ -5,18 +5,25 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Eye, EyeOff, Layers, Loader2, Check,
-  ChevronDown, ChevronUp, ArrowLeft,
+  Eye, EyeOff, Loader2, Check,
+  ChevronDown, ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
-import { Footer } from "@/components/layout/Footer";
+import { AuthNavbar } from "@/components/layout/AuthNavbar";
 import { useAuth } from "@/context/AuthContext";
 import { MOCK_USERS, REDIRECT_MAP, ROLE_LABELS, ROLE_COLORS, ALL_ROLES } from "@/config/roles";
 import type { Role } from "@/config/roles";
 import { cn } from "@/lib/utils";
+
+const BRAND = "#5B4EE8";
+
+const FEATURES = [
+  "Quản lý đơn hàng realtime",
+  "Báo cáo doanh thu chi tiết",
+  "Quản lý kho hàng tự động",
+];
 
 export default function LoginPage() {
   const router      = useRouter();
@@ -59,236 +66,215 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+    <div className="flex min-h-screen flex-col" style={{ backgroundColor: BRAND }}>
+      <AuthNavbar />
 
-      {/* ── Navbar ─────────────────────────────────────────────────────── */}
-      <nav className="fixed top-0 inset-x-0 z-50 border-b border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-950/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
-              <Layers className="h-[18px] w-[18px] text-white" />
-            </div>
-            <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white">Lumio</span>
-          </Link>
+      {/* ── Full-page purple background with floating card ──────────────── */}
+      <main className="flex flex-1 items-center justify-center px-6 pt-24 pb-12">
+        <div className="mx-auto w-full max-w-5xl flex items-center gap-14">
 
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Link href="/">
-              <Button variant="ghost" size="sm" className="gap-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                <ArrowLeft className="h-3.5 w-3.5" />
-                Trang chủ
-              </Button>
-            </Link>
-
-            {/* Auth tab pills */}
-            <div className="flex items-center gap-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-1">
-              {/* Đăng nhập — active */}
-              <span className="rounded-md bg-white dark:bg-gray-900 px-3 py-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 shadow-sm select-none">
-                Đăng nhập
-              </span>
-              {/* Đăng ký — inactive */}
-              <Link href="/register">
-                <span className="rounded-md px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">
-                  Đăng ký
-                </span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* ── Main ───────────────────────────────────────────────────────── */}
-      <main className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-24">
-
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50/70 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950/50" />
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-32 right-0 h-[500px] w-[500px] rounded-full bg-indigo-100/60 dark:bg-indigo-900/20 blur-3xl" />
-          <div className="absolute bottom-0 left-0 h-[350px] w-[350px] rounded-full bg-blue-100/50 dark:bg-blue-900/15 blur-3xl" />
-        </div>
-
-        {/* Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 24, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0,  scale: 1    }}
-          transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-          className="relative z-10 w-full max-w-md"
-        >
-          {/* Logo + heading */}
-          <div className="mb-7 flex flex-col items-center gap-3 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50">
-              <Layers className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Chào mừng trở lại</h1>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Đăng nhập vào Lumio</p>
-            </div>
-          </div>
-
-          {/* Form card */}
-          <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl shadow-gray-100/80 dark:shadow-gray-950/50">
-            <form onSubmit={handleSubmit} className="px-6 pb-6 pt-6 space-y-4">
-
-              {/* Error */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-3 py-2 text-sm text-red-700 dark:text-red-400"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Shake wrapper */}
-              <motion.div
-                animate={shake ? { x: [-8, 8, -6, 6, -4, 4, 0] } : { x: 0 }}
-                transition={{ duration: 0.5 }}
-                className="space-y-4"
-              >
-                {/* Email */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Email</Label>
-                  <Input
-                    type="email"
-                    placeholder="you@pos.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus-visible:ring-indigo-500"
-                  />
-                </div>
-
-                {/* Password */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Mật khẩu</Label>
-                  <div className="relative">
-                    <Input
-                      type={showPw ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 pr-10 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus-visible:ring-indigo-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPw(!showPw)}
-                      className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
-                    >
-                      {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+          {/* ── LEFT: Branding text ──────────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, x: -24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="hidden lg:block flex-1 text-white"
+          >
+            <h2 className="text-4xl font-extrabold leading-tight mb-4">
+              Quản lý bán hàng<br />thông minh
+            </h2>
+            <p className="text-white/70 text-base leading-relaxed mb-10 max-w-xs">
+              Nền tảng F&amp;B hiện đại, từ đơn hàng đến báo cáo.
+            </p>
+            <ul className="space-y-4">
+              {FEATURES.map((f) => (
+                <li key={f} className="flex items-center gap-3">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/25">
+                    <Check className="h-3 w-3 text-white" />
                   </div>
-                </div>
-              </motion.div>
+                  <span className="text-white/90 text-sm font-medium">{f}</span>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
 
-              {/* Remember + Forgot */}
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer select-none">
-                  <div
-                    onClick={() => setRemember(!remember)}
-                    className={cn(
-                      "flex h-4 w-4 items-center justify-center rounded border transition-colors",
-                      remember
-                        ? "bg-indigo-600 border-indigo-600"
-                        : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
-                    )}
-                  >
-                    {remember && <Check className="h-2.5 w-2.5 text-white" />}
-                  </div>
-                  Ghi nhớ đăng nhập
-                </label>
-                <button type="button" className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline transition-colors">
-                  Quên mật khẩu?
-                </button>
+          {/* ── RIGHT: Floating card ─────────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
+            className="w-full max-w-[420px] shrink-0"
+          >
+            <div className="rounded-2xl bg-white dark:bg-gray-900 shadow-2xl overflow-hidden">
+
+              {/* Card header */}
+              <div className="px-8 pt-8 pb-6 border-b border-gray-100 dark:border-gray-800">
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Đăng nhập</h1>
+                <p className="mt-0.5 text-sm text-gray-400 dark:text-gray-500">Đăng nhập vào Lumio</p>
               </div>
 
-              {/* Submit */}
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-md shadow-indigo-200 dark:shadow-indigo-900/40"
-              >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Đang đăng nhập…
-                  </span>
-                ) : "Đăng nhập"}
-              </Button>
+              {/* Card body */}
+              <div className="px-8 py-6">
 
-              {/* Demo accounts */}
-              <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => setDemoOpen(!demoOpen)}
-                  className="flex w-full items-center justify-between px-4 py-2.5 text-xs font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
-                >
-                  <span>🎭 Tài khoản demo</span>
-                  {demoOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                </button>
-
+                {/* Error banner */}
                 <AnimatePresence>
-                  {demoOpen && (
+                  {error && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="overflow-hidden border-t border-gray-200 dark:border-gray-700"
+                      initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                      animate={{ opacity: 1, height: "auto", marginBottom: 16 }}
+                      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                      className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-3 py-2.5 text-sm text-red-700 dark:text-red-400 overflow-hidden"
                     >
-                      <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                        {ALL_ROLES.map((role) => {
-                          const u = MOCK_USERS[role];
-                          return (
-                            <div key={role} className="flex items-center gap-3 px-4 py-2.5">
-                              <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold", ROLE_COLORS[role])}>
-                                {u.avatar}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{u.name}</p>
-                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{u.email}</p>
-                              </div>
-                              <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold", ROLE_COLORS[role])}>
-                                {ROLE_LABELS[role]}
-                              </span>
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={() => fillDemo(role)}
-                                className="h-6 shrink-0 border-gray-300 dark:border-gray-600 px-2 text-[10px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                              >
-                                Dùng
-                              </Button>
-                            </div>
-                          );
-                        })}
-                      </div>
+                      {error}
                     </motion.div>
                   )}
                 </AnimatePresence>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <motion.div
+                    animate={shake ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
+                    transition={{ duration: 0.45 }}
+                    className="space-y-4"
+                  >
+                    {/* Email */}
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</Label>
+                      <Input
+                        type="email"
+                        placeholder="you@lumio.app"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="h-11 rounded-lg border-gray-200 dark:border-gray-700 bg-[#F5F6FA] dark:bg-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus-visible:ring-[#5B4EE8]"
+                      />
+                    </div>
+
+                    {/* Password */}
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Mật khẩu</Label>
+                      <div className="relative">
+                        <Input
+                          type={showPw ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="h-11 rounded-lg border-gray-200 dark:border-gray-700 bg-[#F5F6FA] dark:bg-gray-800 pr-10 text-gray-900 dark:text-white placeholder:text-gray-400 focus-visible:ring-[#5B4EE8]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPw(!showPw)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                        >
+                          {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Remember + Forgot */}
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none">
+                      <div
+                        onClick={() => setRemember(!remember)}
+                        className={cn(
+                          "flex h-4 w-4 items-center justify-center rounded border transition-colors",
+                          remember ? "border-[#5B4EE8] bg-[#5B4EE8]" : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                        )}
+                      >
+                        {remember && <Check className="h-2.5 w-2.5 text-white" />}
+                      </div>
+                      Ghi nhớ đăng nhập
+                    </label>
+                    <button type="button" className="text-sm font-medium hover:opacity-75 transition-opacity" style={{ color: BRAND }}>
+                      Quên mật khẩu?
+                    </button>
+                  </div>
+
+                  {/* Submit */}
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-11 rounded-lg font-semibold text-white text-sm"
+                    style={{ backgroundColor: BRAND }}
+                  >
+                    {loading ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Đang đăng nhập…
+                      </span>
+                    ) : "Đăng nhập"}
+                  </Button>
+
+                  {/* Demo accounts */}
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-[#F5F6FA] dark:bg-gray-800/60 overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setDemoOpen(!demoOpen)}
+                      className="flex w-full items-center justify-between px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                    >
+                      <span>🎭 Tài khoản demo</span>
+                      {demoOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                    </button>
+                    <AnimatePresence>
+                      {demoOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.22 }}
+                          className="overflow-hidden border-t border-gray-200 dark:border-gray-700"
+                        >
+                          <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                            {ALL_ROLES.map((role) => {
+                              const u = MOCK_USERS[role];
+                              return (
+                                <div key={role} className="flex items-center gap-3 px-4 py-2.5">
+                                  <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold", ROLE_COLORS[role])}>
+                                    {u.avatar}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{u.name}</p>
+                                    <p className="text-[10px] text-gray-400 truncate">{u.email}</p>
+                                  </div>
+                                  <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold", ROLE_COLORS[role])}>
+                                    {ROLE_LABELS[role]}
+                                  </span>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => fillDemo(role)}
+                                    className="h-6 shrink-0 border-gray-300 dark:border-gray-600 px-2 text-[10px] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                  >
+                                    Dùng
+                                  </Button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  <p className="text-center text-[11px] text-gray-400 dark:text-gray-500">
+                    🚀 Chế độ demo — mọi mật khẩu đều hoạt động
+                  </p>
+                </form>
               </div>
 
-              <p className="text-center text-[10px] text-gray-400 dark:text-gray-500">
-                🚀 Chế độ demo — mọi mật khẩu đều hoạt động
-              </p>
-            </form>
-
-            {/* Switch to register */}
-            <div className="border-t border-gray-100 dark:border-gray-700 px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-              Chưa có tài khoản?{" "}
-              <Link href="/register" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors">
-                Đăng ký ngay
-              </Link>
+              {/* Card footer */}
+              <div className="border-t border-gray-100 dark:border-gray-800 px-8 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                Chưa có tài khoản?{" "}
+                <Link href="/register" className="font-semibold hover:opacity-75 transition-opacity" style={{ color: BRAND }}>
+                  Đăng ký ngay
+                </Link>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      </main>
+          </motion.div>
 
-      <Footer />
+        </div>
+      </main>
     </div>
   );
 }
