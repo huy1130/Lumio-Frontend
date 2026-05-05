@@ -5,13 +5,11 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   ArrowRight, Check, BarChart3, Shield, Zap,
-  ShoppingCart, Package, DollarSign, Users, TrendingUp,
-  Star, Play, Layers,
+  ShoppingCart, Package, Users, TrendingUp,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 import { mockSubscriptions } from "@/lib/mock-data";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -72,13 +70,8 @@ const FEATURES = [
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
-
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-
-      {/* ══ NAVBAR ══════════════════════════════════════════════════════════ */}
-      <Navbar />
-
+    <>
       {/* ══ HERO ════════════════════════════════════════════════════════════ */}
       <section className="relative flex items-center overflow-hidden pt-16 min-h-[88vh]">
 
@@ -382,9 +375,6 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </section>
-
-      <Footer />
-
-    </div>
+    </>
   );
 }

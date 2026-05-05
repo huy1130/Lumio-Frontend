@@ -46,6 +46,9 @@ const FAQS = [
 
 export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
+
+  const isAnnual = billingCycle === "annual";
 
   return (
     <div className="pt-16">
@@ -77,6 +80,49 @@ export default function PricingPage() {
       {/* ── Pricing cards ─────────────────────────────────────────────────── */}
       <section className="py-28 bg-white dark:bg-gray-950">
         <div className="mx-auto max-w-7xl px-6">
+
+          {/* Billing cycle toggle */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45 }}
+            className="flex flex-col items-center gap-3 mb-14"
+          >
+            <div className="flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-800 p-1">
+              <button
+                onClick={() => setBillingCycle("monthly")}
+                className={cn(
+                  "px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200",
+                  !isAnnual
+                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                )}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle("annual")}
+                className={cn(
+                  "px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-2",
+                  isAnnual
+                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                )}
+              >
+                Annual
+                <span className="rounded-full bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 text-xs font-bold px-2 py-0.5">
+                  Save 20%
+                </span>
+              </button>
+            </div>
+            {isAnnual && (
+              <p className="text-sm text-gray-400 dark:text-gray-500">
+                Billed once per year · prices shown per month
+              </p>
+            )}
+          </motion.div>
+
           <motion.div
             initial="hidden"
             whileInView="show"
@@ -86,6 +132,10 @@ export default function PricingPage() {
           >
             {mockSubscriptions.map((plan, i) => {
               const isPopular = i === 1;
+              const displayPrice = isAnnual
+                ? Math.round(plan.price * 0.8)
+                : plan.price;
+
               return (
                 <motion.div
                   key={plan.id}
@@ -109,19 +159,31 @@ export default function PricingPage() {
                     <p className={cn("text-base font-semibold mb-2", isPopular ? "text-indigo-100" : "text-gray-900 dark:text-white")}>
                       {plan.planName}
                     </p>
-                    <div className="flex items-baseline gap-1 mb-2">
+                    <div className="flex items-baseline gap-1 mb-1">
                       <span className={cn("text-4xl font-extrabold", isPopular ? "text-white" : "text-gray-900 dark:text-white")}>
-                        {formatCurrency(plan.price)}
+                        {formatCurrency(displayPrice)}
                       </span>
                       <span className={cn("text-sm", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
-                        /{plan.billingCycle}
+                        /mo
                       </span>
                     </div>
+                    {isAnnual && (
+                      <p className={cn("text-xs mb-1 line-through", isPopular ? "text-indigo-300" : "text-gray-400 dark:text-gray-500")}>
+                        {formatCurrency(plan.price)}/mo
+                      </p>
+                    )}
                     <p className={cn("text-xs", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
-                      {plan.maxUsers === -1 ? "Unlimited users" : `Up to ${plan.maxUsers} users`}
-                      {" · "}
-                      {plan.maxProducts === -1 ? "Unlimited products" : `${plan.maxProducts.toLocaleString()} products`}
+                      {isAnnual
+                        ? `${formatCurrency(displayPrice * 12)} billed annually`
+                        : `${plan.maxUsers === -1 ? "Unlimited users" : `Up to ${plan.maxUsers} users`} · ${plan.maxProducts === -1 ? "Unlimited products" : `${plan.maxProducts.toLocaleString()} products`}`}
                     </p>
+                    {isAnnual && (
+                      <p className={cn("text-xs mt-0.5", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
+                        {plan.maxUsers === -1 ? "Unlimited users" : `Up to ${plan.maxUsers} users`}
+                        {" · "}
+                        {plan.maxProducts === -1 ? "Unlimited products" : `${plan.maxProducts.toLocaleString()} products`}
+                      </p>
+                    )}
                   </div>
 
                   <ul className="flex-1 space-y-3 mb-8">

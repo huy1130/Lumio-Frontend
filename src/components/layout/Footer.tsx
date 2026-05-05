@@ -48,23 +48,23 @@ function IconTwitterX({ className }: { className?: string }) {
 // ─── Data ──────────────────────────────────────────────────────────────────────
 
 const CONTACT = [
-  { icon: Mail,    label: "Email",    value: "support@possystem.vn",      href: "mailto:support@possystem.vn" },
-  { icon: Phone,   label: "Hotline",  value: "1800 6868",                 href: "tel:18006868"                },
+  { icon: Mail,    label: "Email",    value: "Lumio@gmail.com",      href: "mailto:support@possystem.vn" },
+  { icon: Phone,   label: "Hotline",  value: "1800 3979",                 href: "tel:18006868"                },
   { icon: MapPin,  label: "Địa chỉ", value: "123 Lý Tự Trọng, Q.1, TP.HCM", href: "#"                      },
 ];
 
 const SUPPORT_LINKS = [
-  { icon: BookOpen,    label: "Tài liệu hướng dẫn", href: "#docs"   },
-  { icon: HelpCircle,  label: "Câu hỏi thường gặp",  href: "#faq"    },
-  { icon: Activity,    label: "Trạng thái hệ thống",  href: "#status" },
-  { icon: MessageSquare, label: "Liên hệ hỗ trợ",     href: "#support"},
+  { icon: BookOpen,    label: "Tài liệu hướng dẫn", href: "/"   },
+  { icon: HelpCircle,  label: "Câu hỏi thường gặp",  href: "/"    },
+  { icon: Activity,    label: "Trạng thái hệ thống",  href: "/" },
+  { icon: MessageSquare, label: "Liên hệ hỗ trợ",     href: "/contact"},
 ];
 
 const PRODUCT_LINKS = [
-  { label: "Tính năng",    href: "#features" },
-  { label: "Bảng giá",    href: "#pricing"  },
-  { label: "Blog",         href: "#blog"     },
-  { label: "Cập nhật mới", href: "#updates"  },
+  { label: "Tính năng",    href: "/features" },
+  { label: "Bảng giá",    href: "/pricing"  },
+  { label: "Thông tin",         href: "/about"     },
+ 
 ];
 
 const LEGAL_LINKS = [
