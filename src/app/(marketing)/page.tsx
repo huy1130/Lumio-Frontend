@@ -60,12 +60,12 @@ const HERO_CARDS = [
 
 // ─── Features section data ─────────────────────────────────────────────────────
 const FEATURES = [
-  { icon: Zap,         title: "Real-time POS",        desc: "Lightning-fast transactions with instant sync across all devices and locations."  },
-  { icon: BarChart3,   title: "Advanced Analytics",   desc: "Deep insights on sales, inventory trends, and staff performance in one view."      },
-  { icon: Shield,      title: "Role-based Access",    desc: "Granular permissions for Manager, Admin, Staff, and Cashier — no overlap."         },
-  { icon: Layers,      title: "Inventory Control",    desc: "Auto-reorder alerts, multi-location tracking, and a full audit trail."             },
-  { icon: TrendingUp,  title: "AI-powered Insights",  desc: "Predictive analytics and smart suggestions to boost your revenue daily."           },
-  { icon: ShoppingCart,title: "Omnichannel Orders",   desc: "Handle dine-in, takeaway, delivery, and online orders from one dashboard."         },
+  { icon: Zap,         title: "POS thời gian thực",      desc: "Xử lý giao dịch cực nhanh, đồng bộ tức thì trên mọi thiết bị và chi nhánh."        },
+  { icon: BarChart3,   title: "Phân tích nâng cao",       desc: "Góc nhìn sâu về doanh thu, xu hướng tồn kho và hiệu suất nhân viên trong một màn hình." },
+  { icon: Shield,      title: "Phân quyền theo vai trò",  desc: "Quyền truy cập chi tiết cho Quản lý, Admin, Nhân viên và Thu ngân — không chồng chéo."  },
+  { icon: Layers,      title: "Quản lý tồn kho",          desc: "Cảnh báo tái nhập tự động, theo dõi đa chi nhánh và lịch sử kiểm kê đầy đủ."           },
+  { icon: TrendingUp,  title: "Thông tin từ AI",           desc: "Phân tích dự đoán và gợi ý thông minh giúp tăng doanh thu mỗi ngày."                   },
+  { icon: ShoppingCart,title: "Đơn hàng đa kênh",         desc: "Xử lý đặt bàn, mang đi, giao hàng và đơn trực tuyến từ một dashboard duy nhất."         },
 ];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -190,10 +190,10 @@ export default function LandingPage() {
         </div>
         <div className="mx-auto max-w-7xl px-6">
           <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger} className="text-center mb-16">
-            <motion.p variants={fadeUp} className="text-sm font-semibold text-indigo-600 mb-3 tracking-widest uppercase">Features</motion.p>
-            <motion.h2 variants={fadeUp} className="text-3xl font-extrabold sm:text-4xl mb-4 text-gray-900 dark:text-white">Everything your business needs</motion.h2>
+            <motion.p variants={fadeUp} className="text-sm font-semibold text-indigo-600 mb-3 tracking-widest uppercase">Tính năng</motion.p>
+            <motion.h2 variants={fadeUp} className="text-3xl font-extrabold sm:text-4xl mb-4 text-gray-900 dark:text-white">Tất cả những gì doanh nghiệp cần</motion.h2>
             <motion.p variants={fadeUp} className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-              Built for food &amp; beverage businesses of all sizes — from single-location cafes to multi-branch chains.
+              Được xây dựng cho doanh nghiệp F&amp;B ở mọi quy mô — từ quán cà phê đơn lẻ đến chuỗi nhà hàng nhiều chi nhánh.
             </motion.p>
           </motion.div>
 
@@ -229,16 +229,16 @@ export default function LandingPage() {
 
             <div className="relative z-10 grid gap-8 px-10 py-16 md:grid-cols-2 md:items-center">
               <div>
-                <Badge className="mb-4 border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Made for F&amp;B</Badge>
+                <Badge className="mb-4 border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Dành cho F&amp;B</Badge>
                 <h2 className="text-3xl font-extrabold mb-4 leading-tight text-gray-900 dark:text-white">
-                  From the counter<br />to the cloud
+                  Từ quầy thu ngân<br />đến đám mây
                 </h2>
                 <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                  Whether you run a coffee shop, bakery, or restaurant chain — Lumio gives your team
-                  the tools to serve faster, manage smarter, and grow confidently.
+                  Dù bạn đang vận hành quán cà phê, tiệm bánh hay chuỗi nhà hàng — Lumio trang bị
+                  cho đội ngũ của bạn công cụ để phục vụ nhanh hơn, quản lý thông minh hơn và phát triển tự tin hơn.
                 </p>
                 <div className="flex flex-col gap-2">
-                  {["Instant order processing with QR & NFC", "Inventory auto-reorder when stock is low", "Daily sales report delivered to your inbox"].map((t) => (
+                  {["Xử lý đơn tức thì với QR & NFC", "Tự động tái nhập kho khi hàng sắp hết", "Báo cáo doanh thu hàng ngày gửi thẳng vào hộp thư"].map((t) => (
                     <div key={t} className="flex items-center gap-2.5 text-sm text-gray-700 dark:text-gray-300">
                       <Check className="h-4 w-4 text-green-500 shrink-0" />
                       {t}
@@ -270,10 +270,10 @@ export default function LandingPage() {
       <section id="pricing" className="py-28 bg-gray-50 dark:bg-gray-900">
         <div className="mx-auto max-w-7xl px-6">
           <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger} className="text-center mb-16">
-            <motion.p variants={fadeUp} className="text-sm font-semibold text-indigo-600 mb-3 tracking-widest uppercase">Pricing</motion.p>
-            <motion.h2 variants={fadeUp} className="text-3xl font-extrabold sm:text-4xl mb-4 text-gray-900 dark:text-white">Simple, transparent pricing</motion.h2>
+            <motion.p variants={fadeUp} className="text-sm font-semibold text-indigo-600 mb-3 tracking-widest uppercase">Bảng giá</motion.p>
+            <motion.h2 variants={fadeUp} className="text-3xl font-extrabold sm:text-4xl mb-4 text-gray-900 dark:text-white">Đơn giản, minh bạch</motion.h2>
             <motion.p variants={fadeUp} className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-              No hidden fees. Upgrade, downgrade, or cancel anytime.
+              Không phí ẩn. Nâng cấp, hạ cấp hoặc hủy bất cứ lúc nào.
             </motion.p>
           </motion.div>
 
@@ -330,7 +330,7 @@ export default function LandingPage() {
                           : "bg-indigo-600 hover:bg-indigo-500 text-white"
                       )}
                     >
-                      Get started
+                      Bắt đầu
                     </Button>
                   </Link>
                 </motion.div>
@@ -354,20 +354,20 @@ export default function LandingPage() {
               <div className="absolute -right-20 bottom-10 h-60 w-60 rounded-full bg-violet-500/20 blur-3xl" />
             </div>
             <div className="relative">
-              <Badge className="mb-5 border-white/20 bg-white/10 text-white">14-day free trial · No credit card</Badge>
-              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Ready to grow your business?</h2>
+              <Badge className="mb-5 border-white/20 bg-white/10 text-white">Dùng thử 14 ngày · Không cần thẻ tín dụng</Badge>
+              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Sẵn sàng phát triển doanh nghiệp?</h2>
               <p className="text-indigo-100 mb-8 max-w-md mx-auto">
-                Join thousands of F&amp;B businesses using Lumio to run smarter operations every day.
+                Hàng nghìn doanh nghiệp F&amp;B đang dùng Lumio để vận hành thông minh hơn mỗi ngày.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/register">
                   <Button size="lg" className="h-12 gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-8 font-semibold shadow-lg">
-                    Start free trial <ArrowRight className="h-4 w-4" />
+                    Dùng thử miễn phí <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Link href="/login">
                   <Button size="lg" variant="outline" className="h-12 border-white/30 bg-white/10 text-white hover:bg-white/20 px-8">
-                    Sign in instead
+                    Đăng nhập
                   </Button>
                 </Link>
               </div>

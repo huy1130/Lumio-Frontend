@@ -14,22 +14,22 @@ const stagger = { show: { transition: { staggerChildren: 0.12 } } };
 const PILLARS = [
   {
     emoji: "🎯",
-    title: "Our Mission",
-    desc:  "Empower every F&B business — from street-side coffee shops to multi-branch restaurant chains — with affordable, intuitive software that makes running a business genuinely effortless.",
+    title: "Sứ mệnh",
+    desc:  "Trao quyền cho mọi doanh nghiệp F&B — từ quán cà phê vỉa hè đến chuỗi nhà hàng nhiều chi nhánh — bằng phần mềm giá cả phải chăng, dễ dùng, giúp vận hành kinh doanh trở nên thực sự nhẹ nhàng.",
     bg:    "bg-blue-50 dark:bg-blue-950/30",
     border:"border-blue-100 dark:border-blue-800/40",
   },
   {
     emoji: "👁",
-    title: "Our Vision",
-    desc:  "A world where every restaurant owner, café manager, and food entrepreneur has access to the same powerful tools that enterprise giants use — without the enterprise price tag.",
+    title: "Tầm nhìn",
+    desc:  "Một thế giới nơi mọi chủ nhà hàng, quản lý quán cà phê và doanh nhân ẩm thực đều có thể tiếp cận những công cụ mạnh mẽ như các tập đoàn lớn — mà không cần chi phí khổng lồ.",
     bg:    "bg-indigo-50 dark:bg-indigo-950/30",
     border:"border-indigo-100 dark:border-indigo-800/40",
   },
   {
     emoji: "💎",
-    title: "Our Values",
-    desc:  "Transparency in everything we build. Innovation that solves real problems. Impact measured by the success of the businesses we serve — not just our own bottom line.",
+    title: "Giá trị cốt lõi",
+    desc:  "Minh bạch trong mọi thứ chúng tôi xây dựng. Đổi mới để giải quyết vấn đề thực tế. Tác động được đo bằng sự thành công của các doanh nghiệp chúng tôi phục vụ — không chỉ lợi nhuận của chính mình.",
     bg:    "bg-purple-50 dark:bg-purple-950/30",
     border:"border-purple-100 dark:border-purple-800/40",
   },
@@ -38,30 +38,30 @@ const PILLARS = [
 // ─── Team ─────────────────────────────────────────────────────────────────────
 const TEAM = [
   {
-    name: "Nguyen Van A",
-    role: "Chief Executive Officer",
-    bio:  "10+ years scaling SaaS products across Southeast Asia. Former VP at a leading F&B tech startup.",
+    name: "Nguyễn Văn A",
+    role: "Giám đốc điều hành",
+    bio:  "Hơn 10 năm phát triển sản phẩm SaaS tại Đông Nam Á. Cựu Phó Giám đốc tại một startup công nghệ F&B hàng đầu.",
     initials: "NA",
     color: "bg-blue-600",
   },
   {
-    name: "Tran Thi B",
-    role: "Chief Technology Officer",
-    bio:  "Full-stack engineer passionate about distributed systems. Led engineering teams at two unicorn startups.",
+    name: "Trần Thị B",
+    role: "Giám đốc công nghệ",
+    bio:  "Kỹ sư full-stack đam mê hệ thống phân tán. Dẫn dắt đội kỹ thuật tại hai startup kỳ lân.",
     initials: "TB",
     color: "bg-emerald-600",
   },
   {
-    name: "Le Van C",
-    role: "Design Lead",
-    bio:  "Award-winning product designer with a focus on accessibility and delightful user experiences for SMBs.",
+    name: "Lê Văn C",
+    role: "Trưởng nhóm thiết kế",
+    bio:  "Nhà thiết kế sản phẩm từng đoạt giải thưởng, tập trung vào khả năng tiếp cận và trải nghiệm người dùng cho doanh nghiệp vừa và nhỏ.",
     initials: "LC",
     color: "bg-orange-500",
   },
   {
-    name: "Pham Thi D",
-    role: "Head of Product",
-    bio:  "Former restaurant owner turned product manager. Turns real operator pain-points into elegant features.",
+    name: "Phạm Thị D",
+    role: "Trưởng bộ phận sản phẩm",
+    bio:  "Cựu chủ nhà hàng chuyển sang quản lý sản phẩm. Biến những điểm đau thực tế của người vận hành thành tính năng tinh tế.",
     initials: "PD",
     color: "bg-purple-600",
   },
@@ -69,10 +69,10 @@ const TEAM = [
 
 // ─── Stats ─────────────────────────────────────────────────────────────────────
 const STATS = [
-  { icon: Calendar, label: "Founded",   value: "2023"     },
-  { icon: Users,    label: "Users",     value: "300,000+" },
-  { icon: Globe,    label: "Countries", value: "10+"      },
-  { icon: Activity, label: "Uptime",    value: "99.9%"    },
+  { icon: Calendar, label: "Thành lập",    value: "2023"     },
+  { icon: Users,    label: "Người dùng",   value: "300.000+" },
+  { icon: Globe,    label: "Quốc gia",     value: "10+"      },
+  { icon: Activity, label: "Uptime",       value: "99.9%"    },
 ];
 
 export default function AboutPage() {
@@ -85,23 +85,23 @@ export default function AboutPage() {
           <motion.div initial="hidden" animate="show" variants={stagger}>
             <motion.div variants={fadeUp}>
               <Badge className="mb-5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border-indigo-200 dark:border-indigo-700/50 px-4 py-1.5 text-sm font-medium">
-                Our Story
+                Câu chuyện của chúng tôi
               </Badge>
             </motion.div>
             <motion.h1
               variants={fadeUp}
               className="mb-6 text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.08]"
             >
-              Built for{" "}
-              <span className="text-indigo-600 dark:text-indigo-400">F&B businesses</span>
+              Xây dựng cho{" "}
+              <span className="text-indigo-600 dark:text-indigo-400">doanh nghiệp F&B</span>
             </motion.h1>
             <motion.p
               variants={fadeUp}
               className="mx-auto max-w-2xl text-xl text-gray-600 dark:text-gray-300 leading-relaxed"
             >
-              Lumio was born from a simple frustration: great restaurant tools shouldn&apos;t cost a fortune.
-              We set out to build software that operators actually love — fast, reliable, and designed with
-              real F&B workflows in mind.
+              Lumio ra đời từ một sự bức xúc đơn giản: công cụ quản lý nhà hàng tốt không nên tốn một gia tài.
+              Chúng tôi bắt tay xây dựng phần mềm mà người vận hành thực sự yêu thích — nhanh, đáng tin cậy
+              và được thiết kế theo quy trình F&B thực tế.
             </motion.p>
           </motion.div>
         </div>
@@ -143,13 +143,13 @@ export default function AboutPage() {
           >
             <motion.div variants={fadeUp} className="mb-14 text-center">
               <Badge className="mb-4 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border-indigo-200 dark:border-indigo-700/50 px-4 py-1.5 text-sm">
-                The Team
+                Đội ngũ
               </Badge>
               <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white">
-                The people behind Lumio
+                Những người đứng sau Lumio
               </h2>
               <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-                A small, focused team obsessed with making F&B operations smoother for everyone.
+                Một đội ngũ nhỏ, tập trung, luôn trăn trở để vận hành F&B trở nên dễ dàng hơn cho tất cả mọi người.
               </p>
             </motion.div>
 

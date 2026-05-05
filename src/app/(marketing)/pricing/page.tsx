@@ -19,28 +19,28 @@ const stagger = { show: { transition: { staggerChildren: 0.1 } } };
 // ─── FAQ ─────────────────────────────────────────────────────────────────────
 const FAQS = [
   {
-    q: "Can I switch plans later?",
-    a: "Absolutely. You can upgrade or downgrade at any time. Changes take effect immediately and we'll prorate the billing.",
+    q: "Tôi có thể đổi gói sau không?",
+    a: "Hoàn toàn có thể. Bạn có thể nâng cấp hoặc hạ cấp bất cứ lúc nào. Thay đổi có hiệu lực ngay lập tức và chúng tôi sẽ tính phí theo tỷ lệ tương ứng.",
   },
   {
-    q: "Is there a free trial?",
-    a: "Yes — every plan comes with a 14-day free trial. No credit card required to get started.",
+    q: "Có dùng thử miễn phí không?",
+    a: "Có — mỗi gói đều đi kèm 14 ngày dùng thử miễn phí. Không cần thẻ tín dụng để bắt đầu.",
   },
   {
-    q: "What payment methods do you accept?",
-    a: "We accept all major credit/debit cards, bank transfers, and popular digital wallets including MoMo and ZaloPay.",
+    q: "Bạn chấp nhận những hình thức thanh toán nào?",
+    a: "Chúng tôi chấp nhận tất cả thẻ tín dụng/ghi nợ lớn, chuyển khoản ngân hàng và các ví điện tử phổ biến bao gồm MoMo và ZaloPay.",
   },
   {
-    q: "Do you offer discounts for annual billing?",
-    a: "Yes, annual plans save you up to 20% compared to monthly billing. Toggle the billing cycle above to compare.",
+    q: "Có giảm giá khi thanh toán hàng năm không?",
+    a: "Có, gói hàng năm giúp bạn tiết kiệm đến 20% so với thanh toán hàng tháng. Chuyển đổi chu kỳ thanh toán ở phía trên để so sánh.",
   },
   {
-    q: "What happens when my trial ends?",
-    a: "You'll be prompted to choose a plan. If you don't, your account moves to read-only mode — your data is safe.",
+    q: "Điều gì xảy ra khi hết thời gian dùng thử?",
+    a: "Bạn sẽ được nhắc chọn một gói phù hợp. Nếu không chọn, tài khoản sẽ chuyển sang chế độ chỉ đọc — dữ liệu của bạn vẫn an toàn.",
   },
   {
-    q: "Is there a setup fee or hidden costs?",
-    a: "None at all. The price you see is the price you pay. Onboarding support and updates are included.",
+    q: "Có phí cài đặt hoặc chi phí ẩn không?",
+    a: "Hoàn toàn không. Giá bạn thấy là giá bạn trả. Hỗ trợ đào tạo và cập nhật tính năng đều được bao gồm.",
   },
 ];
 
@@ -59,19 +59,18 @@ export default function PricingPage() {
           <motion.div initial="hidden" animate="show" variants={stagger}>
             <motion.div variants={fadeUp}>
               <Badge className="mb-5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border-indigo-200 dark:border-indigo-700/50 px-4 py-1.5 text-sm font-medium">
-                Pricing
+                Bảng giá
               </Badge>
             </motion.div>
             <motion.h1
               variants={fadeUp}
               className="mb-5 text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.08]"
             >
-              Simple,{" "}
-              <span className="text-indigo-600 dark:text-indigo-400">transparent</span>{" "}
-              pricing
+              Đơn giản,{" "}
+              <span className="text-indigo-600 dark:text-indigo-400">minh bạch</span>
             </motion.h1>
             <motion.p variants={fadeUp} className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-              No hidden fees. No surprises. Pick the plan that fits your business and upgrade anytime.
+              Không phí ẩn. Không bất ngờ. Chọn gói phù hợp và nâng cấp bất cứ lúc nào.
             </motion.p>
           </motion.div>
         </div>
@@ -99,7 +98,7 @@ export default function PricingPage() {
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 )}
               >
-                Monthly
+                Hàng tháng
               </button>
               <button
                 onClick={() => setBillingCycle("annual")}
@@ -110,15 +109,15 @@ export default function PricingPage() {
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 )}
               >
-                Annual
+                Hàng năm
                 <span className="rounded-full bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 text-xs font-bold px-2 py-0.5">
-                  Save 20%
+                  Tiết kiệm 20%
                 </span>
               </button>
             </div>
             {isAnnual && (
               <p className="text-sm text-gray-400 dark:text-gray-500">
-                Billed once per year · prices shown per month
+                Thanh toán một lần mỗi năm · giá hiển thị theo tháng
               </p>
             )}
           </motion.div>
@@ -150,7 +149,7 @@ export default function PricingPage() {
                   {isPopular && (
                     <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                       <span className="rounded-full bg-white text-indigo-600 px-4 py-1 text-xs font-bold shadow-sm border border-indigo-100">
-                        Most Popular
+                        Phổ biến nhất
                       </span>
                     </div>
                   )}
@@ -164,24 +163,24 @@ export default function PricingPage() {
                         {formatCurrency(displayPrice)}
                       </span>
                       <span className={cn("text-sm", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
-                        /mo
+                        /tháng
                       </span>
                     </div>
                     {isAnnual && (
                       <p className={cn("text-xs mb-1 line-through", isPopular ? "text-indigo-300" : "text-gray-400 dark:text-gray-500")}>
-                        {formatCurrency(plan.price)}/mo
+                        {formatCurrency(plan.price)}/tháng
                       </p>
                     )}
                     <p className={cn("text-xs", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
                       {isAnnual
-                        ? `${formatCurrency(displayPrice * 12)} billed annually`
-                        : `${plan.maxUsers === -1 ? "Unlimited users" : `Up to ${plan.maxUsers} users`} · ${plan.maxProducts === -1 ? "Unlimited products" : `${plan.maxProducts.toLocaleString()} products`}`}
+                        ? `${formatCurrency(displayPrice * 12)} thanh toán hàng năm`
+                        : `${plan.maxUsers === -1 ? "Không giới hạn người dùng" : `Tối đa ${plan.maxUsers} người dùng`} · ${plan.maxProducts === -1 ? "Không giới hạn sản phẩm" : `${plan.maxProducts.toLocaleString()} sản phẩm`}`}
                     </p>
                     {isAnnual && (
                       <p className={cn("text-xs mt-0.5", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
-                        {plan.maxUsers === -1 ? "Unlimited users" : `Up to ${plan.maxUsers} users`}
+                        {plan.maxUsers === -1 ? "Không giới hạn người dùng" : `Tối đa ${plan.maxUsers} người dùng`}
                         {" · "}
-                        {plan.maxProducts === -1 ? "Unlimited products" : `${plan.maxProducts.toLocaleString()} products`}
+                        {plan.maxProducts === -1 ? "Không giới hạn sản phẩm" : `${plan.maxProducts.toLocaleString()} sản phẩm`}
                       </p>
                     )}
                   </div>
@@ -204,7 +203,7 @@ export default function PricingPage() {
                           : "bg-indigo-600 hover:bg-indigo-500 text-white"
                       )}
                     >
-                      Get started
+                      Bắt đầu
                     </Button>
                   </Link>
                 </motion.div>
@@ -220,7 +219,7 @@ export default function PricingPage() {
             transition={{ delay: 0.4 }}
             className="mt-10 text-center text-sm text-gray-400 dark:text-gray-500"
           >
-            All plans include a 14-day free trial · No credit card required · Cancel anytime
+            Tất cả gói đều có 14 ngày dùng thử miễn phí · Không cần thẻ tín dụng · Hủy bất cứ lúc nào
           </motion.p>
         </div>
       </section>
@@ -235,21 +234,21 @@ export default function PricingPage() {
             variants={stagger}
           >
             <motion.h2 variants={fadeUp} className="text-3xl font-extrabold text-gray-900 dark:text-white mb-4">
-              Not sure which plan is right?
+              Chưa chắc gói nào phù hợp?
             </motion.h2>
             <motion.p variants={fadeUp} className="text-gray-500 dark:text-gray-400 mb-8 max-w-xl mx-auto">
-              Explore everything Lumio has to offer — then pick the tier that fits where your business is today.
-              You can always upgrade later.
+              Khám phá tất cả những gì Lumio cung cấp — rồi chọn gói phù hợp với quy mô doanh nghiệp hiện tại.
+              Bạn luôn có thể nâng cấp sau.
             </motion.p>
             <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-4">
               <Link href="/features">
                 <Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold shadow-lg shadow-indigo-200/50 dark:shadow-indigo-900/30">
-                  Explore all features <ArrowRight className="ml-2 h-4 w-4" />
+                  Khám phá tất cả tính năng <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/contact">
                 <Button size="lg" variant="outline" className="h-12 px-8 rounded-xl border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
-                  Talk to sales
+                  Liên hệ kinh doanh
                 </Button>
               </Link>
             </motion.div>
@@ -268,10 +267,10 @@ export default function PricingPage() {
           >
             <motion.div variants={fadeUp} className="mb-12 text-center">
               <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-3">
-                Frequently asked questions
+                Câu hỏi thường gặp
               </h2>
               <p className="text-gray-500 dark:text-gray-400">
-                Can&apos;t find the answer? <Link href="/contact" className="text-indigo-600 dark:text-indigo-400 hover:underline">Drop us a message.</Link>
+                Không tìm thấy câu trả lời? <Link href="/contact" className="text-indigo-600 dark:text-indigo-400 hover:underline">Nhắn tin cho chúng tôi.</Link>
               </p>
             </motion.div>
 
@@ -322,20 +321,20 @@ export default function PricingPage() {
               <div className="absolute -right-20 bottom-10 h-60 w-60 rounded-full bg-violet-500/20 blur-3xl" />
             </div>
             <div className="relative">
-              <Badge className="mb-5 border-white/20 bg-white/10 text-white">14-day free trial · No credit card</Badge>
-              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Start growing today</h2>
+              <Badge className="mb-5 border-white/20 bg-white/10 text-white">Dùng thử 14 ngày · Không cần thẻ tín dụng</Badge>
+              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Bắt đầu phát triển ngay hôm nay</h2>
               <p className="text-indigo-100 mb-8 max-w-md mx-auto">
-                Join 300,000+ businesses already running smarter with Lumio.
+                Hơn 300.000 doanh nghiệp đang vận hành thông minh hơn cùng Lumio.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/register">
                   <Button size="lg" className="h-12 gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-8 font-semibold shadow-lg">
-                    Start free trial <ArrowRight className="h-4 w-4" />
+                    Dùng thử miễn phí <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Link href="/contact">
                   <Button size="lg" variant="outline" className="h-12 border-white/30 bg-white/10 text-white hover:bg-white/20 px-8">
-                    Contact sales
+                    Liên hệ kinh doanh
                   </Button>
                 </Link>
               </div>

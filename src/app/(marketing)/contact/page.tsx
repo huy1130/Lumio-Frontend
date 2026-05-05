@@ -47,20 +47,20 @@ const CONTACT_INFO = [
   },
   {
     icon: Phone,
-    label: "Phone",
+    label: "Điện thoại",
     value: "+84 28 1234 5678",
     href:  "tel:+842812345678",
   },
   {
     icon: MapPin,
-    label: "Address",
-    value: "123 Nguyen Hue, District 1, HCMC",
+    label: "Địa chỉ",
+    value: "123 Nguyễn Huệ, Quận 1, TP.HCM",
     href:  undefined,
   },
   {
     icon: Clock,
-    label: "Hours",
-    value: "Mon–Fri, 9:00–18:00 ICT",
+    label: "Giờ làm việc",
+    value: "Thứ 2–6, 9:00–18:00 ICT",
     href:  undefined,
   },
 ];
@@ -97,18 +97,18 @@ export default function ContactPage() {
           <motion.div initial="hidden" animate="show" variants={stagger}>
             <motion.div variants={fadeUp}>
               <Badge className="mb-5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border-indigo-200 dark:border-indigo-700/50 px-4 py-1.5 text-sm font-medium">
-                Get in Touch
+                Liên hệ
               </Badge>
             </motion.div>
             <motion.h1
               variants={fadeUp}
               className="mb-5 text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.08]"
             >
-              We&apos;d love to{" "}
-              <span className="text-indigo-600 dark:text-indigo-400">hear from you</span>
+              Chúng tôi rất vui được{" "}
+              <span className="text-indigo-600 dark:text-indigo-400">lắng nghe bạn</span>
             </motion.h1>
             <motion.p variants={fadeUp} className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-              Have a question, idea, or just want to say hi? Drop us a message and we&apos;ll get back to you within 24 hours.
+              Có câu hỏi, ý tưởng hoặc chỉ muốn chào hỏi? Nhắn tin cho chúng tôi và chúng tôi sẽ phản hồi trong vòng 24 giờ.
             </motion.p>
           </motion.div>
         </div>
@@ -127,7 +127,7 @@ export default function ContactPage() {
               variants={stagger}
             >
               <motion.h2 variants={fadeUp} className="mb-8 text-2xl font-bold text-gray-900 dark:text-white">
-                Send us a message
+                Gửi tin nhắn cho chúng tôi
               </motion.h2>
 
               {success ? (
@@ -137,27 +137,27 @@ export default function ContactPage() {
                   className="flex flex-col items-center justify-center rounded-2xl border border-green-200 dark:border-green-800/40 bg-green-50 dark:bg-green-950/30 px-8 py-16 text-center"
                 >
                   <CheckCircle2 className="mb-4 h-14 w-14 text-green-500" />
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Message sent!</h3>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Tin nhắn đã được gửi!</h3>
                   <p className="text-gray-500 dark:text-gray-400">
-                    We&apos;ll be in touch soon. Expect a reply within 24 hours.
+                    Chúng tôi sẽ liên lạc với bạn sớm. Vui lòng chờ phản hồi trong vòng 24 giờ.
                   </p>
                   <Button
                     variant="outline"
                     className="mt-6"
                     onClick={() => { setSuccess(false); setForm({ name: "", email: "", subject: "", message: "" }); }}
                   >
-                    Send another message
+                    Gửi tin nhắn khác
                   </Button>
                 </motion.div>
               ) : (
                 <motion.form variants={fadeUp} onSubmit={handleSubmit} className="space-y-5">
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">Full Name</Label>
+                      <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">Họ và tên</Label>
                       <Input
                         id="name"
                         name="name"
-                        placeholder="Nguyen Van A"
+                        placeholder="Nguyễn Văn A"
                         value={form.name}
                         onChange={handleChange}
                         required
@@ -180,11 +180,11 @@ export default function ContactPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="subject" className="text-gray-700 dark:text-gray-300">Subject</Label>
+                    <Label htmlFor="subject" className="text-gray-700 dark:text-gray-300">Chủ đề</Label>
                     <Input
                       id="subject"
                       name="subject"
-                      placeholder="How can we help?"
+                      placeholder="Chúng tôi có thể giúp gì cho bạn?"
                       value={form.subject}
                       onChange={handleChange}
                       required
@@ -193,11 +193,11 @@ export default function ContactPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="message" className="text-gray-700 dark:text-gray-300">Message</Label>
+                    <Label htmlFor="message" className="text-gray-700 dark:text-gray-300">Nội dung</Label>
                     <textarea
                       id="message"
                       name="message"
-                      placeholder="Tell us more about your question or feedback..."
+                      placeholder="Hãy cho chúng tôi biết thêm về câu hỏi hoặc phản hồi của bạn..."
                       rows={5}
                       value={form.message}
                       onChange={handleChange}
@@ -219,13 +219,13 @@ export default function ContactPage() {
                     {loading ? (
                       <span className="flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Sending…
+                        Đang gửi…
                       </span>
-                    ) : "Send Message"}
+                    ) : "Gửi tin nhắn"}
                   </Button>
 
                   <p className="text-center text-xs text-gray-400 dark:text-gray-500">
-                    We&apos;ll get back to you within 24 hours.
+                    Chúng tôi sẽ phản hồi trong vòng 24 giờ.
                   </p>
                 </motion.form>
               )}
@@ -240,7 +240,7 @@ export default function ContactPage() {
               className="flex flex-col gap-6"
             >
               <motion.h2 variants={fadeUp} className="text-2xl font-bold text-gray-900 dark:text-white">
-                Contact information
+                Thông tin liên hệ
               </motion.h2>
 
               {/* Info cards */}
@@ -270,7 +270,7 @@ export default function ContactPage() {
 
               {/* Social links */}
               <motion.div variants={fadeUp} className="mt-2">
-                <p className="mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">Follow us</p>
+                <p className="mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">Theo dõi chúng tôi</p>
                 <div className="flex gap-3">
                   {SOCIALS.map(({ icon: Icon, label, href }) => (
                     <a

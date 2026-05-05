@@ -19,47 +19,47 @@ const stagger = { show: { transition: { staggerChildren: 0.1 } } };
 // ─── Feature categories ───────────────────────────────────────────────────────
 const CATEGORIES = [
   {
-    badge: "Sales",
-    title: "Sell faster, smarter",
-    desc:  "Everything you need at the counter — from table management to split bills, built for speed.",
+    badge: "Bán hàng",
+    title: "Bán nhanh hơn, thông minh hơn",
+    desc:  "Mọi thứ bạn cần tại quầy — từ quản lý bàn đến tách hóa đơn, được xây dựng cho tốc độ.",
     color: "blue",
     features: [
-      { icon: ShoppingCart, title: "Real-time POS",        desc: "Lightning-fast transactions with instant sync across all your devices and locations." },
-      { icon: CreditCard,   title: "Multiple Payment",     desc: "Accept cash, cards, QR codes, and digital wallets — all from one screen."            },
-      { icon: Globe,        title: "Omnichannel Orders",   desc: "Handle dine-in, takeaway, delivery, and online orders from one dashboard."           },
+      { icon: ShoppingCart, title: "POS thời gian thực",    desc: "Xử lý giao dịch cực nhanh, đồng bộ tức thì trên mọi thiết bị và chi nhánh của bạn." },
+      { icon: CreditCard,   title: "Thanh toán đa dạng",    desc: "Chấp nhận tiền mặt, thẻ, mã QR và ví điện tử — tất cả từ một màn hình duy nhất."   },
+      { icon: Globe,        title: "Đơn hàng đa kênh",      desc: "Xử lý đặt bàn, mang đi, giao hàng và đơn trực tuyến từ một dashboard duy nhất."     },
     ],
   },
   {
-    badge: "Operations",
-    title: "Run a tighter operation",
-    desc:  "Keep your inventory accurate, your team aligned, and your costs under control.",
+    badge: "Vận hành",
+    title: "Vận hành chặt chẽ hơn",
+    desc:  "Giữ tồn kho chính xác, đội ngũ đồng bộ và chi phí trong tầm kiểm soát.",
     color: "emerald",
     features: [
-      { icon: Package,  title: "Inventory Control",  desc: "Auto-reorder alerts, multi-location tracking, and a full audit trail in real time."    },
-      { icon: Layers,   title: "Recipe & Wastage",   desc: "Link ingredients to menu items and track wastage to protect your margins."             },
-      { icon: Users,    title: "Staff Management",   desc: "Shift scheduling, role-based permissions, and performance tracking for every team member." },
+      { icon: Package,  title: "Quản lý tồn kho",     desc: "Cảnh báo tái nhập tự động, theo dõi đa chi nhánh và lịch sử kiểm kê đầy đủ thời gian thực." },
+      { icon: Layers,   title: "Công thức & Hao hụt",  desc: "Liên kết nguyên liệu với món ăn và theo dõi hao hụt để bảo vệ lợi nhuận của bạn."           },
+      { icon: Users,    title: "Quản lý nhân viên",    desc: "Lên lịch ca, phân quyền theo vai trò và theo dõi hiệu suất cho từng thành viên."             },
     ],
   },
   {
-    badge: "Insights",
-    title: "Know your numbers",
-    desc:  "Deep analytics that show you exactly what's working and where to focus next.",
+    badge: "Phân tích",
+    title: "Nắm rõ con số của bạn",
+    desc:  "Phân tích sâu cho thấy chính xác điều gì đang hiệu quả và nên tập trung vào đâu tiếp theo.",
     color: "purple",
     features: [
-      { icon: BarChart3,  title: "Advanced Analytics",   desc: "Deep insights on sales, inventory trends, and staff performance in one view."        },
-      { icon: TrendingUp, title: "AI-powered Insights",  desc: "Predictive analytics and smart suggestions to boost your revenue every day."         },
-      { icon: Bell,       title: "Smart Alerts",         desc: "Get notified instantly on low stock, peak hours, or unusual transaction patterns."   },
+      { icon: BarChart3,  title: "Phân tích nâng cao",  desc: "Góc nhìn sâu về doanh thu, xu hướng tồn kho và hiệu suất nhân viên trong một màn hình."  },
+      { icon: TrendingUp, title: "Thông tin từ AI",      desc: "Phân tích dự đoán và gợi ý thông minh giúp tăng doanh thu của bạn mỗi ngày."             },
+      { icon: Bell,       title: "Cảnh báo thông minh", desc: "Nhận thông báo tức thì khi hàng sắp hết, giờ cao điểm hoặc giao dịch bất thường."         },
     ],
   },
   {
-    badge: "Security",
-    title: "Built on trust",
-    desc:  "Enterprise-grade security and role-based controls so the right people access the right data.",
+    badge: "Bảo mật",
+    title: "Xây dựng trên sự tin tưởng",
+    desc:  "Bảo mật cấp doanh nghiệp và kiểm soát theo vai trò để đúng người truy cập đúng dữ liệu.",
     color: "orange",
     features: [
-      { icon: Shield,      title: "Role-based Access",   desc: "Granular permissions for Manager, Admin, Staff, and Cashier — zero overlap."         },
-      { icon: Zap,         title: "99.9% Uptime SLA",    desc: "Built on resilient infrastructure with real-time failover — always-on for your business." },
-      { icon: Headphones,  title: "24/7 Support",        desc: "Live chat, email, and phone support from a team that actually knows F&B."            },
+      { icon: Shield,      title: "Phân quyền theo vai trò", desc: "Quyền truy cập chi tiết cho Quản lý, Admin, Nhân viên và Thu ngân — không chồng chéo."     },
+      { icon: Zap,         title: "Cam kết uptime 99.9%",    desc: "Xây dựng trên hạ tầng bền vững với chuyển đổi dự phòng thời gian thực — luôn hoạt động."  },
+      { icon: Headphones,  title: "Hỗ trợ 24/7",             desc: "Chat trực tiếp, email và điện thoại từ đội ngũ thực sự am hiểu ngành F&B."                },
     ],
   },
 ];
@@ -73,12 +73,12 @@ const COLOR_MAP: Record<string, { badge: string; accent: string; icon: string; d
 
 // ─── High-level capability list ───────────────────────────────────────────────
 const HIGHLIGHTS = [
-  "Free 14-day trial, no credit card required",
-  "Works on tablet, desktop, and mobile",
-  "Offline mode — sell even without internet",
-  "Instant onboarding, setup in under 10 minutes",
-  "Integrates with major delivery platforms",
-  "Dedicated onboarding support included",
+  "Dùng thử 14 ngày miễn phí, không cần thẻ tín dụng",
+  "Hoạt động trên máy tính bảng, máy tính và điện thoại",
+  "Chế độ ngoại tuyến — bán hàng ngay cả khi không có mạng",
+  "Khởi động ngay, cài đặt trong vòng 10 phút",
+  "Tích hợp với các nền tảng giao hàng lớn",
+  "Hỗ trợ đào tạo chuyên dụng được bao gồm trong gói",
 ];
 
 export default function FeaturesPage() {
@@ -91,32 +91,32 @@ export default function FeaturesPage() {
           <motion.div initial="hidden" animate="show" variants={stagger}>
             <motion.div variants={fadeUp}>
               <Badge className="mb-5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border-indigo-200 dark:border-indigo-700/50 px-4 py-1.5 text-sm font-medium">
-                Product Features
+                Tính năng sản phẩm
               </Badge>
             </motion.div>
             <motion.h1
               variants={fadeUp}
               className="mb-6 text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.08]"
             >
-              Everything your{" "}
-              <span className="text-indigo-600 dark:text-indigo-400">F&B business needs</span>
+              Tất cả những gì{" "}
+              <span className="text-indigo-600 dark:text-indigo-400">doanh nghiệp F&B của bạn cần</span>
             </motion.h1>
             <motion.p
               variants={fadeUp}
               className="mx-auto max-w-2xl text-xl text-gray-600 dark:text-gray-300 leading-relaxed"
             >
-              From the first sale of the day to closing-time reports, Lumio covers every corner of your
-              operations so you can focus on what matters — great food and happy customers.
+              Từ giao dịch đầu tiên trong ngày đến báo cáo cuối ca, Lumio bao quát mọi khía cạnh vận hành
+              để bạn tập trung vào điều quan trọng nhất — món ngon và khách hàng hài lòng.
             </motion.p>
             <motion.div variants={fadeUp} className="mt-10 flex flex-wrap justify-center gap-4">
               <Link href="/register">
                 <Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200/50 dark:shadow-indigo-900/30">
-                  Start free trial <ArrowRight className="ml-2 h-4 w-4" />
+                  Dùng thử miễn phí <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/pricing">
                 <Button size="lg" variant="outline" className="h-12 px-8 rounded-xl border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
-                  View pricing
+                  Xem bảng giá
                 </Button>
               </Link>
             </motion.div>
@@ -179,8 +179,8 @@ export default function FeaturesPage() {
             variants={stagger}
           >
             <motion.div variants={fadeUp} className="mb-12 text-center">
-              <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white">And so much more</h2>
-              <p className="mt-3 text-gray-500 dark:text-gray-400">Built with operators in mind, every detail matters.</p>
+              <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white">Và còn nhiều hơn nữa</h2>
+              <p className="mt-3 text-gray-500 dark:text-gray-400">Được xây dựng với tư duy vận hành thực tế, mọi chi tiết đều quan trọng.</p>
             </motion.div>
             <motion.div variants={fadeUp} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {HIGHLIGHTS.map((item) => (
@@ -210,20 +210,20 @@ export default function FeaturesPage() {
               <div className="absolute -right-20 bottom-10 h-60 w-60 rounded-full bg-violet-500/20 blur-3xl" />
             </div>
             <div className="relative">
-              <Badge className="mb-5 border-white/20 bg-white/10 text-white">14-day free trial · No credit card</Badge>
-              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Ready to see it in action?</h2>
+              <Badge className="mb-5 border-white/20 bg-white/10 text-white">Dùng thử 14 ngày · Không cần thẻ tín dụng</Badge>
+              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Sẵn sàng trải nghiệm thực tế?</h2>
               <p className="text-indigo-100 mb-8 max-w-md mx-auto">
-                Start your free trial today and discover why 300,000+ businesses trust Lumio.
+                Bắt đầu dùng thử miễn phí ngay hôm nay và khám phá lý do hơn 300.000 doanh nghiệp tin dùng Lumio.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/register">
                   <Button size="lg" className="h-12 gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-8 font-semibold shadow-lg">
-                    Start free trial <ArrowRight className="h-4 w-4" />
+                    Dùng thử miễn phí <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Link href="/pricing">
                   <Button size="lg" variant="outline" className="h-12 border-white/30 bg-white/10 text-white hover:bg-white/20 px-8">
-                    See pricing
+                    Xem bảng giá
                   </Button>
                 </Link>
               </div>
