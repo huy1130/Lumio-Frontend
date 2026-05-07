@@ -194,7 +194,7 @@ export default function PricingPage() {
                     ))}
                   </ul>
 
-                  <Link href="/register">
+                  <Link href={`/onboarding?plan=${plan.id}&cycle=${billingCycle}`}>
                     <Button
                       className={cn(
                         "w-full font-semibold h-11 rounded-xl",

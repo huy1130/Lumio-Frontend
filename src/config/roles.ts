@@ -1,6 +1,6 @@
 // Pure constants — NO "use client". Safe to import from Server Components.
 
-export type Role = "manager" | "admin" | "shop_owner" | "staff" | "cashier";
+export type Role = "manager" | "admin" | "shop_owner" | "staff" | "cashier" | "user";
 
 export interface MockUser {
   name:   string;
@@ -15,6 +15,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   shop_owner: "Shop Owner",
   staff:      "Staff",
   cashier:    "Cashier",
+  user:       "User",
 };
 
 export const ROLE_COLORS: Record<Role, string> = {
@@ -23,6 +24,7 @@ export const ROLE_COLORS: Record<Role, string> = {
   shop_owner: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
   staff:      "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300",
   cashier:    "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300",
+  user:       "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
 };
 
 export const MOCK_USERS: Record<Role, MockUser> = {
@@ -31,6 +33,7 @@ export const MOCK_USERS: Record<Role, MockUser> = {
   shop_owner: { name: "Le Van C",     email: "owner@pos.com",   role: "shop_owner", avatar: "LC" },
   staff:      { name: "Pham Thi D",   email: "staff@pos.com",   role: "staff",      avatar: "PD" },
   cashier:    { name: "Hoang Van E",  email: "cashier@pos.com", role: "cashier",    avatar: "HE" },
+  user:       { name: "Nguyen Thi F", email: "user@pos.com",    role: "user",       avatar: "NF" },
 };
 
 export const REDIRECT_MAP: Record<Role, string> = {
@@ -39,6 +42,7 @@ export const REDIRECT_MAP: Record<Role, string> = {
   shop_owner: "/shop-owner/dashboard",
   staff:      "/staff/dashboard",
   cashier:    "/cashier/dashboard",
+  user:       "/",
 };
 
-export const ALL_ROLES: Role[] = ["manager", "admin", "shop_owner", "staff", "cashier"];
+export const ALL_ROLES: Role[] = ["manager", "admin", "shop_owner", "staff", "cashier", "user"];
