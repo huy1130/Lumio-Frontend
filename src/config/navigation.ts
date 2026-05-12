@@ -24,25 +24,25 @@ export interface NavSection {
 const managerNav: NavSection[] = [
   {
     title: "Overview",
-    items: [{ title: "Dashboard",        href: "/manager/dashboard",  icon: LayoutDashboard }],
+    items: [{ title: "Dashboard",      href: "/dashboard",  icon: LayoutDashboard }],
   },
   {
     title: "Management",
     items: [
-      { title: "Manage Admins",  href: "/manager/admins",   icon: UserCog   },
-      { title: "Manage Tenants", href: "/manager/tenants",  icon: Building2 },
+      { title: "Manage Admins",  href: "/admins",   icon: UserCog   },
+      { title: "Manage Tenants", href: "/tenants",  icon: Building2 },
     ],
   },
   {
     title: "AI Config",
-    items: [{ title: "Configure AI", href: "/manager/ai-config", icon: BrainCircuit }],
+    items: [{ title: "Configure AI", href: "/ai/config", icon: BrainCircuit }],
   },
   {
     title: "Analytics",
     items: [
-      { title: "AI Statistics",      href: "/manager/ai-stats",   icon: BarChart3     },
-      { title: "Trends",             href: "/manager/trends",     icon: TrendingUp    },
-      { title: "Audit Logs",         href: "/manager/audit-logs", icon: ClipboardList },
+      { title: "AI Statistics", href: "/ai/stats",    icon: BarChart3     },
+      { title: "Trends",        href: "/trends",      icon: TrendingUp    },
+      { title: "Audit Logs",    href: "/audit-logs",  icon: ClipboardList },
     ],
   },
   {
@@ -55,35 +55,35 @@ const managerNav: NavSection[] = [
 const adminNav: NavSection[] = [
   {
     title: "Overview",
-    items: [{ title: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard }],
+    items: [{ title: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
   },
   {
     title: "Admin",
     items: [
-      { title: "Subscriptions", href: "/admin/subscriptions", icon: Tag       },
-      { title: "Tenants",       href: "/admin/tenants",       icon: Building2 },
-      { title: "Users",         href: "/admin/users",         icon: Users     },
+      { title: "Subscriptions", href: "/subscriptions", icon: Tag       },
+      { title: "Tenants",       href: "/tenants",       icon: Building2 },
+      { title: "Users",         href: "/users",         icon: Users     },
     ],
   },
   {
     title: "Store",
     items: [
-      { title: "Products",     href: "/admin/products",     icon: Package   },
-      { title: "Inventory",    href: "/admin/inventory",    icon: Warehouse },
-      { title: "Merchandises", href: "/admin/merchandises", icon: Store     },
+      { title: "Products",     href: "/products",     icon: Package   },
+      { title: "Inventory",    href: "/inventory",    icon: Warehouse },
+      { title: "Merchandises", href: "/merchandises", icon: Store     },
     ],
   },
   {
     title: "Operations",
-    items: [{ title: "Orders", href: "/admin/orders", icon: ShoppingCart }],
+    items: [{ title: "Orders", href: "/orders", icon: ShoppingCart }],
   },
   {
     title: "Analytics & AI",
     items: [
-      { title: "AI Charts",   href: "/admin/ai-charts",   icon: BrainCircuit  },
-      { title: "Reports",     href: "/admin/reports",     icon: BarChart3     },
-      { title: "Audit Logs",  href: "/admin/audit-logs",  icon: ClipboardList },
-      { title: "Export Data", href: "/admin/export",      icon: FileDown      },
+      { title: "AI Charts",   href: "/ai/charts",   icon: BrainCircuit  },
+      { title: "Reports",     href: "/reports",     icon: BarChart3     },
+      { title: "Audit Logs",  href: "/audit-logs",  icon: ClipboardList },
+      { title: "Export Data", href: "/export",      icon: FileDown      },
     ],
   },
   {
@@ -96,29 +96,29 @@ const adminNav: NavSection[] = [
 const shopOwnerNav: NavSection[] = [
   {
     title: "Overview",
-    items: [{ title: "Dashboard", href: "/shop-owner/dashboard", icon: LayoutDashboard }],
+    items: [{ title: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
   },
   {
     title: "Store",
     items: [
-      { title: "Products",       href: "/shop-owner/products",       icon: Package   },
-      { title: "Inventory",      href: "/shop-owner/inventory",      icon: Warehouse },
-      { title: "Merchandises",   href: "/shop-owner/merchandises",   icon: Store     },
-      { title: "Merch Program",  href: "/shop-owner/merch-programs", icon: Gift      },
+      { title: "Products",      href: "/products",     icon: Package   },
+      { title: "Inventory",     href: "/inventory",    icon: Warehouse },
+      { title: "Merchandises",  href: "/merchandises", icon: Store     },
+      { title: "Merch Program", href: "/programs",     icon: Gift      },
     ],
   },
   {
     title: "Orders",
-    items: [{ title: "Orders", href: "/shop-owner/orders", icon: ShoppingCart }],
+    items: [{ title: "Orders", href: "/orders", icon: ShoppingCart }],
   },
   {
     title: "Analytics & AI",
     items: [
-      { title: "Financial Stats", href: "/shop-owner/financials",  icon: DollarSign    },
-      { title: "AI Charts",       href: "/shop-owner/ai-charts",   icon: BrainCircuit  },
-      { title: "Reports",         href: "/shop-owner/reports",     icon: BarChart3     },
-      { title: "Audit Logs",      href: "/shop-owner/audit-logs",  icon: ClipboardList },
-      { title: "Export Data",     href: "/shop-owner/export",      icon: FileDown      },
+      { title: "Financial Stats", href: "/financials",  icon: DollarSign    },
+      { title: "AI Charts",       href: "/ai/charts",   icon: BrainCircuit  },
+      { title: "Reports",         href: "/reports",     icon: BarChart3     },
+      { title: "Audit Logs",      href: "/audit-logs",  icon: ClipboardList },
+      { title: "Export Data",     href: "/export",      icon: FileDown      },
     ],
   },
   {
@@ -131,26 +131,26 @@ const shopOwnerNav: NavSection[] = [
 const staffNav: NavSection[] = [
   {
     title: "Overview",
-    items: [{ title: "Dashboard", href: "/staff/dashboard", icon: LayoutDashboard }],
+    items: [{ title: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
   },
   {
     title: "Operations",
     items: [
-      { title: "Create Orders", href: "/staff/orders", icon: ClipboardList },
+      { title: "Create Orders", href: "/orders", icon: ClipboardList },
     ],
   },
   {
     title: "Analytics & AI",
     items: [
-      { title: "AI Charts",   href: "/staff/ai-charts", icon: BrainCircuit },
-      { title: "Export Data", href: "/staff/export",    icon: FileDown     },
+      { title: "AI Charts",   href: "/ai/charts", icon: BrainCircuit },
+      { title: "Export Data", href: "/export",    icon: FileDown     },
     ],
   },
   {
     title: "System",
     items: [
-      { title: "My Profile", href: "/staff/profile", icon: UserCircle },
-      { title: "Settings",   href: "/settings",      icon: Settings   },
+      { title: "My Profile", href: "/profile",  icon: UserCircle },
+      { title: "Settings",   href: "/settings", icon: Settings   },
     ],
   },
 ];
@@ -159,25 +159,25 @@ const staffNav: NavSection[] = [
 const cashierNav: NavSection[] = [
   {
     title: "Overview",
-    items: [{ title: "Dashboard", href: "/cashier/dashboard", icon: LayoutDashboard }],
+    items: [{ title: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
   },
   {
     title: "Operations",
     items: [
-      { title: "Payments",  href: "/cashier/payments",  icon: CreditCard  },
-      { title: "Checkout",  href: "/cashier/checkout",  icon: ShoppingBag },
-      { title: "Customers", href: "/cashier/customers", icon: Users       },
+      { title: "Payments",  href: "/payments",  icon: CreditCard  },
+      { title: "Checkout",  href: "/checkout",  icon: ShoppingBag },
+      { title: "Customers", href: "/customers", icon: Users       },
     ],
   },
   {
     title: "AI",
-    items: [{ title: "AI Chatbot", href: "/cashier/ai-chatbot", icon: BrainCircuit }],
+    items: [{ title: "AI Chatbot", href: "/ai/chatbot", icon: BrainCircuit }],
   },
   {
     title: "System",
     items: [
-      { title: "My Profile", href: "/cashier/profile", icon: UserCircle },
-      { title: "Settings",   href: "/settings",        icon: Settings   },
+      { title: "My Profile", href: "/profile",  icon: UserCircle },
+      { title: "Settings",   href: "/settings", icon: Settings   },
     ],
   },
 ];
@@ -189,6 +189,7 @@ const NAV_MAP: Record<Role, NavSection[]> = {
   shop_owner: shopOwnerNav,
   staff:      staffNav,
   cashier:    cashierNav,
+  user:       [],
 };
 
 export function getNavigationByRole(role: Role): NavSection[] {

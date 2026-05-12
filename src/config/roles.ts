@@ -37,11 +37,11 @@ export const MOCK_USERS: Record<Role, MockUser> = {
 };
 
 export const REDIRECT_MAP: Record<Role, string> = {
-  manager:    "/manager/dashboard",
-  admin:      "/admin/dashboard",
-  shop_owner: "/shop-owner/dashboard",
-  staff:      "/staff/dashboard",
-  cashier:    "/cashier/dashboard",
+  manager:    "/dashboard",
+  admin:      "/dashboard",
+  shop_owner: "/dashboard",
+  staff:      "/dashboard",
+  cashier:    "/dashboard",
   user:       "/",
 };
 
