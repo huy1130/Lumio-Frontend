@@ -3,16 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Layers, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { label: "Features", href: "/features" },
-  { label: "Pricing",  href: "/pricing"  },
-  { label: "About",    href: "/about"    },
-  { label: "Contact",  href: "/contact"  },
+  { label: "Pricing", href: "/pricing" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function Navbar() {
@@ -31,11 +32,16 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
-            <Layers className="h-[18px] w-[18px] text-white" />
-          </div>
-          <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white">Lumio</span>
+        <Link href="/" className="flex items-center gap-2 shrink-0 h-10">
+          <Image
+            src="/images/lumio-icon.png"
+            alt="Lumio Logo"
+            width={36}
+            height={36}
+            className="h-9 w-9 object-contain"
+            priority
+          />
+          <span className="text-xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400">Lumio</span>
         </Link>
 
         {/* Desktop nav links */}
