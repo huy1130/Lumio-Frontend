@@ -19,7 +19,7 @@ export const mockSubscriptions: Subscription[] = [
   {
     id: "1",
     planName: "Starter",
-    price: 29,
+    price: 119000,
     billingCycle: "monthly",
     features: ["Up to 2 users", "100 products", "Basic reports", "Email support"],
     maxUsers: 2,
@@ -29,7 +29,7 @@ export const mockSubscriptions: Subscription[] = [
   {
     id: "2",
     planName: "Professional",
-    price: 79,
+    price: 159000,
     billingCycle: "monthly",
     features: ["Up to 10 users", "1,000 products", "Advanced analytics", "Priority support", "Multi-location"],
     maxUsers: 10,
@@ -39,7 +39,7 @@ export const mockSubscriptions: Subscription[] = [
   {
     id: "3",
     planName: "Enterprise",
-    price: 199,
+    price: 299000,
     billingCycle: "monthly",
     features: ["Unlimited users", "Unlimited products", "Custom reports", "24/7 support", "API access", "White label"],
     maxUsers: -1,

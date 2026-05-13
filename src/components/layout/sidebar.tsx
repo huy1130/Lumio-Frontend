@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Layers, LogOut, Menu, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Menu, X } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,14 +35,25 @@ export function Sidebar() {
     return (
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className={cn("flex h-16 shrink-0 items-center border-b border-gray-200 dark:border-gray-700 px-4", isCollapsed ? "justify-center" : "gap-3")}>
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600">
-            <Layers className="h-5 w-5 text-white" />
-          </div>
-          {!isCollapsed && (
-            <div>
-              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">POS System</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Management Suite</p>
+        <div className={cn("flex h-16 shrink-0 items-center border-b border-gray-200 dark:border-gray-700 px-4", isCollapsed ? "justify-center" : "justify-start")}>
+          {isCollapsed ? (
+            <Image
+              src="/images/lumio-icon.png"
+              alt="Lumio Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
+            />
+          ) : (
+            <div className="flex items-center gap-2">
+              <Image
+                src="/images/lumio-icon.png"
+                alt="Lumio Logo"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain"
+              />
+              <span className="text-lg font-bold tracking-tight text-indigo-600 dark:text-indigo-400">Lumio</span>
             </div>
           )}
         </div>
