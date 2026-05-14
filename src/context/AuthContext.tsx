@@ -17,6 +17,8 @@ interface AuthContextValue {
   accessToken: string | null;
   user: AuthUser | null;
   role: Role;
+  /** Platform admin (admins/login) — quản lý subscription CRUD, users, v.v. */
+  isRealAdmin: boolean;
   loading: boolean;
   setSession: (token: string, nextUser: AuthUser) => void;
   logout: () => void;
@@ -55,6 +57,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return user.role ?? getRoleFromId(user.role_id);
   }, [user]);
 
+  const isRealAdmin = useMemo(() => role === "admin", [role]);
+
   function setSession(token: string, nextUser: AuthUser) {
     setAccessToken(token);
     setUser(nextUser);
@@ -72,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ accessToken, user, role, loading, setSession, logout }}
+      value={{ accessToken, user, role, isRealAdmin, loading, setSession, logout }}
     >
       {children}
     </AuthContext.Provider>

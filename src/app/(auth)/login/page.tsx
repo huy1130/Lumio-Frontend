@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getRedirectByRoleId, REDIRECT_MAP } from "@/config/roles";
 import { cn } from "@/lib/utils";
 import { adminLogin, userLogin } from "@/lib/auth-service";
+import { toast } from "sonner";
 
 const FEATURES = [
   "Quản lý đơn hàng realtime",
@@ -43,6 +44,15 @@ export default function LoginPage() {
       const redirect = response.user.role_id
         ? getRedirectByRoleId(response.user.role_id)
         : REDIRECT_MAP[response.user.role ?? "user"];
+
+      const displayName =
+        response.user.full_name?.trim() ||
+        response.user.username?.trim() ||
+        response.user.email ||
+        "bạn";
+      const isAdmin = response.user.role === "admin";
+      toast.success("Đăng nhập thành công");
+
       router.push(redirect);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Đăng nhập thất bại";

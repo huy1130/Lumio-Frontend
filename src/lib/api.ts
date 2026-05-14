@@ -1,8 +1,11 @@
+import { AUTH_TOKEN_KEY } from "@/lib/api-client";
+
 // CORS đã được bật ở backend → browser gọi thẳng, không cần proxy
 /** Trùng cổng mặc định của Nest (`PORT ?? 3000`) và BFF `API_BACKEND_URL`. */
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
-const TOKEN_KEY = "lumio_admin_token";
+/** Cùng key với AuthContext / axios (`lumio_access_token`). */
+const TOKEN_KEY = AUTH_TOKEN_KEY;
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
