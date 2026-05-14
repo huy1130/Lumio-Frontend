@@ -23,22 +23,25 @@ function pathToBreadcrumb(path: string): string {
   const parts = path.split("/").filter(Boolean);
   if (parts.length === 0) return "Home";
   return parts
-    .map((p) => p.replace(/-/g, " ").split(" ").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" "))
+    .map((p) =>
+      p
+        .replace(/-/g, " ")
+        .split(" ")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" "),
+    )
     .join(" / ");
 }
 
 export function Header() {
   const pathname = usePathname();
-  const { user, role, apiAdmin, isRealAdmin, logout } = useAuth();
+  const { user, role, logout } = useAuth();
 
   const breadcrumb = pathToBreadcrumb(pathname);
 
-  const displayName = isRealAdmin
-    ? apiAdmin?.full_name ?? apiAdmin?.email ?? "Admin"
-    : user?.full_name ?? user?.username ?? user?.email ?? "User";
-  const displayEmail = isRealAdmin
-    ? apiAdmin?.email ?? ""
-    : user?.email ?? "";
+  const displayName =
+    user?.full_name ?? user?.username ?? user?.email ?? "User";
+  const displayEmail = user?.email ?? "";
 
   const initials = displayName
     .split(" ")
@@ -49,11 +52,11 @@ export function Header() {
 
   const avatarClass = cn(
     "flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold overflow-hidden",
-    isRealAdmin ? "bg-indigo-600 text-white" : ROLE_COLORS[role],
+    ROLE_COLORS[role],
   );
   const spanClass = cn(
     "mt-1 inline-block w-fit rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
-    isRealAdmin ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300" : ROLE_COLORS[role],
+    ROLE_COLORS[role],
   );
 
   function handleLogout() {
@@ -78,7 +81,11 @@ export function Header() {
       <RoleSwitcher />
       <ThemeToggle />
 
-      <Button variant="ghost" size="icon" className="relative shrink-0 text-muted-foreground">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="relative shrink-0 text-muted-foreground"
+      >
         <Bell className="h-4 w-4" />
         <Badge className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center p-0 text-[9px]">
           3
@@ -89,20 +96,14 @@ export function Header() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-9 w-9 shrink-0 rounded-full p-0">
             <div className={avatarClass}>
-              {isRealAdmin && apiAdmin?.avatar
-                ? <img src={apiAdmin.avatar} alt={displayName} className="h-full w-full object-cover" />
-                : initials || displayName.slice(0, 2).toUpperCase()}
+              {initials || displayName.slice(0, 2).toUpperCase()}
             </div>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <span className={spanClass}>
-                {isRealAdmin
-                  ? apiAdmin?.manager_id === null ? "Super Admin" : "Admin"
-                  : ROLE_LABELS[role]}
-              </span>
+              <span className={spanClass}>{ROLE_LABELS[role]}</span>
               <p className="text-xs text-muted-foreground">{displayEmail}</p>
             </div>
           </DropdownMenuLabel>
