@@ -1,6 +1,5 @@
-// Browser calls /api/proxy/... → Next.js server forwards to backend (bypasses CORS)
-// Fallback is relative so it works on any port the dev server runs on
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api/proxy";
+// CORS đã được bật ở backend → browser gọi thẳng, không cần proxy
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:2999";
 
 const TOKEN_KEY = "lumio_admin_token";
 
@@ -45,8 +44,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  get:    <T>(path: string)                  => request<T>(path),
-  post:   <T>(path: string, body: unknown)   => request<T>(path, { method: "POST",   body: JSON.stringify(body) }),
-  patch:  <T>(path: string, body?: unknown)  => request<T>(path, { method: "PATCH",  body: body ? JSON.stringify(body) : undefined }),
-  delete: <T>(path: string)                  => request<T>(path, { method: "DELETE" }),
+  get:    <T>(path: string)                 => request<T>(path),
+  post:   <T>(path: string, body: unknown)  => request<T>(path, { method: "POST",   body: JSON.stringify(body) }),
+  patch:  <T>(path: string, body?: unknown) => request<T>(path, { method: "PATCH",  body: body ? JSON.stringify(body) : undefined }),
+  delete: <T>(path: string)                 => request<T>(path, { method: "DELETE" }),
 };

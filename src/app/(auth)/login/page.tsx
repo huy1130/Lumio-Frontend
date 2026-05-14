@@ -45,18 +45,20 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // ── Real backend admin login (qua Next.js proxy, không bị CORS) ─────────
+      // ── Đăng nhập admin qua backend (CORS đã bật, gọi thẳng) ────────────────
       const res = await adminService.login(email, password);
       loginAdmin(res.accessToken, res.admin);
       router.push("/dashboard");
     } catch (apiErr: unknown) {
       const msg = apiErr instanceof Error ? apiErr.message : "";
 
-      // 503 = proxy không reach được backend → fallback mock
-      const isBackendDown = msg.toLowerCase().includes("unreachable");
+      // Network error (backend offline) → fallback mock demo
+      const isNetworkError =
+        msg.toLowerCase().includes("failed to fetch") ||
+        msg.toLowerCase().includes("network") ||
+        msg.toLowerCase().includes("fetch");
 
-      if (isBackendDown) {
-        // ── Backend offline → mock demo ────────────────────────────────────────
+      if (isNetworkError) {
         const found = Object.entries(MOCK_USERS).find(([, u]) => u.email === email);
         if (!found) {
           setError("Backend đang offline. Email không có trong tài khoản demo.");
@@ -69,7 +71,7 @@ export default function LoginPage() {
         setRole(role);
         router.push(REDIRECT_MAP[role]);
       } else {
-        // ── Lỗi từ backend (sai mật khẩu, bị khoá, ...) ─────────────────────
+        // Lỗi từ backend: sai mật khẩu, tài khoản bị khoá, v.v.
         setError(msg || "Email hoặc mật khẩu không đúng.");
         triggerShake();
         setLoading(false);
