@@ -12,7 +12,11 @@ import { cn } from "@/lib/utils";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: "easeOut" as const },
+  },
 };
 const stagger = { show: { transition: { staggerChildren: 0.1 } } };
 
@@ -46,13 +50,14 @@ const FAQS = [
 
 export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
+    "monthly",
+  );
 
   const isAnnual = billingCycle === "annual";
 
   return (
     <div className="pt-16">
-
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="py-28 bg-gradient-to-br from-blue-50 via-white to-indigo-50/60 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950/40">
         <div className="mx-auto max-w-3xl px-6 text-center">
@@ -67,10 +72,16 @@ export default function PricingPage() {
               className="mb-5 text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.08]"
             >
               Đơn giản,{" "}
-              <span className="text-indigo-600 dark:text-indigo-400">minh bạch</span>
+              <span className="text-indigo-600 dark:text-indigo-400">
+                minh bạch
+              </span>
             </motion.h1>
-            <motion.p variants={fadeUp} className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-              Không phí ẩn. Không bất ngờ. Chọn gói phù hợp và nâng cấp bất cứ lúc nào.
+            <motion.p
+              variants={fadeUp}
+              className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed"
+            >
+              Không phí ẩn. Không bất ngờ. Chọn gói phù hợp và nâng cấp bất cứ
+              lúc nào.
             </motion.p>
           </motion.div>
         </div>
@@ -79,7 +90,6 @@ export default function PricingPage() {
       {/* ── Pricing cards ─────────────────────────────────────────────────── */}
       <section className="py-28 bg-white dark:bg-gray-950">
         <div className="mx-auto max-w-7xl px-6">
-
           {/* Billing cycle toggle */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -95,7 +105,7 @@ export default function PricingPage() {
                   "px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200",
                   !isAnnual
                     ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300",
                 )}
               >
                 Hàng tháng
@@ -106,7 +116,7 @@ export default function PricingPage() {
                   "px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-2",
                   isAnnual
                     ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300",
                 )}
               >
                 Hàng năm
@@ -143,7 +153,7 @@ export default function PricingPage() {
                     "relative flex flex-col rounded-2xl border p-8",
                     isPopular
                       ? "border-indigo-300 bg-indigo-600 text-white ring-4 ring-indigo-100 dark:ring-indigo-900 scale-[1.03] shadow-xl shadow-indigo-200 dark:shadow-indigo-900/50"
-                      : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md transition-all"
+                      : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md transition-all",
                   )}
                 >
                   {isPopular && (
@@ -155,52 +165,113 @@ export default function PricingPage() {
                   )}
 
                   <div className="mb-6">
-                    <p className={cn("text-base font-semibold mb-2", isPopular ? "text-indigo-100" : "text-gray-900 dark:text-white")}>
+                    <p
+                      className={cn(
+                        "text-base font-semibold mb-2",
+                        isPopular
+                          ? "text-indigo-100"
+                          : "text-gray-900 dark:text-white",
+                      )}
+                    >
                       {plan.planName}
                     </p>
                     <div className="flex items-baseline gap-1 mb-1">
-                      <span className={cn("text-4xl font-extrabold", isPopular ? "text-white" : "text-gray-900 dark:text-white")}>
+                      <span
+                        className={cn(
+                          "text-4xl font-extrabold",
+                          isPopular
+                            ? "text-white"
+                            : "text-gray-900 dark:text-white",
+                        )}
+                      >
                         {formatCurrency(displayPrice)}
                       </span>
-                      <span className={cn("text-sm", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
+                      <span
+                        className={cn(
+                          "text-sm",
+                          isPopular
+                            ? "text-indigo-200"
+                            : "text-gray-400 dark:text-gray-500",
+                        )}
+                      >
                         /tháng
                       </span>
                     </div>
                     {isAnnual && (
-                      <p className={cn("text-xs mb-1 line-through", isPopular ? "text-indigo-300" : "text-gray-400 dark:text-gray-500")}>
+                      <p
+                        className={cn(
+                          "text-xs mb-1 line-through",
+                          isPopular
+                            ? "text-indigo-300"
+                            : "text-gray-400 dark:text-gray-500",
+                        )}
+                      >
                         {formatCurrency(plan.price)}/tháng
                       </p>
                     )}
-                    <p className={cn("text-xs", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
+                    <p
+                      className={cn(
+                        "text-xs",
+                        isPopular
+                          ? "text-indigo-200"
+                          : "text-gray-400 dark:text-gray-500",
+                      )}
+                    >
                       {isAnnual
                         ? `${formatCurrency(displayPrice * 12)} thanh toán hàng năm`
                         : `${plan.maxUsers === -1 ? "Không giới hạn người dùng" : `Tối đa ${plan.maxUsers} người dùng`} · ${plan.maxProducts === -1 ? "Không giới hạn sản phẩm" : `${plan.maxProducts.toLocaleString()} sản phẩm`}`}
                     </p>
                     {isAnnual && (
-                      <p className={cn("text-xs mt-0.5", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
-                        {plan.maxUsers === -1 ? "Không giới hạn người dùng" : `Tối đa ${plan.maxUsers} người dùng`}
+                      <p
+                        className={cn(
+                          "text-xs mt-0.5",
+                          isPopular
+                            ? "text-indigo-200"
+                            : "text-gray-400 dark:text-gray-500",
+                        )}
+                      >
+                        {plan.maxUsers === -1
+                          ? "Không giới hạn người dùng"
+                          : `Tối đa ${plan.maxUsers} người dùng`}
                         {" · "}
-                        {plan.maxProducts === -1 ? "Không giới hạn sản phẩm" : `${plan.maxProducts.toLocaleString()} sản phẩm`}
+                        {plan.maxProducts === -1
+                          ? "Không giới hạn sản phẩm"
+                          : `${plan.maxProducts.toLocaleString()} sản phẩm`}
                       </p>
                     )}
                   </div>
 
                   <ul className="flex-1 space-y-3 mb-8">
                     {plan.features.map((f) => (
-                      <li key={f} className={cn("flex items-start gap-2.5 text-sm", isPopular ? "text-indigo-100" : "text-gray-600 dark:text-gray-300")}>
-                        <Check className={cn("h-4 w-4 shrink-0 mt-0.5", isPopular ? "text-indigo-200" : "text-green-500")} />
+                      <li
+                        key={f}
+                        className={cn(
+                          "flex items-start gap-2.5 text-sm",
+                          isPopular
+                            ? "text-indigo-100"
+                            : "text-gray-600 dark:text-gray-300",
+                        )}
+                      >
+                        <Check
+                          className={cn(
+                            "h-4 w-4 shrink-0 mt-0.5",
+                            isPopular ? "text-indigo-200" : "text-green-500",
+                          )}
+                        />
                         {f}
                       </li>
                     ))}
                   </ul>
 
-                  <Link href={`/onboarding?plan=${plan.id}&cycle=${billingCycle}`}>
+                  <Link
+                    href={`/onboarding?plan=${plan.id}&cycle=${billingCycle}`}
+                  >
                     <Button
                       className={cn(
                         "w-full font-semibold h-11 rounded-xl",
                         isPopular
                           ? "bg-white text-indigo-600 hover:bg-indigo-50 shadow-sm"
-                          : "bg-indigo-600 hover:bg-indigo-500 text-white"
+                          : "bg-indigo-600 hover:bg-indigo-500 text-white",
                       )}
                     >
                       Bắt đầu
@@ -219,7 +290,8 @@ export default function PricingPage() {
             transition={{ delay: 0.4 }}
             className="mt-10 text-center text-sm text-gray-400 dark:text-gray-500"
           >
-            Tất cả gói đều có 14 ngày dùng thử miễn phí · Không cần thẻ tín dụng · Hủy bất cứ lúc nào
+            Tất cả gói đều có 14 ngày dùng thử miễn phí · Không cần thẻ tín dụng
+            · Hủy bất cứ lúc nào
           </motion.p>
         </div>
       </section>
@@ -233,21 +305,38 @@ export default function PricingPage() {
             viewport={{ once: true, margin: "-80px" }}
             variants={stagger}
           >
-            <motion.h2 variants={fadeUp} className="text-3xl font-extrabold text-gray-900 dark:text-white mb-4">
+            <motion.h2
+              variants={fadeUp}
+              className="text-3xl font-extrabold text-gray-900 dark:text-white mb-4"
+            >
               Chưa chắc gói nào phù hợp?
             </motion.h2>
-            <motion.p variants={fadeUp} className="text-gray-500 dark:text-gray-400 mb-8 max-w-xl mx-auto">
-              Khám phá tất cả những gì Lumio cung cấp — rồi chọn gói phù hợp với quy mô doanh nghiệp hiện tại.
-              Bạn luôn có thể nâng cấp sau.
+            <motion.p
+              variants={fadeUp}
+              className="text-gray-500 dark:text-gray-400 mb-8 max-w-xl mx-auto"
+            >
+              Khám phá tất cả những gì Lumio cung cấp — rồi chọn gói phù hợp với
+              quy mô doanh nghiệp hiện tại. Bạn luôn có thể nâng cấp sau.
             </motion.p>
-            <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-4">
+            <motion.div
+              variants={fadeUp}
+              className="flex flex-wrap justify-center gap-4"
+            >
               <Link href="/features">
-                <Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold shadow-lg shadow-indigo-200/50 dark:shadow-indigo-900/30">
-                  Khám phá tất cả tính năng <ArrowRight className="ml-2 h-4 w-4" />
+                <Button
+                  size="lg"
+                  className="h-12 px-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold shadow-lg shadow-indigo-200/50 dark:shadow-indigo-900/30"
+                >
+                  Khám phá tất cả tính năng{" "}
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/contact">
-                <Button size="lg" variant="outline" className="h-12 px-8 rounded-xl border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-12 px-8 rounded-xl border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+                >
                   Liên hệ kinh doanh
                 </Button>
               </Link>
@@ -270,7 +359,13 @@ export default function PricingPage() {
                 Câu hỏi thường gặp
               </h2>
               <p className="text-gray-500 dark:text-gray-400">
-                Không tìm thấy câu trả lời? <Link href="/contact" className="text-indigo-600 dark:text-indigo-400 hover:underline">Nhắn tin cho chúng tôi.</Link>
+                Không tìm thấy câu trả lời?{" "}
+                <Link
+                  href="/contact"
+                  className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                >
+                  Nhắn tin cho chúng tôi.
+                </Link>
               </p>
             </motion.div>
 
@@ -289,7 +384,9 @@ export default function PricingPage() {
                     <HelpCircle
                       className={cn(
                         "h-4 w-4 shrink-0 ml-4 transition-colors",
-                        openFaq === idx ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400"
+                        openFaq === idx
+                          ? "text-indigo-600 dark:text-indigo-400"
+                          : "text-gray-400",
                       )}
                     />
                   </button>
@@ -321,19 +418,31 @@ export default function PricingPage() {
               <div className="absolute -right-20 bottom-10 h-60 w-60 rounded-full bg-violet-500/20 blur-3xl" />
             </div>
             <div className="relative">
-              <Badge className="mb-5 border-white/20 bg-white/10 text-white">Dùng thử 14 ngày · Không cần thẻ tín dụng</Badge>
-              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Bắt đầu phát triển ngay hôm nay</h2>
+              <Badge className="mb-5 border-white/20 bg-white/10 text-white">
+                Dùng thử 14 ngày · Không cần thẻ tín dụng
+              </Badge>
+              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">
+                Bắt đầu phát triển ngay hôm nay
+              </h2>
               <p className="text-indigo-100 mb-8 max-w-md mx-auto">
-                Hơn 300.000 doanh nghiệp đang vận hành thông minh hơn cùng Lumio.
+                Hơn 300.000 doanh nghiệp đang vận hành thông minh hơn cùng
+                Lumio.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/register">
-                  <Button size="lg" className="h-12 gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-8 font-semibold shadow-lg">
-                    Dùng thử miễn phí <ArrowRight className="h-4 w-4" />
+                <Link href="/contact">
+                  <Button
+                    size="lg"
+                    className="h-12 gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-8 font-semibold shadow-lg"
+                  >
+                    Liên hệ tư vấn <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Link href="/contact">
-                  <Button size="lg" variant="outline" className="h-12 border-white/30 bg-white/10 text-white hover:bg-white/20 px-8">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 border-white/30 bg-white/10 text-white hover:bg-white/20 px-8"
+                  >
                     Liên hệ kinh doanh
                   </Button>
                 </Link>
@@ -342,7 +451,6 @@ export default function PricingPage() {
           </motion.div>
         </div>
       </section>
-
     </div>
   );
 }

@@ -15,13 +15,13 @@ interface AccessGuardProps {
  * is not in the allowed list. Renders nothing until access is confirmed.
  */
 export function AccessGuard({ roles, children }: AccessGuardProps) {
-  const { role } = useAuth();
+  const { role, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!roles.includes(role)) router.push("/dashboard");
-  }, [role, router, roles]);
+    if (!loading && !roles.includes(role)) router.push("/dashboard");
+  }, [role, router, roles, loading]);
 
-  if (!roles.includes(role)) return null;
+  if (loading || !roles.includes(role)) return null;
   return <>{children}</>;
 }

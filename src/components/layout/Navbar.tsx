@@ -28,9 +28,13 @@ export function Navbar() {
     : "border-b border-gray-200/60 dark:border-gray-800/60 bg-white/90 dark:bg-gray-950/90 backdrop-blur-xl";
 
   return (
-    <nav className={cn("fixed top-0 inset-x-0 z-50 transition-all duration-300", navBg)}>
+    <nav
+      className={cn(
+        "fixed top-0 inset-x-0 z-50 transition-all duration-300",
+        navBg,
+      )}
+    >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0 h-10">
           <Image
@@ -41,13 +45,16 @@ export function Navbar() {
             className="h-9 w-9 object-contain"
             priority
           />
-          <span className="text-xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400">Lumio</span>
+          <span className="text-xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400">
+            Lumio
+          </span>
         </Link>
 
         {/* Desktop nav links */}
         <div className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map(({ label, href }) => {
-            const isActive = pathname === href || pathname.startsWith(href + "/");
+            const isActive =
+              pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
                 key={label}
@@ -56,7 +63,7 @@ export function Navbar() {
                   "relative px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-200",
                   isActive
                     ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200 dark:shadow-indigo-900/40"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/70 dark:hover:bg-white/8"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/70 dark:hover:bg-white/8",
                 )}
               >
                 {label}
@@ -78,25 +85,10 @@ export function Navbar() {
                 "transition-all duration-200",
                 pathname === "/login"
                   ? "bg-indigo-600 hover:bg-indigo-500 text-white border-transparent shadow-sm"
-                  : "border-gray-400/60 dark:border-gray-500/60 bg-white/20 dark:bg-white/10 text-gray-800 dark:text-gray-200 hover:bg-white/40 dark:hover:bg-white/20 backdrop-blur-sm"
+                  : "border-gray-400/60 dark:border-gray-500/60 bg-white/20 dark:bg-white/10 text-gray-800 dark:text-gray-200 hover:bg-white/40 dark:hover:bg-white/20 backdrop-blur-sm",
               )}
             >
               Đăng nhập
-            </Button>
-          </Link>
-
-          {/* Register — filled when active */}
-          <Link href="/register" className="hidden md:block">
-            <Button
-              size="sm"
-              className={cn(
-                "transition-all duration-200 text-white",
-                pathname === "/register"
-                  ? "bg-indigo-700 hover:bg-indigo-600 shadow-md ring-2 ring-indigo-400/40"
-                  : "bg-indigo-600/90 hover:bg-indigo-600 shadow-sm backdrop-blur-sm"
-              )}
-            >
-              Đăng ký
             </Button>
           </Link>
 
@@ -106,7 +98,11 @@ export function Navbar() {
             className="md:hidden text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
             aria-label="Toggle menu"
           >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </button>
         </div>
       </div>
@@ -115,7 +111,8 @@ export function Navbar() {
       {mobileOpen && (
         <div className="border-t border-gray-200/60 dark:border-gray-800/60 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md px-4 py-3 space-y-1 md:hidden">
           {NAV_LINKS.map(({ label, href }) => {
-            const isActive = pathname === href || pathname.startsWith(href + "/");
+            const isActive =
+              pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
                 key={label}
@@ -125,39 +122,33 @@ export function Navbar() {
                   "flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-medium transition-all",
                   isActive
                     ? "bg-indigo-600 text-white"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white",
                 )}
               >
-                {isActive && <span className="h-1.5 w-1.5 rounded-full bg-white shrink-0" />}
+                {isActive && (
+                  <span className="h-1.5 w-1.5 rounded-full bg-white shrink-0" />
+                )}
                 {label}
               </Link>
             );
           })}
 
           <div className="pt-2 pb-1 flex gap-2">
-            <Link href="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
+            <Link
+              href="/login"
+              className="flex-1"
+              onClick={() => setMobileOpen(false)}
+            >
               <Button
                 variant="outline"
                 size="sm"
                 className={cn(
                   "w-full transition-all",
-                  pathname === "/login" && "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400"
+                  pathname === "/login" &&
+                    "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400",
                 )}
               >
                 Đăng nhập
-              </Button>
-            </Link>
-            <Link href="/register" className="flex-1" onClick={() => setMobileOpen(false)}>
-              <Button
-                size="sm"
-                className={cn(
-                  "w-full text-white transition-all",
-                  pathname === "/register"
-                    ? "bg-indigo-700 ring-2 ring-indigo-400/40"
-                    : "bg-indigo-600 hover:bg-indigo-500"
-                )}
-              >
-                Đăng ký
               </Button>
             </Link>
           </div>
