@@ -2,13 +2,6 @@
 
 export type Role = "manager" | "admin" | "shop_owner" | "staff" | "cashier" | "user";
 
-export interface MockUser {
-  name:   string;
-  email:  string;
-  role:   Role;
-  avatar: string; // 2-letter initials
-}
-
 export const ROLE_LABELS: Record<Role, string> = {
   manager:    "Manager",
   admin:      "Admin",
@@ -27,15 +20,6 @@ export const ROLE_COLORS: Record<Role, string> = {
   user:       "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
 };
 
-export const MOCK_USERS: Record<Role, MockUser> = {
-  manager:    { name: "Nguyen Van A", email: "manager@pos.com", role: "manager",    avatar: "MA" },
-  admin:      { name: "Tran Thi B",   email: "admin@pos.com",   role: "admin",      avatar: "TB" },
-  shop_owner: { name: "Le Van C",     email: "owner@pos.com",   role: "shop_owner", avatar: "LC" },
-  staff:      { name: "Pham Thi D",   email: "staff@pos.com",   role: "staff",      avatar: "PD" },
-  cashier:    { name: "Hoang Van E",  email: "cashier@pos.com", role: "cashier",    avatar: "HE" },
-  user:       { name: "Nguyen Thi F", email: "user@pos.com",    role: "user",       avatar: "NF" },
-};
-
 export const REDIRECT_MAP: Record<Role, string> = {
   manager:    "/dashboard",
   admin:      "/dashboard",
@@ -46,3 +30,22 @@ export const REDIRECT_MAP: Record<Role, string> = {
 };
 
 export const ALL_ROLES: Role[] = ["manager", "admin", "shop_owner", "staff", "cashier", "user"];
+
+// Update these IDs to match your roles table.
+export const ROLE_ID_MAP: Record<number, Role> = {
+  1: "manager",
+  2: "admin",
+  3: "shop_owner",
+  4: "staff",
+  5: "cashier",
+  6: "user",
+};
+
+export function getRoleFromId(roleId?: number | null): Role {
+  if (roleId == null) return "user";
+  return ROLE_ID_MAP[roleId] ?? "user";
+}
+
+export function getRedirectByRoleId(roleId?: number | null): string {
+  return REDIRECT_MAP[getRoleFromId(roleId)] ?? "/dashboard";
+}
