@@ -92,7 +92,7 @@ export interface Payment {
   processedBy: string;
 }
 
-// ── Subscription ──────────────────────────────────────────────────────────────
+// ── Subscription (mock / marketing UI) ────────────────────────────────────────
 export interface Subscription {
   id: string;
   planName: string;
@@ -103,6 +103,58 @@ export interface Subscription {
   maxProducts: number;
   status: "active" | "inactive";
 }
+
+// ── ApiSubscription (matches backend Prisma model) ─────────────────────────────
+export interface ApiSubscription {
+  id: number;
+  package_code: string;
+  description: string | null;
+  price: string;           // Prisma Decimal serialises as string
+  billing_cycle: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+export interface CreateSubscriptionPayload {
+  package_code: string;
+  description?: string;
+  price: number;
+  billing_cycle: string;
+  is_active?: boolean;
+}
+
+export type UpdateSubscriptionPayload = Partial<CreateSubscriptionPayload>;
+
+// ── Admin (matches backend Prisma model) ──────────────────────────────────────
+export interface ApiAdmin {
+  id: number;
+  email: string;
+  full_name: string | null;
+  phone: string | null;
+  avatar: string | null;
+  is_active: boolean;
+  manager_id: number | null;
+  last_login_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminLoginResponse {
+  accessToken: string;
+  admin: ApiAdmin;
+}
+
+export interface CreateAdminPayload {
+  email: string;
+  password: string;
+  full_name?: string;
+  phone?: string;
+  avatar?: string;
+}
+
+export type UpdateAdminPayload = Partial<Omit<CreateAdminPayload, "email"> & { email?: string }>;
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 export interface NavItem {

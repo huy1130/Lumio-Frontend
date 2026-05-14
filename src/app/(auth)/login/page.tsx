@@ -16,6 +16,8 @@ import { useAuth } from "@/context/AuthContext";
 import { MOCK_USERS, REDIRECT_MAP, ROLE_LABELS, ROLE_COLORS, ALL_ROLES } from "@/config/roles";
 import type { Role } from "@/config/roles";
 import { cn } from "@/lib/utils";
+import { adminService } from "@/services/adminService";
+import { toast } from "sonner";
 
 const BRAND = "#5B4EE8";
 
@@ -27,31 +29,60 @@ const FEATURES = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setRole } = useAuth();
+  const { setRole, loginAdmin } = useAuth();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [showPw, setShowPw] = useState(false);
+  const [showPw, setShowPw]     = useState(false);
   const [remember, setRemember] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [shake, setShake] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading]   = useState(false);
+  const [shake, setShake]       = useState(false);
+  const [error, setError]       = useState("");
   const [demoOpen, setDemoOpen] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    const found = Object.entries(MOCK_USERS).find(([, u]) => u.email === email);
-    if (!found) {
-      setError("Email không tồn tại trong demo.");
-      triggerShake();
-      return;
-    }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    const role = found[0] as Role;
-    setRole(role);
-    router.push(REDIRECT_MAP[role]);
+
+    try {
+      // ── Đăng nhập admin qua backend (CORS đã bật, gọi thẳng) ────────────────
+      const res = await adminService.login(email, password);
+      loginAdmin(res.accessToken, res.admin);
+      toast.success("Đăng nhập thành công", {
+        description: `Chào mừng trở lại, ${res.admin?.email ?? "Admin"}!`,
+      });
+      router.push("/dashboard");
+    } catch (apiErr: unknown) {
+      const msg = apiErr instanceof Error ? apiErr.message : "";
+
+      // Network error (backend offline) → fallback mock demo
+      const isNetworkError =
+        msg.toLowerCase().includes("failed to fetch") ||
+        msg.toLowerCase().includes("network") ||
+        msg.toLowerCase().includes("fetch");
+
+      if (isNetworkError) {
+        const found = Object.entries(MOCK_USERS).find(([, u]) => u.email === email);
+        if (!found) {
+          setError("Backend đang offline. Email không có trong tài khoản demo.");
+          triggerShake();
+          setLoading(false);
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 600));
+        const role = found[0] as Role;
+        setRole(role);
+        router.push(REDIRECT_MAP[role]);
+      } else {
+        // Lỗi từ backend: sai mật khẩu, tài khoản bị khoá, v.v.
+        setError(msg || "Email hoặc mật khẩu không đúng.");
+        triggerShake();
+        setLoading(false);
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   function triggerShake() {
@@ -77,7 +108,6 @@ export default function LoginPage() {
         className="absolute inset-0 h-full w-full object-cover"
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260331_074327_a4d6275d-82d9-4c83-bfbe-f1fb2213c17c.mp4"
       />
-      {/* Dark overlay for readability */}
       <div className="absolute inset-0 bg-black/55 backdrop-blur-[1px]" />
 
       {/* ── Page content ─────────────────────────────────────────────────── */}
@@ -87,7 +117,7 @@ export default function LoginPage() {
         <main className="flex flex-1 items-center justify-center px-6 pt-24 pb-12">
           <div className="mx-auto w-full max-w-5xl flex items-center gap-14">
 
-            {/* ── LEFT: Branding text ──────────────────────────────────────── */}
+            {/* ── LEFT: Branding ───────────────────────────────────────────── */}
             <motion.div
               initial={{ opacity: 0, x: -24 }}
               animate={{ opacity: 1, x: 0 }}
@@ -112,7 +142,7 @@ export default function LoginPage() {
               </ul>
             </motion.div>
 
-            {/* ── RIGHT: Indigo card ───────────────────────────────────────── */}
+            {/* ── RIGHT: Login card ─────────────────────────────────────────── */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
@@ -172,6 +202,7 @@ export default function LoginPage() {
                             placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            required
                             className="h-11 rounded-lg border-indigo-400/60 bg-indigo-500/40 text-white placeholder:text-indigo-300 pr-10 focus-visible:ring-white/40 focus-visible:border-white/60"
                           />
                           <button
@@ -199,9 +230,12 @@ export default function LoginPage() {
                         </div>
                         Ghi nhớ đăng nhập
                       </label>
-                      <button type="button" className="text-sm font-medium text-indigo-200 hover:text-white transition-colors">
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm font-medium text-indigo-200 hover:text-white transition-colors"
+                      >
                         Quên mật khẩu?
-                      </button>
+                      </Link>
                     </div>
 
                     {/* Submit */}
@@ -225,7 +259,7 @@ export default function LoginPage() {
                         onClick={() => setDemoOpen(!demoOpen)}
                         className="flex w-full items-center justify-between px-4 py-3 text-xs font-semibold text-indigo-200 hover:text-white hover:bg-indigo-600/50 transition-colors"
                       >
-                        <span>🎭 Tài khoản demo</span>
+                        <span>🎭 Tài khoản demo (offline)</span>
                         {demoOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
                       </button>
                       <AnimatePresence>
@@ -271,7 +305,7 @@ export default function LoginPage() {
                     </div>
 
                     <p className="text-center text-[11px] text-indigo-300">
-                      🚀 Chế độ demo — mọi mật khẩu đều hoạt động
+                      Admin thật: dùng tài khoản từ backend. Demo: mọi mật khẩu đều hoạt động.
                     </p>
                   </form>
                 </div>

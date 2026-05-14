@@ -30,11 +30,37 @@ function pathToBreadcrumb(path: string): string {
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, role } = useAuth();
+  const { user, role, apiAdmin, isRealAdmin, logoutAdmin } = useAuth();
 
   const breadcrumb = pathToBreadcrumb(pathname);
-  const avatarClass = cn("flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold", ROLE_COLORS[role]);
-  const spanClass = cn("mt-1 inline-block w-fit rounded-full px-2.5 py-0.5 text-[11px] font-semibold", ROLE_COLORS[role]);
+
+  // Nếu đang login bằng tài khoản admin thật thì dùng data từ API
+  const displayName  = isRealAdmin
+    ? (apiAdmin?.full_name ?? apiAdmin?.email ?? "Admin")
+    : user.name;
+  const displayEmail = isRealAdmin ? (apiAdmin?.email ?? "") : user.email;
+
+  // Avatar: ảnh thật nếu có, không thì lấy 2 chữ cái đầu
+  const initials = displayName
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
+
+  const avatarClass = cn(
+    "flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold overflow-hidden",
+    isRealAdmin ? "bg-indigo-600 text-white" : ROLE_COLORS[role],
+  );
+  const spanClass = cn(
+    "mt-1 inline-block w-fit rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
+    isRealAdmin ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300" : ROLE_COLORS[role],
+  );
+
+  function handleLogout() {
+    logoutAdmin();
+    router.push("/login");
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-gray-200 bg-white/80 px-4 backdrop-blur-md dark:border-gray-700 dark:bg-gray-900/80 sm:px-6">
@@ -65,25 +91,32 @@ export function Header() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-9 w-9 shrink-0 rounded-full p-0">
             <div className={avatarClass}>
-              {user.avatar}
+              {isRealAdmin && apiAdmin?.avatar
+                ? <img src={apiAdmin.avatar} alt={displayName} className="h-full w-full object-cover" />
+                : isRealAdmin
+                ? initials
+                : user.avatar}
             </div>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-semibold">{user.name}</p>
-              <p className="text-xs text-muted-foreground">{user.email}</p>
-              <span className={spanClass}>{ROLE_LABELS[role]}</span>
+              <span className={spanClass}>
+                {isRealAdmin
+                  ? apiAdmin?.manager_id === null ? "Super Admin" : "Admin"
+                  : ROLE_LABELS[role]}
+              </span>
+              <p className="text-xs text-muted-foreground">{displayEmail}</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="cursor-pointer text-destructive focus:text-destructive"
-            onClick={() => router.push("/login")}
+            onClick={handleLogout}
           >
             <LogOut className="mr-2 h-4 w-4" />
-            Log out
+            Đăng xuất
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

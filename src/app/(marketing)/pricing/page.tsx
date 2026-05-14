@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight, HelpCircle } from "lucide-react";
+import { Check, ArrowRight, HelpCircle, Loader2 } from "lucide-react";
 import { mockSubscriptions } from "@/lib/mock-data";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import type { ApiSubscription } from "@/types";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -44,11 +45,99 @@ const FAQS = [
   },
 ];
 
+// ─── helpers ─────────────────────────────────────────────────────────────────
+
+/** Parse description thành danh sách feature (phân cách bởi dấu phẩy / xuống dòng) */
+function parseFeatures(description: string | null): string[] {
+  if (!description) return [];
+  return description
+    .split(/[,\n]/)
+    .map((f) => f.trim())
+    .filter(Boolean);
+}
+
+/** "STARTER_MONTHLY" → "Starter Monthly" */
+function formatPackageCode(code: string): string {
+  return code
+    .split(/[_-]/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+// ─── Unified plan shape (works for both mock & real data) ────────────────────
+interface PricingPlan {
+  id:           string;
+  name:         string;
+  price:        number;
+  billingCycle: string;
+  features:     string[];
+  description:  string;
+}
+
+function fromApi(sub: ApiSubscription): PricingPlan {
+  const features = parseFeatures(sub.description);
+  return {
+    id:           String(sub.id),
+    name:         formatPackageCode(sub.package_code),
+    price:        parseFloat(sub.price),
+    billingCycle: sub.billing_cycle,
+    features,
+    description:  sub.description ?? "",
+  };
+}
+
+function fromMock(m: typeof mockSubscriptions[0]): PricingPlan {
+  return {
+    id:           m.id,
+    name:         m.planName,
+    price:        m.price,
+    billingCycle: m.billingCycle,
+    features:     m.features,
+    description:  `Tối đa ${m.maxUsers === -1 ? "không giới hạn" : m.maxUsers} người dùng · ${m.maxProducts === -1 ? "không giới hạn" : m.maxProducts} sản phẩm`,
+  };
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function PricingPage() {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaq, setOpenFaq]           = useState<number | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
+  const [plans, setPlans]               = useState<PricingPlan[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [isLive, setIsLive]             = useState(false);
 
   const isAnnual = billingCycle === "annual";
+
+  useEffect(() => {
+    async function load() {
+      try {
+        // Forward token nếu user đang login (admin) → route dùng luôn không cần service credentials
+        const token = typeof window !== "undefined"
+          ? localStorage.getItem("lumio_admin_token")
+          : null;
+
+        const headers: HeadersInit = token
+          ? { Authorization: `Bearer ${token}` }
+          : {};
+
+        const res = await fetch("/api/public/subscriptions", { headers });
+        if (res.ok) {
+          const data: ApiSubscription[] = await res.json();
+          if (data.length > 0) {
+            setPlans(data.map(fromApi));
+            setIsLive(true);
+            return;
+          }
+        }
+      } catch {
+        // silently fall through to mock
+      }
+      // fallback: mock data
+      setPlans(mockSubscriptions.map(fromMock));
+      setIsLive(false);
+    }
+    load().finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="pt-16">
@@ -80,7 +169,7 @@ export default function PricingPage() {
       <section className="py-28 bg-white dark:bg-gray-950">
         <div className="mx-auto max-w-7xl px-6">
 
-          {/* Billing cycle toggle */}
+          {/* Billing toggle */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -122,105 +211,123 @@ export default function PricingPage() {
             )}
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={stagger}
-            className="grid gap-6 md:grid-cols-3 items-start"
-          >
-            {mockSubscriptions.map((plan, i) => {
-              const isPopular = i === 1;
-              const displayPrice = isAnnual
-                ? Math.round(plan.price * 0.8)
-                : plan.price;
+          {/* Cards */}
+          {loading ? (
+            <div className="flex items-center justify-center py-24 text-gray-400">
+              <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+              Đang tải gói dịch vụ…
+            </div>
+          ) : (
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-80px" }}
+              variants={stagger}
+              className={cn(
+                "grid gap-6 items-start",
+                plans.length === 1 && "max-w-sm mx-auto",
+                plans.length === 2 && "md:grid-cols-2 max-w-3xl mx-auto",
+                plans.length >= 3 && "md:grid-cols-3",
+              )}
+            >
+              {plans.map((plan, i) => {
+                const isPopular     = i === Math.floor(plans.length / 2) && plans.length > 1;
+                const displayPrice  = isAnnual ? Math.round(plan.price * 0.8) : plan.price;
 
-              return (
-                <motion.div
-                  key={plan.id}
-                  variants={fadeUp}
-                  className={cn(
-                    "relative flex flex-col rounded-2xl border p-8",
-                    isPopular
-                      ? "border-indigo-300 bg-indigo-600 text-white ring-4 ring-indigo-100 dark:ring-indigo-900 scale-[1.03] shadow-xl shadow-indigo-200 dark:shadow-indigo-900/50"
-                      : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md transition-all"
-                  )}
-                >
-                  {isPopular && (
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                      <span className="rounded-full bg-white text-indigo-600 px-4 py-1 text-xs font-bold shadow-sm border border-indigo-100">
-                        Phổ biến nhất
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="mb-6">
-                    <p className={cn("text-base font-semibold mb-2", isPopular ? "text-indigo-100" : "text-gray-900 dark:text-white")}>
-                      {plan.planName}
-                    </p>
-                    <div className="flex items-baseline gap-1 mb-1">
-                      <span className={cn("text-4xl font-extrabold", isPopular ? "text-white" : "text-gray-900 dark:text-white")}>
-                        {formatCurrency(displayPrice)}
-                      </span>
-                      <span className={cn("text-sm", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
-                        /tháng
-                      </span>
-                    </div>
-                    {isAnnual && (
-                      <p className={cn("text-xs mb-1 line-through", isPopular ? "text-indigo-300" : "text-gray-400 dark:text-gray-500")}>
-                        {formatCurrency(plan.price)}/tháng
-                      </p>
+                return (
+                  <motion.div
+                    key={plan.id}
+                    variants={fadeUp}
+                    className={cn(
+                      "relative flex flex-col rounded-2xl border p-8",
+                      isPopular
+                        ? "border-indigo-300 bg-indigo-600 text-white ring-4 ring-indigo-100 dark:ring-indigo-900 scale-[1.03] shadow-xl shadow-indigo-200 dark:shadow-indigo-900/50"
+                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md transition-all"
                     )}
-                    <p className={cn("text-xs", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
-                      {isAnnual
-                        ? `${formatCurrency(displayPrice * 12)} thanh toán hàng năm`
-                        : `${plan.maxUsers === -1 ? "Không giới hạn người dùng" : `Tối đa ${plan.maxUsers} người dùng`} · ${plan.maxProducts === -1 ? "Không giới hạn sản phẩm" : `${plan.maxProducts.toLocaleString()} sản phẩm`}`}
-                    </p>
-                    {isAnnual && (
-                      <p className={cn("text-xs mt-0.5", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
-                        {plan.maxUsers === -1 ? "Không giới hạn người dùng" : `Tối đa ${plan.maxUsers} người dùng`}
-                        {" · "}
-                        {plan.maxProducts === -1 ? "Không giới hạn sản phẩm" : `${plan.maxProducts.toLocaleString()} sản phẩm`}
-                      </p>
+                  >
+                    {isPopular && (
+                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                        <span className="rounded-full bg-white text-indigo-600 px-4 py-1 text-xs font-bold shadow-sm border border-indigo-100">
+                          Phổ biến nhất
+                        </span>
+                      </div>
                     )}
-                  </div>
 
-                  <ul className="flex-1 space-y-3 mb-8">
-                    {plan.features.map((f) => (
-                      <li key={f} className={cn("flex items-start gap-2.5 text-sm", isPopular ? "text-indigo-100" : "text-gray-600 dark:text-gray-300")}>
-                        <Check className={cn("h-4 w-4 shrink-0 mt-0.5", isPopular ? "text-indigo-200" : "text-green-500")} />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link href={`/onboarding?plan=${plan.id}&cycle=${billingCycle}`}>
-                    <Button
-                      className={cn(
-                        "w-full font-semibold h-11 rounded-xl",
-                        isPopular
-                          ? "bg-white text-indigo-600 hover:bg-indigo-50 shadow-sm"
-                          : "bg-indigo-600 hover:bg-indigo-500 text-white"
+                    {/* Header */}
+                    <div className="mb-6">
+                      <p className={cn("text-base font-semibold mb-2", isPopular ? "text-indigo-100" : "text-gray-900 dark:text-white")}>
+                        {plan.name}
+                      </p>
+                      <div className="flex items-baseline gap-1 mb-1">
+                        <span className={cn("text-4xl font-extrabold", isPopular ? "text-white" : "text-gray-900 dark:text-white")}>
+                          {formatCurrency(displayPrice)}
+                        </span>
+                        <span className={cn("text-sm", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
+                          /tháng
+                        </span>
+                      </div>
+                      {isAnnual && (
+                        <p className={cn("text-xs mb-1 line-through", isPopular ? "text-indigo-300" : "text-gray-400 dark:text-gray-500")}>
+                          {formatCurrency(plan.price)}/tháng
+                        </p>
                       )}
-                    >
-                      Bắt đầu
-                    </Button>
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </motion.div>
+                      {plan.description && plan.features.length === 0 && (
+                        <p className={cn("text-xs mt-1", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
+                          {plan.description}
+                        </p>
+                      )}
+                      <p className={cn("text-xs mt-1 capitalize", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
+                        Chu kỳ: {plan.billingCycle}
+                        {isAnnual && ` · ${formatCurrency(displayPrice * 12)}/năm`}
+                      </p>
+                    </div>
 
-          {/* Trial note */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-            className="mt-10 text-center text-sm text-gray-400 dark:text-gray-500"
-          >
-            Tất cả gói đều có 14 ngày dùng thử miễn phí · Không cần thẻ tín dụng · Hủy bất cứ lúc nào
-          </motion.p>
+                    {/* Features */}
+                    {plan.features.length > 0 && (
+                      <ul className="flex-1 space-y-3 mb-8">
+                        {plan.features.map((f) => (
+                          <li key={f} className={cn("flex items-start gap-2.5 text-sm", isPopular ? "text-indigo-100" : "text-gray-600 dark:text-gray-300")}>
+                            <Check className={cn("h-4 w-4 shrink-0 mt-0.5", isPopular ? "text-indigo-200" : "text-green-500")} />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    <div className={plan.features.length === 0 ? "mt-auto" : ""}>
+                      <Link href={`/onboarding?plan=${plan.id}&cycle=${billingCycle}`}>
+                        <Button
+                          className={cn(
+                            "w-full font-semibold h-11 rounded-xl",
+                            isPopular
+                              ? "bg-white text-indigo-600 hover:bg-indigo-50 shadow-sm"
+                              : "bg-indigo-600 hover:bg-indigo-500 text-white"
+                          )}
+                        >
+                          Bắt đầu
+                        </Button>
+                      </Link>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          )}
+
+          {/* Source badge + trial note */}
+          {!loading && (
+            <div className="mt-10 flex flex-col items-center gap-2">
+              {isLive && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 px-3 py-1 text-xs text-green-700 dark:text-green-400 font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                  Dữ liệu thật từ hệ thống
+                </span>
+              )}
+              <p className="text-center text-sm text-gray-400 dark:text-gray-500">
+                Tất cả gói đều có 14 ngày dùng thử miễn phí · Không cần thẻ tín dụng · Hủy bất cứ lúc nào
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -270,7 +377,10 @@ export default function PricingPage() {
                 Câu hỏi thường gặp
               </h2>
               <p className="text-gray-500 dark:text-gray-400">
-                Không tìm thấy câu trả lời? <Link href="/contact" className="text-indigo-600 dark:text-indigo-400 hover:underline">Nhắn tin cho chúng tôi.</Link>
+                Không tìm thấy câu trả lời?{" "}
+                <Link href="/contact" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+                  Nhắn tin cho chúng tôi.
+                </Link>
               </p>
             </motion.div>
 
