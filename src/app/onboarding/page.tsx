@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import {
   Check,
   CreditCard,
   Loader2,
-  Coffee,
   Store,
   ArrowLeft,
   Mail,
@@ -247,12 +247,24 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: BRAND }}>
 
-      {/* Top bar */}
-      <div className="flex items-center gap-2.5 px-8 py-5 shrink-0">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20">
-          <Coffee className="h-4 w-4 text-white" />
-        </div>
-        <span className="text-white font-bold text-base tracking-tight">Lumio</span>
+      {/* Top bar — logo giống Navbar / AuthNavbar */}
+      <div className="flex items-center px-8 py-5 shrink-0">
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 shrink-0 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        >
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white p-1 shadow-sm">
+            <Image
+              src="/images/lumio-icon.png"
+              alt="Lumio"
+              width={28}
+              height={28}
+              className="h-7 w-7 object-contain"
+              priority
+            />
+          </span>
+          <span className="text-white font-bold text-base tracking-tight">Lumio</span>
+        </Link>
       </div>
 
       <main className="flex flex-1 items-center justify-center px-6 pb-12">
