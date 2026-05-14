@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Bell, LogOut, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,18 +29,17 @@ function pathToBreadcrumb(path: string): string {
 
 export function Header() {
   const pathname = usePathname();
-  const router = useRouter();
-  const { user, role, apiAdmin, isRealAdmin, logoutAdmin } = useAuth();
+  const { user, role, apiAdmin, isRealAdmin, logout } = useAuth();
 
   const breadcrumb = pathToBreadcrumb(pathname);
 
-  // Nếu đang login bằng tài khoản admin thật thì dùng data từ API
-  const displayName  = isRealAdmin
-    ? (apiAdmin?.full_name ?? apiAdmin?.email ?? "Admin")
-    : user.name;
-  const displayEmail = isRealAdmin ? (apiAdmin?.email ?? "") : user.email;
+  const displayName = isRealAdmin
+    ? apiAdmin?.full_name ?? apiAdmin?.email ?? "Admin"
+    : user?.full_name ?? user?.username ?? user?.email ?? "User";
+  const displayEmail = isRealAdmin
+    ? apiAdmin?.email ?? ""
+    : user?.email ?? "";
 
-  // Avatar: ảnh thật nếu có, không thì lấy 2 chữ cái đầu
   const initials = displayName
     .split(" ")
     .filter(Boolean)
@@ -58,8 +57,7 @@ export function Header() {
   );
 
   function handleLogout() {
-    logoutAdmin();
-    router.push("/login");
+    logout();
   }
 
   return (
@@ -93,9 +91,7 @@ export function Header() {
             <div className={avatarClass}>
               {isRealAdmin && apiAdmin?.avatar
                 ? <img src={apiAdmin.avatar} alt={displayName} className="h-full w-full object-cover" />
-                : isRealAdmin
-                ? initials
-                : user.avatar}
+                : initials || displayName.slice(0, 2).toUpperCase()}
             </div>
           </Button>
         </DropdownMenuTrigger>

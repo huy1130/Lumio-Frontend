@@ -1,79 +1,76 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import type { Role, MockUser } from "@/config/roles";
-import { MOCK_USERS } from "@/config/roles";
-import { setToken, clearToken } from "@/lib/api";
-import type { ApiAdmin } from "@/types";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { useRouter } from "next/navigation";
+import type { Role } from "@/config/roles";
+import { getRoleFromId } from "@/config/roles";
+import type { AuthUser } from "@/types/user";
+import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from "@/lib/api-client";
 
 interface AuthContextValue {
-  // ── mock / demo role (non-admin roles) ──────────────────────────────────────
-  role:    Role;
-  user:    MockUser;
-  setRole: (role: Role) => void;
-
-  // ── real admin session ───────────────────────────────────────────────────────
-  apiAdmin: ApiAdmin | null;
-  loginAdmin:  (token: string, admin: ApiAdmin) => void;
-  logoutAdmin: () => void;
-  isRealAdmin: boolean;
+  accessToken: string | null;
+  user: AuthUser | null;
+  role: Role;
+  loading: boolean;
+  setSession: (token: string, nextUser: AuthUser) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const ROLE_KEY       = "pos_demo_role";
-const ADMIN_DATA_KEY = "lumio_admin_data";
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [role, setRoleState]       = useState<Role>("admin");
-  const [apiAdmin, setApiAdmin]    = useState<ApiAdmin | null>(null);
+  const router = useRouter();
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Rehydrate from localStorage after mount
   useEffect(() => {
-    const savedRole = localStorage.getItem(ROLE_KEY) as Role | null;
-    if (savedRole && savedRole in MOCK_USERS) setRoleState(savedRole);
+    const storedToken = localStorage.getItem(AUTH_TOKEN_KEY);
+    const storedUser = localStorage.getItem(AUTH_USER_KEY);
 
-    const savedAdmin = localStorage.getItem(ADMIN_DATA_KEY);
-    if (savedAdmin) {
+    if (storedToken && storedUser) {
       try {
-        setApiAdmin(JSON.parse(savedAdmin) as ApiAdmin);
+        const parsedUser = JSON.parse(storedUser) as AuthUser;
+        setAccessToken(storedToken);
+        setUser(parsedUser);
       } catch {
-        localStorage.removeItem(ADMIN_DATA_KEY);
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+        localStorage.removeItem(AUTH_USER_KEY);
       }
     }
+
+    setLoading(false);
   }, []);
 
-  function setRole(newRole: Role) {
-    setRoleState(newRole);
-    localStorage.setItem(ROLE_KEY, newRole);
+  const role = useMemo<Role>(() => {
+    if (!user) return "user";
+    return user.role ?? getRoleFromId(user.role_id);
+  }, [user]);
+
+  function setSession(token: string, nextUser: AuthUser) {
+    setAccessToken(token);
+    setUser(nextUser);
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(nextUser));
   }
 
-  function loginAdmin(token: string, admin: ApiAdmin) {
-    setToken(token);
-    setApiAdmin(admin);
-    localStorage.setItem(ADMIN_DATA_KEY, JSON.stringify(admin));
-    // Sync mock role so route guards pass
-    setRole("admin");
-  }
-
-  function logoutAdmin() {
-    clearToken();
-    setApiAdmin(null);
-    localStorage.removeItem(ADMIN_DATA_KEY);
-    setRole("admin");
+  function logout() {
+    setAccessToken(null);
+    setUser(null);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_KEY);
+    router.push("/login");
   }
 
   return (
     <AuthContext.Provider
-      value={{
-        role,
-        user: MOCK_USERS[role],
-        setRole,
-        apiAdmin,
-        loginAdmin,
-        logoutAdmin,
-        isRealAdmin: apiAdmin !== null,
-      }}
+      value={{ accessToken, user, role, loading, setSession, logout }}
     >
       {children}
     </AuthContext.Provider>
