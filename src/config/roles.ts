@@ -42,7 +42,7 @@ export const ROLE_ID_MAP: Record<number, Role> = {
 };
 
 export function getRoleFromId(roleId?: number | null): Role {
-  if (!roleId) return "user";
+  if (roleId == null) return "user";
   return ROLE_ID_MAP[roleId] ?? "user";
 }
 

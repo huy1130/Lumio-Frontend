@@ -43,8 +43,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem(AUTH_TOKEN_KEY);
         localStorage.removeItem(AUTH_USER_KEY);
       }
+    } else if (storedToken || storedUser) {
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      localStorage.removeItem(AUTH_USER_KEY);
     }
-
     setLoading(false);
   }, []);
 

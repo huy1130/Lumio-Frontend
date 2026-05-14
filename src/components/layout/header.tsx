@@ -51,7 +51,7 @@ export function Header() {
     .join("");
 
   const avatarClass = cn(
-    "flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold overflow-hidden",
+   "flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold",
     ROLE_COLORS[role],
   );
   const spanClass = cn(

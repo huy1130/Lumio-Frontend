@@ -26,26 +26,26 @@ function normalizeUser(user: AuthUser): AuthUser {
 }
 
 function normalizeAuthResponse(payload: AdminLoginResponse | UserLoginResponse): AuthResponse {
-  if ((payload as UserLoginResponse).user) {
-    const data = payload as UserLoginResponse;
+  if ("admin" in payload) {
+     const data = payload as AdminLoginResponse;
     return {
       accessToken: data.accessToken,
-      user: normalizeUser(data.user),
+      user: {
+         id: data.admin.id,
+         email: data.admin.email,
+         username: data.admin.email,
+         full_name: data.admin.full_name ?? null,
+         phone: data.admin.phone ?? null,
+         role: "admin",
+         role_id: null,
+       },
     };
   }
 
-  const data = payload as AdminLoginResponse;
+  const data = payload as UserLoginResponse;
   return {
     accessToken: data.accessToken,
-    user: {
-      id: data.admin.id,
-      email: data.admin.email,
-      username: data.admin.email,
-      full_name: data.admin.full_name ?? null,
-      phone: data.admin.phone ?? null,
-      role: "admin",
-      role_id: null,
-    },
+    user: normalizeUser(data.user),
   };
 }
 
