@@ -12,6 +12,16 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
   if (typeof window === "undefined") return config;
+  const path = `${config.baseURL ?? ""}${config.url ?? ""}`;
+  const isPublicAuth =
+    /\/auth\/(login|register|forgot-password|reset-password)(\?|$)/.test(path) ||
+    /\/admins\/login(\?|$)/.test(path);
+  if (isPublicAuth) {
+    if (config.headers) {
+      delete (config.headers as Record<string, unknown>).Authorization;
+    }
+    return config;
+  }
   const token = localStorage.getItem(AUTH_TOKEN_KEY);
   if (token) {
     config.headers = config.headers ?? {};
