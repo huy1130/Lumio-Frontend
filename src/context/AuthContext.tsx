@@ -12,6 +12,7 @@ import type { Role } from "@/config/roles";
 import { getRoleFromId } from "@/config/roles";
 import type { AuthUser } from "@/types/user";
 import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from "@/lib/api-client";
+import { clearShopSessionCache } from "@/lib/resolve-tenant-shop";
 
 interface AuthContextValue {
   accessToken: string | null;
@@ -71,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     localStorage.removeItem(AUTH_TOKEN_KEY);
     localStorage.removeItem(AUTH_USER_KEY);
+    clearShopSessionCache();
     router.push("/login");
   }
 

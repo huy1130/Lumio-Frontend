@@ -6,6 +6,7 @@ import type { Role } from "@/config/roles";
  */
 export const FEATURE_ACCESS: Record<string, Role[]> = {
   dashboard:     ["manager", "admin", "shop_owner", "staff", "cashier"],
+  shop:          ["shop_owner"],
   products:      ["admin", "shop_owner"],
   inventory:     ["admin", "shop_owner"],
   orders:        ["admin", "shop_owner", "staff"],

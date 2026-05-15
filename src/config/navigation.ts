@@ -90,6 +90,7 @@ const shopOwnerNav: NavSection[] = [
   {
     title: "Store",
     items: [
+      { title: "Cửa hàng",      href: "/shop",         icon: Store     },
       { title: "Products",      href: "/products",     icon: Package   },
       { title: "Inventory",     href: "/inventory",    icon: Warehouse },
       { title: "Merchandises",  href: "/merchandises", icon: Store     },

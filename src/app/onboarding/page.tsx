@@ -25,6 +25,7 @@ import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { ApiSubscription } from "@/types";
+import { savePendingShop } from "@/lib/pending-shop";
 
 const BRAND = "#5B4EE8";
 
@@ -235,6 +236,7 @@ export default function OnboardingPage() {
       }
 
       if (data?.checkoutUrl) {
+        savePendingShop({ shop_name: tenantName.trim() });
         if (data.orderCode) {
           try {
             sessionStorage.setItem("lumio_payos_order_code", String(data.orderCode));

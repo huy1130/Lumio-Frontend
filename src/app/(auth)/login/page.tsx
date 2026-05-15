@@ -12,6 +12,8 @@ import { useAuth } from "@/context/AuthContext";
 import { getRedirectByRoleId, REDIRECT_MAP } from "@/config/roles";
 import { cn } from "@/lib/utils";
 import { adminLogin, userLogin } from "@/lib/auth-service";
+import { ensureShopSetup } from "@/lib/ensure-shop-setup";
+import { resolveTenantShops } from "@/lib/resolve-tenant-shop";
 import { toast } from "sonner";
 
 const FEATURES = [
@@ -40,18 +42,46 @@ export default function LoginPage() {
       const response = isAdminLogin
         ? await adminLogin(identifier.trim(), password)
         : await userLogin(identifier.trim(), password);
-      setSession(response.accessToken, response.user);
-      const redirect = response.user.role_id
-        ? getRedirectByRoleId(response.user.role_id)
-        : REDIRECT_MAP[response.user.role ?? "user"];
 
-      const displayName =
-        response.user.full_name?.trim() ||
-        response.user.username?.trim() ||
-        response.user.email ||
-        "bạn";
-      const isAdmin = response.user.role === "admin";
-      toast.success("Đăng nhập thành công");
+      let user = response.user;
+      setSession(response.accessToken, user);
+
+      if (!isAdminLogin) {
+        try {
+          const resolved = await resolveTenantShops(user);
+          user = resolved.user;
+          setSession(response.accessToken, user);
+
+          const shopResult = await ensureShopSetup(user);
+          if (shopResult.status === "created") {
+            user = shopResult.user;
+            setSession(response.accessToken, user);
+            toast.success("Đăng nhập thành công — đã tạo cửa hàng");
+          } else if (shopResult.status === "already_exists") {
+            toast.success("Đăng nhập thành công — cửa hàng đã được thiết lập");
+            router.push("/shop");
+            return;
+          } else if (shopResult.status === "needs_setup") {
+            toast.success("Đăng nhập thành công");
+            router.push("/shop");
+            return;
+          } else {
+            toast.success("Đăng nhập thành công");
+          }
+        } catch (shopErr) {
+          const shopMessage =
+            shopErr instanceof Error ? shopErr.message : "Không thể tạo cửa hàng";
+          toast.error(shopMessage);
+          router.push("/shop");
+          return;
+        }
+      } else {
+        toast.success("Đăng nhập thành công");
+      }
+
+      const redirect = user.role_id
+        ? getRedirectByRoleId(user.role_id)
+        : REDIRECT_MAP[user.role ?? "user"];
 
       router.push(redirect);
     } catch (err) {

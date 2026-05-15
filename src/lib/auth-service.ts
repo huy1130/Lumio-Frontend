@@ -17,11 +17,18 @@ interface UserLoginResponse {
   user: AuthUser;
 }
 
-function normalizeUser(user: AuthUser): AuthUser {
-  const role = user.role ?? getRoleFromId(user.role_id);
+function normalizeUser(
+  user: AuthUser & { role_code?: string | null },
+): AuthUser {
+  const roleFromCode =
+    user.role_code === "SHOPOWNER" ? ("shop_owner" as const) : undefined;
+  const role = user.role ?? roleFromCode ?? getRoleFromId(user.role_id);
   return {
     ...user,
     role,
+    role_code: user.role_code ?? null,
+    tenant_id: user.tenant_id ?? null,
+    shop_id: user.shop_id ?? null,
   };
 }
 

@@ -10,7 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { ROLE_LABELS, ROLE_COLORS } from "@/config/roles";
-import { getNavigationByRole } from "@/config/navigation";
+import { getNavigationByRole, type NavSection } from "@/config/navigation";
+import { shouldShowShopSetup } from "@/lib/ensure-shop-setup";
+import { getStoredShopForTenant } from "@/lib/shop-storage";
+import { pickPrimaryShop } from "@/lib/pick-primary-shop";
+import { shopService } from "@/services/shopService";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -19,7 +23,50 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const navigation = getNavigationByRole(role);
+  const [shopLabel, setShopLabel] = useState<string | null>(null);
+  const [tenantShopCount, setTenantShopCount] = useState(0);
+
+  useEffect(() => {
+    if (role !== "shop_owner" || !user) {
+      setShopLabel(null);
+      setTenantShopCount(0);
+      return;
+    }
+
+    const stored = getStoredShopForTenant(user.tenant_id);
+    if (stored?.shop_name) {
+      setShopLabel(stored.shop_name);
+    }
+
+    let cancelled = false;
+    shopService
+      .getMine()
+      .then((list) => {
+        if (cancelled) return;
+        const forTenant = list.filter((s) => s.tenant_id === user.tenant_id);
+        setTenantShopCount(forTenant.length);
+        const primary = pickPrimaryShop(forTenant, user);
+        if (primary?.shop_name) setShopLabel(primary.shop_name);
+      })
+      .catch(() => {
+        if (!cancelled && stored?.shop_name) setShopLabel(stored.shop_name);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [role, user, pathname]);
+
+  const navigation: NavSection[] = getNavigationByRole(role).map((section) => ({
+    ...section,
+    items: section.items.map((item) => {
+      if (item.href !== "/shop" || role !== "shop_owner") return item;
+      if (user && shouldShowShopSetup(user, tenantShopCount)) {
+        return { ...item, badge: "!" };
+      }
+      return item;
+    }),
+  }));
 
   useEffect(() => {
     setMobileOpen(false);
@@ -89,6 +136,16 @@ export function Sidebar() {
               {displayName}
             </p>
             <span className={roleBadgeClass}>{ROLE_LABELS[role]}</span>
+            {shopLabel && (
+              <p className="mt-1.5 truncate text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                {shopLabel}
+              </p>
+            )}
+            {role === "shop_owner" && user && shouldShowShopSetup(user, tenantShopCount) && !shopLabel && (
+              <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
+                Chưa có cửa hàng
+              </p>
+            )}
           </div>
         )}
 
