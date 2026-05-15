@@ -128,6 +128,20 @@ export interface CreateSubscriptionPayload {
 
 export type UpdateSubscriptionPayload = Partial<CreateSubscriptionPayload>;
 
+/** GET /subscriptions/stats (admin) */
+export interface SubscriptionPackageStat {
+  id: number;
+  package_code: string;
+  description: string | null;
+  price: string | number;
+  total_purchased: number;
+}
+
+export interface SubscriptionStatsResponse {
+  totalRevenue: string | number;
+  packageStats: SubscriptionPackageStat[];
+}
+
 // ── Admin (matches backend Prisma model) ──────────────────────────────────────
 export interface ApiAdmin {
   id: number;

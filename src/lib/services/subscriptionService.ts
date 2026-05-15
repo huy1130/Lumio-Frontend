@@ -2,6 +2,7 @@ import { api } from "@/lib/api";
 import type {
   ApiSubscription,
   CreateSubscriptionPayload,
+  SubscriptionStatsResponse,
   UpdateSubscriptionPayload,
 } from "@/types";
 
@@ -30,5 +31,10 @@ export const subscriptionService = {
 
   deactivate(id: number): Promise<ApiSubscription> {
     return api.patch<ApiSubscription>(`${BASE}/${id}/deactivate`);
+  },
+
+  /** GET /subscriptions/stats — JwtAuthGuard + AdminOnlyGuard */
+  getStats(): Promise<SubscriptionStatsResponse> {
+    return api.get<SubscriptionStatsResponse>(`${BASE}/stats`);
   },
 };

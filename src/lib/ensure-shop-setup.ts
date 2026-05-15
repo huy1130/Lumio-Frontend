@@ -1,89 +1,56 @@
 import { getRoleFromBackend } from "@/lib/roles";
-import { isShopLimitReachedError } from "@/lib/shop-errors";
-import { readPendingShop, clearPendingShop } from "@/lib/pending-shop";
-import {
-  saveShop,
-  saveShopSnapshot,
-  getStoredShopForTenant,
-} from "@/lib/shop-storage";
+import { needsShopSelection, pickPrimaryShop } from "@/lib/pick-primary-shop";
+import { getStoredShopForTenant } from "@/lib/shop-storage";
+import { bindActiveShopToUser } from "@/lib/shop-session";
 import { resolveTenantShops } from "@/lib/resolve-tenant-shop";
-import { shopService } from "@/lib/services/shopService";
 import type { AuthUser } from "@/types/user";
 
 export function isShopOwnerUser(user: AuthUser): boolean {
   return getRoleFromBackend(user) === "shop_owner";
 }
 
-/** Shop owner sau PayOS thường chưa có shop_id cho đến khi POST /shops */
 export function needsShopSetup(user: AuthUser): boolean {
   return isShopOwnerUser(user) && user.shop_id == null;
 }
 
-/** Hiển thị form tạo shop — false khi tenant đã có shop trên DB */
+/** Form tạo shop đầu tiên — khi chưa có shop trên DB */
 export function shouldShowShopSetup(
   user: AuthUser | null,
   tenantShopCount = 0,
 ): boolean {
   if (!user || !isShopOwnerUser(user)) return false;
-  if (tenantShopCount > 0) return false;
-  if (user.shop_id != null && user.shop_id > 0) return false;
-  const stored = getStoredShopForTenant(user.tenant_id);
-  if (stored) return false;
-  return true;
+  return tenantShopCount === 0;
 }
 
-export type EnsureShopSetupResult =
-  | { status: "ok"; user: AuthUser }
-  | { status: "created"; user: AuthUser }
-  | { status: "already_exists"; user: AuthUser }
-  | { status: "needs_setup" };
+export type ShopOwnerLoginStatus = "ready" | "needs_setup" | "needs_select";
 
-export async function ensureShopSetup(user: AuthUser): Promise<EnsureShopSetupResult> {
+/**
+ * Sau login: không POST /shops — chỉ định tuyến setup / chọn shop / dashboard.
+ */
+export async function resolveShopOwnerAfterLogin(
+  user: AuthUser,
+): Promise<{ status: ShopOwnerLoginStatus; user: AuthUser }> {
   const resolved = await resolveTenantShops(user);
-  if (resolved.shops.length > 0) {
-    return { status: "ok", user: resolved.user };
-  }
+  const shops = resolved.shops;
 
-  if (!shouldShowShopSetup(user)) {
-    return { status: "ok", user };
-  }
-
-  const pending = readPendingShop();
-  if (!pending?.shop_name?.trim()) {
-    return { status: "needs_setup" };
-  }
-
-  try {
-    const shop = await shopService.create({
-      shop_name: pending.shop_name.trim(),
-      address: pending.address?.trim() || undefined,
-      phone: pending.phone?.trim() || undefined,
-    });
-
-    clearPendingShop();
-    saveShop(shop);
-
-    return {
-      status: "created",
-      user: { ...user, shop_id: shop.id },
-    };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "";
-    if (isShopLimitReachedError(message)) {
-      const again = await resolveTenantShops(user);
-      if (again.shops.length > 0) {
-        clearPendingShop();
-        return { status: "ok", user: again.user };
-      }
-      clearPendingShop();
-      saveShopSnapshot({
-        shop_name: pending.shop_name.trim(),
-        address: pending.address,
-        phone: pending.phone,
-        tenant_id: user.tenant_id,
-      });
-      return { status: "already_exists", user };
+  if (shops.length === 0) {
+    if (shouldShowShopSetup(user, 0)) {
+      return { status: "needs_setup", user: resolved.user };
     }
-    throw err;
+    return { status: "ready", user: resolved.user };
   }
+
+  if (needsShopSelection(shops, user)) {
+    return { status: "needs_select", user: resolved.user };
+  }
+
+  const primary = pickPrimaryShop(shops, user);
+  if (primary) {
+    return {
+      status: "ready",
+      user: bindActiveShopToUser(resolved.user, primary),
+    };
+  }
+
+  return { status: "ready", user: resolved.user };
 }

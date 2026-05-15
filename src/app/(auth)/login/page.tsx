@@ -13,8 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getRedirectByBackendRole } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 import { adminLogin, userLogin } from "@/lib/auth-service";
-import { ensureShopSetup } from "@/lib/ensure-shop-setup";
-import { resolveTenantShops } from "@/lib/resolve-tenant-shop";
+import { resolveShopOwnerAfterLogin } from "@/lib/ensure-shop-setup";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -42,33 +41,33 @@ export default function LoginPage() {
 
       if (!isAdminLogin) {
         try {
-          const resolved = await resolveTenantShops(user);
-          user = resolved.user;
+          const shopStatus = await resolveShopOwnerAfterLogin(user);
+          user = shopStatus.user;
           setSession(response.accessToken, user);
 
-          const shopResult = await ensureShopSetup(user);
-          if (shopResult.status === "created") {
-            user = shopResult.user;
-            setSession(response.accessToken, user);
-            toast.success("Đăng nhập thành công — đã tạo cửa hàng", {
-              closeButton: true,
-            });
-          } else if (shopResult.status === "already_exists") {
-            toast.success("Đăng nhập thành công — cửa hàng đã được thiết lập", {
+          if (shopStatus.status === "needs_setup") {
+            toast.success("Đăng nhập thành công. Vui lòng thiết lập cửa hàng.", {
               closeButton: true,
             });
             router.push("/shop");
             return;
-          } else if (shopResult.status === "needs_setup") {
-            toast.success("Đăng nhập thành công", { closeButton: true });
-            router.push("/shop");
-            return;
-          } else {
-            toast.success("Đăng nhập thành công", { closeButton: true });
           }
+          if (shopStatus.status === "needs_select") {
+            toast.success("Đăng nhập thành công. Chọn cửa hàng để quản lý.", {
+              closeButton: true,
+            });
+            setSession(response.accessToken, shopStatus.user);
+            router.push("/select-shop");
+            return;
+          }
+          if (shopStatus.user.shop_id !== user.shop_id) {
+            setSession(response.accessToken, shopStatus.user);
+            user = shopStatus.user;
+          }
+          toast.success("Đăng nhập thành công", { closeButton: true });
         } catch (shopErr) {
           const shopMessage =
-            shopErr instanceof Error ? shopErr.message : "Không thể tạo cửa hàng";
+            shopErr instanceof Error ? shopErr.message : "Không thể tải thông tin cửa hàng";
           toast.error(shopMessage);
           router.push("/shop");
           return;

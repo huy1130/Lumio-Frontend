@@ -7,20 +7,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
-import { getRedirectByBackendRole } from "@/lib/roles";
 import { readPendingShop, clearPendingShop } from "@/lib/pending-shop";
 import { isShopLimitReachedError } from "@/lib/shop-errors";
-import { saveShop, saveShopSnapshot } from "@/lib/shop-storage";
+import { bindActiveShopToUser } from "@/lib/shop-session";
+import { resolveTenantShops } from "@/lib/resolve-tenant-shop";
+import { saveShopSnapshot } from "@/lib/shop-storage";
 import { shopService } from "@/lib/services/shopService";
 import { toast } from "sonner";
 
 interface SetupShopFormProps {
   redirectAfterCreate?: boolean;
+  resetFormAfterCreate?: boolean;
+  onCancel?: () => void;
   onShopResolved?: () => void;
 }
 
 export function SetupShopForm({
   redirectAfterCreate = false,
+  resetFormAfterCreate = false,
+  onCancel,
   onShopResolved,
 }: SetupShopFormProps) {
   const router = useRouter();
@@ -33,10 +38,16 @@ export function SetupShopForm({
 
   useEffect(() => {
     const pending = readPendingShop();
-    if (pending?.shop_name) setShopName(pending.shop_name);
+    if (pending?.shop_name && !resetFormAfterCreate) setShopName(pending.shop_name);
     if (pending?.address) setAddress(pending.address);
     if (pending?.phone) setPhone(pending.phone);
-  }, []);
+  }, [resetFormAfterCreate]);
+
+  function clearFormFields() {
+    setShopName("");
+    setAddress("");
+    setPhone("");
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -57,14 +68,19 @@ export function SetupShopForm({
       });
 
       clearPendingShop();
-      saveShop(shop);
-      setSession(accessToken, { ...user, shop_id: shop.id });
+      const nextUser = bindActiveShopToUser(user, shop);
+      setSession(accessToken, nextUser);
       toast.success("Đã tạo cửa hàng thành công");
 
+      if (resetFormAfterCreate) {
+        clearFormFields();
+      }
+
+      onShopResolved?.();
+
       if (redirectAfterCreate) {
-        router.push(getRedirectByBackendRole(user));
-      } else {
-        router.refresh();
+        const resolved = await resolveTenantShops(nextUser);
+        router.push(resolved.shops.length >= 2 ? "/select-shop" : "/dashboard");
       }
     } catch (err) {
       const message =
@@ -72,11 +88,10 @@ export function SetupShopForm({
 
       if (isShopLimitReachedError(message)) {
         clearPendingShop();
-        const { resolveTenantShops } = await import("@/lib/resolve-tenant-shop");
         const resolved = await resolveTenantShops(user);
         if (resolved.shops.length > 0) {
           setSession(accessToken, resolved.user);
-          toast.info("Đã tải cửa hàng của tenant.");
+          toast.info("Đã đạt giới hạn cửa hàng theo gói.");
           onShopResolved?.();
           return;
         }
@@ -86,9 +101,7 @@ export function SetupShopForm({
           phone: phone.trim() || undefined,
           tenant_id: user.tenant_id,
         });
-        toast.info(
-          "Cửa hàng đã tồn tại trên gói đăng ký. Kiểm tra DATABASE_URL nếu chưa thấy chi tiết.",
-        );
+        toast.info(message);
         onShopResolved?.();
         return;
       }
@@ -138,20 +151,33 @@ export function SetupShopForm({
         />
       </div>
 
-      <Button
-        type="submit"
-        disabled={submitting || shopName.trim().length < 2}
-        className="h-11 w-full rounded-xl bg-indigo-600 font-semibold text-white hover:bg-indigo-700"
-      >
-        {submitting ? (
-          <span className="flex items-center justify-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Đang tạo…
-          </span>
-        ) : (
-          "Tạo cửa hàng"
-        )}
-      </Button>
+      <div className="flex gap-2">
+        {onCancel ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 flex-1 rounded-xl"
+            onClick={onCancel}
+            disabled={submitting}
+          >
+            Hủy
+          </Button>
+        ) : null}
+        <Button
+          type="submit"
+          disabled={submitting || shopName.trim().length < 2}
+          className="h-11 flex-1 rounded-xl bg-indigo-600 font-semibold text-white hover:bg-indigo-700"
+        >
+          {submitting ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Đang tạo…
+            </span>
+          ) : (
+            "Tạo cửa hàng"
+          )}
+        </Button>
+      </div>
     </form>
   );
 }

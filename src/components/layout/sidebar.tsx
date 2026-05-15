@@ -141,6 +141,14 @@ export function Sidebar() {
                 {shopLabel}
               </p>
             )}
+            {role === "shop_owner" && tenantShopCount >= 2 && (
+              <Link
+                href="/select-shop"
+                className="mt-1 block truncate text-[10px] text-indigo-500 hover:underline"
+              >
+                Đổi cửa hàng
+              </Link>
+            )}
             {role === "shop_owner" && user && shouldShowShopSetup(user, tenantShopCount) && !shopLabel && (
               <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
                 Chưa có cửa hàng

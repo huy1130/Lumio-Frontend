@@ -27,8 +27,10 @@ export default function SubscriptionSuccessPage({ searchParams }: Props) {
         Thanh toán thành công
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-        PayOS đã xác nhận thanh toán. Hệ thống sẽ hoàn tất thiết lập tài khoản của bạn
-        trong giây lát. Bạn có thể đăng nhập bằng email và mật khẩu đã đăng ký khi mua gói.
+        PayOS đã xác nhận thanh toán. Tài khoản và tenant của bạn sẽ được kích hoạt trong
+        giây lát. Đăng nhập bằng email và mật khẩu đã đăng ký, sau đó vào mục{" "}
+        <strong className="font-medium text-gray-800 dark:text-gray-200">Cửa hàng</strong>{" "}
+        để tạo shop — cửa hàng không được tạo tự động khi thanh toán.
       </p>
       {(orderCode || status) && (
         <p className="mt-6 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-xs text-gray-500 dark:border-gray-800 dark:bg-gray-900/60 dark:text-gray-400">

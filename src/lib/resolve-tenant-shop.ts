@@ -1,12 +1,13 @@
 import { isShopOwnerUser } from "@/lib/ensure-shop-setup";
 import { pickPrimaryShop } from "@/lib/pick-primary-shop";
+import { bindActiveShopToUser } from "@/lib/shop-session";
 import {
-  saveShop,
   clearStoredShop,
   clearStoredShopIfWrongTenant,
   getStoredShopForTenant,
   markTenantHasShop,
 } from "@/lib/shop-storage";
+import { clearAllActiveShops } from "@/lib/active-shop";
 import { shopService } from "@/lib/services/shopService";
 import type { Shop } from "@/types/shop";
 import type { AuthUser } from "@/types/user";
@@ -34,25 +35,18 @@ export async function resolveTenantShops(
       return { shops: [], user };
     }
 
-    saveShop(primary);
     markTenantHasShop();
 
     return {
       shops: forTenant,
-      user: {
-        ...user,
-        shop_id: user.shop_id ?? primary.id,
-      },
+      user: bindActiveShopToUser(user, primary),
     };
   } catch (err) {
     const cached = getStoredShopForTenant(user.tenant_id);
     if (cached) {
       return {
         shops: [cached],
-        user: {
-          ...user,
-          shop_id: user.shop_id ?? cached.id,
-        },
+        user: bindActiveShopToUser(user, cached),
       };
     }
     throw err;
@@ -62,4 +56,5 @@ export async function resolveTenantShops(
 /** Sau logout / đổi tài khoản */
 export function clearShopSessionCache(): void {
   clearStoredShop();
+  clearAllActiveShops();
 }
