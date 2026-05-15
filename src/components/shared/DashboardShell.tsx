@@ -5,7 +5,7 @@ import { SalesByCategory } from "@/components/shared/sales-by-category";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { RoleBadge } from "@/components/shared/RoleBadge";
-import type { Role } from "@/config/roles";
+import type { Role } from "@/lib/roles";
 
 interface StatItem {
   title: string;

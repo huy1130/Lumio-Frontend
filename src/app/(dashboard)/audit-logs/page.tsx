@@ -3,11 +3,11 @@
 import { useAuth } from "@/context/AuthContext";
 import { AuditLogsPage } from "@/components/shared/AuditLogsPage";
 import { AccessGuard } from "@/components/shared/AccessGuard";
-import { ROLE_LABELS } from "@/config/roles";
+import { ROLE_LABELS } from "@/lib/roles";
 
 export default function AuditLogsFeaturePage() {
   return (
-    <AccessGuard roles={["admin", "manager", "shop_owner"]}>
+    <AccessGuard roles={["admin", "shop_owner"]}>
       <AuditLogsContent />
     </AccessGuard>
   );

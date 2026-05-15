@@ -4,7 +4,7 @@ import { Building2, CheckCircle, XCircle, Users, CreditCard, DollarSign } from "
 import { PlaceholderPage } from "@/components/shared/PlaceholderPage";
 import { AccessGuard } from "@/components/shared/AccessGuard";
 import { useAuth } from "@/context/AuthContext";
-import { ROLE_LABELS } from "@/config/roles";
+import { ROLE_LABELS } from "@/lib/roles";
 
 const STATS_BY_ROLE = {
   admin: [
@@ -23,7 +23,7 @@ const STATS_BY_ROLE = {
 
 export default function TenantsPage() {
   return (
-    <AccessGuard roles={["admin", "manager"]}>
+    <AccessGuard roles={["admin"}>
       <TenantsContent />
     </AccessGuard>
   );

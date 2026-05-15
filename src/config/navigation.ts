@@ -1,5 +1,5 @@
 // Pure config — NO "use client". Safe to import from Server Components.
-import type { Role } from "@/config/roles";
+import type { Role } from "@/lib/roles";
 import {
   LayoutDashboard, ShoppingCart, Package, Warehouse, CreditCard,
   Settings, Tag, BarChart3, Store, Users, UserCog, Building2,

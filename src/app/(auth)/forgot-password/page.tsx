@@ -2,19 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Loader2, ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AuthNavbar } from "@/components/layout/AuthNavbar";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { forgotPassword } from "@/lib/auth-service";
-
-const FEATURES = [
-  "Liên kết đặt lại mật khẩu được gửi qua email",
-  "Bảo mật tuyệt đối với mã hoá end-to-end",
-  "Không cần nhập mã OTP",
-];
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -40,191 +36,147 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden">
-      {/* ── Video background ─────────────────────────────────────────────── */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 h-full w-full object-cover"
-        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260331_074327_a4d6275d-82d9-4c83-bfbe-f1fb2213c17c.mp4"
-      />
-      <div className="absolute inset-0 bg-black/55 backdrop-blur-[1px]" />
+    <div className="flex min-h-screen flex-col bg-white">
+      <Navbar />
 
-      <div className="relative z-10 flex min-h-screen flex-col">
-        <AuthNavbar />
+      <main className="flex-1 px-4 pb-10 pt-20 sm:px-6 sm:pb-12 sm:pt-24">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="mx-auto w-full max-w-[62rem] overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white shadow-xl"
+        >
+          <div className="grid min-h-[530px] md:grid-cols-2">
+            <section className="relative min-h-[280px] overflow-hidden">
+              <Image
+                src="/images/image1.jpg"
+                alt="Coffee shop"
+                fill
+                priority
+                className="object-cover"
+              />
+            </section>
 
-        <main className="flex flex-1 items-center justify-center px-6 pt-24 pb-12">
-          <div className="mx-auto w-full max-w-5xl flex items-center gap-14">
-            {/* ── LEFT: Branding ────────────────────────────────────────────── */}
-            <motion.div
-              initial={{ opacity: 0, x: -24 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="hidden lg:block flex-1"
-            >
-              <h2 className="text-4xl font-extrabold leading-tight mb-4 text-white drop-shadow-md">
-                Khôi phục
-                <br />
-                mật khẩu của bạn
-              </h2>
-              <p className="text-white/70 text-base leading-relaxed mb-10 max-w-xs">
-                Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.
-              </p>
-              <ul className="space-y-4">
-                {FEATURES.map((f) => (
-                  <li key={f} className="flex items-center gap-3">
-                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
-                      <Mail className="h-3 w-3 text-white" />
+            <section className="flex items-center px-5 py-7 sm:px-7 md:px-8">
+              <AnimatePresence mode="wait">
+                {sent ? (
+                  <motion.div
+                    key="sent"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="w-full text-center"
+                  >
+                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                      <Send className="h-8 w-8" />
                     </div>
-                    <span className="text-white/85 text-sm font-medium">
-                      {f}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-
-            {/* ── RIGHT: Card ───────────────────────────────────────────────── */}
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-              className="w-full max-w-[420px] shrink-0"
-            >
-              <div className="rounded-2xl bg-indigo-600 dark:bg-indigo-600/95 shadow-2xl shadow-indigo-300/30 dark:shadow-indigo-950/40 overflow-hidden">
-                <AnimatePresence mode="wait">
-                  {sent ? (
-                    /* ── Sent state ──────────────────────────────────────────── */
-                    <motion.div
-                      key="sent"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="flex flex-col items-center justify-center gap-5 px-8 py-16 text-center"
+                    <h1 className="text-2xl font-bold text-slate-800">
+                      Email Sent
+                    </h1>
+                    <p className="mt-2 text-sm text-slate-500">
+                      Vui lòng kiểm tra hộp thư để nhận liên kết đặt lại mật
+                      khẩu.
+                    </p>
+                    <Link
+                      href="/login"
+                      className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-indigo-100 hover:text-indigo-700"
                     >
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 20,
-                          delay: 0.1,
-                        }}
-                        className="flex h-20 w-20 items-center justify-center rounded-full bg-white/20 ring-4 ring-white/30"
-                      >
-                        <Send className="h-9 w-9 text-white" />
-                      </motion.div>
-                      <div>
-                        <p className="text-xl font-bold text-white">
-                          Đã gửi email!
-                        </p>
-                        <p className="mt-1.5 text-sm text-indigo-200">
-                          Vui lòng kiểm tra hộp thư để đặt lại mật khẩu.
-                        </p>
-                      </div>
-                    </motion.div>
-                  ) : (
-                    /* ── Form ────────────────────────────────────────────────── */
-                    <motion.div
-                      key="form"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      {/* Card header */}
-                      <div className="px-8 pt-8 pb-6 border-b border-indigo-500/50">
-                        <h1 className="text-xl font-bold text-white">
-                          Quên mật khẩu
-                        </h1>
-                        <p className="mt-0.5 text-sm text-indigo-200">
-                          Nhập email để nhận link đặt lại mật khẩu
-                        </p>
-                      </div>
+                      <ArrowLeft className="h-4 w-4" />
+                      Quay lại đăng nhập
+                    </Link>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="form"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="w-full"
+                  >
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-800">
+                      Quên mật khẩu
+                    </h1>
+                    <p className="mt-2 text-sm text-slate-500">
+                      Nhập email đăng ký để nhận link đặt lại mật khẩu.
+                    </p>
 
-                      {/* Card body */}
-                      <div className="px-8 py-6">
-                        <AnimatePresence>
-                          {error && (
-                            <motion.div
-                              initial={{
-                                opacity: 0,
-                                height: 0,
-                                marginBottom: 0,
-                              }}
-                              animate={{
-                                opacity: 1,
-                                height: "auto",
-                                marginBottom: 16,
-                              }}
-                              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                              className="rounded-lg border border-red-300/40 bg-red-500/20 px-3 py-2.5 text-sm text-red-100 overflow-hidden"
-                            >
-                              {error}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                          {/* Email */}
-                          <div className="space-y-1.5">
-                            <Label className="text-sm font-medium text-indigo-100">
-                              Địa chỉ email
-                            </Label>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-300 pointer-events-none" />
-                              <Input
-                                type="email"
-                                placeholder="you@lumio.app"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                className="h-11 pl-10 rounded-lg border-indigo-400/60 bg-indigo-500/40 text-white placeholder:text-indigo-300 focus-visible:ring-white/40 focus-visible:border-white/60"
-                              />
-                            </div>
-                            <p className="text-xs text-indigo-300">
-                              Chúng tôi sẽ gửi liên kết đặt lại mật khẩu đến
-                              email này.
-                            </p>
-                          </div>
-
-                          {/* Submit */}
-                          <Button
-                            type="submit"
-                            disabled={loading || !email.trim()}
-                            className="w-full h-11 rounded-lg font-semibold bg-white text-indigo-600 hover:bg-indigo-50 text-sm shadow-sm disabled:opacity-40"
-                          >
-                            {loading ? (
-                              <span className="flex items-center gap-2">
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                Đang gửi email…
-                              </span>
-                            ) : (
-                              "Gửi link đặt lại"
-                            )}
-                          </Button>
-                        </form>
-                      </div>
-
-                      {/* Card footer */}
-                      <div className="border-t border-indigo-500/50 px-8 py-4 text-center text-sm text-indigo-200">
-                        <Link
-                          href="/login"
-                          className="inline-flex items-center gap-1.5 font-semibold text-white hover:opacity-80 transition-opacity"
+                    <AnimatePresence>
+                      {error && (
+                        <motion.div
+                          initial={{
+                            opacity: 0,
+                            height: 0,
+                            marginTop: 0,
+                            marginBottom: 0,
+                          }}
+                          animate={{
+                            opacity: 1,
+                            height: "auto",
+                            marginTop: 16,
+                            marginBottom: 0,
+                          }}
+                          exit={{
+                            opacity: 0,
+                            height: 0,
+                            marginTop: 0,
+                            marginBottom: 0,
+                          }}
+                          className="overflow-hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600"
                         >
-                          <ArrowLeft className="h-3.5 w-3.5" />
-                          Quay lại đăng nhập
-                        </Link>
+                          {error}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-slate-600">
+                          Email
+                        </Label>
+                        <div className="relative">
+                          <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                          <Input
+                            type="email"
+                            placeholder="you@lumio.app"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 text-slate-800 placeholder:text-slate-400 focus-visible:ring-indigo-200"
+                          />
+                        </div>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
+
+                      <Button
+                        type="submit"
+                        disabled={loading || !email.trim()}
+                        className="h-11 w-full rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-base font-semibold text-white hover:from-indigo-600 hover:to-violet-700 disabled:opacity-50"
+                      >
+                        {loading ? (
+                          <span className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Đang gửi...
+                          </span>
+                        ) : (
+                          "Tiếp tục"
+                        )}
+                      </Button>
+
+                      <Link
+                        href="/login"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-indigo-600"
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                        Quay lại trang Đăng nhập
+                      </Link>
+                    </form>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </section>
           </div>
-        </main>
-      </div>
+        </motion.div>
+      </main>
+      <Footer />
     </div>
   );
 }

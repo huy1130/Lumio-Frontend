@@ -1,24 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Plus, Pencil, Loader2, AlertCircle,
-} from "lucide-react";
+import { Plus, Pencil, Loader2, AlertCircle } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Card, CardContent, CardHeader, CardTitle, CardDescription,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { subscriptionService } from "@/services/subscriptionService";
+import { subscriptionService } from "@/lib/services/subscriptionService";
 import { formatCurrency } from "@/lib/utils";
 import type { ApiSubscription, CreateSubscriptionPayload } from "@/types";
 import { toast } from "sonner";
@@ -92,7 +103,9 @@ function SubscriptionsContent() {
     }
   }
 
-  useEffect(() => { fetchSubscriptions(); }, [isRealAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    fetchSubscriptions();
+  }, [isRealAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── modal helpers ──────────────────────────────────────────────────────────
 
@@ -123,7 +136,7 @@ function SubscriptionsContent() {
       if (editing) {
         const updated = await subscriptionService.update(editing.id, form);
         setSubscriptions((prev) =>
-          prev.map((s) => (s.id === updated.id ? updated : s))
+          prev.map((s) => (s.id === updated.id ? updated : s)),
         );
         toast.success("Cập nhật thành công", {
           description: `Gói "${updated.package_code}" đã được cập nhật.`,
@@ -156,7 +169,7 @@ function SubscriptionsContent() {
         ? await subscriptionService.deactivate(sub.id)
         : await subscriptionService.activate(sub.id);
       setSubscriptions((prev) =>
-        prev.map((s) => (s.id === updated.id ? updated : s))
+        prev.map((s) => (s.id === updated.id ? updated : s)),
       );
       if (updated.is_active) {
         toast.success("Kích hoạt thành công", {
@@ -182,7 +195,6 @@ function SubscriptionsContent() {
     <div>
       <Header />
       <div className="p-6 space-y-6">
-
         {/* Error banner */}
         {error && (
           <div className="flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -205,7 +217,9 @@ function SubscriptionsContent() {
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription>Total Plans</CardDescription>
-                <CardTitle className="text-3xl">{subscriptions.length}</CardTitle>
+                <CardTitle className="text-3xl">
+                  {subscriptions.length}
+                </CardTitle>
               </CardHeader>
             </Card>
             <Card>
@@ -258,7 +272,9 @@ function SubscriptionsContent() {
                     <TableHead>Billing Cycle</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Created</TableHead>
-                    {isRealAdmin && <TableHead className="text-right">Actions</TableHead>}
+                    {isRealAdmin && (
+                      <TableHead className="text-right">Actions</TableHead>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -268,7 +284,9 @@ function SubscriptionsContent() {
                         colSpan={isRealAdmin ? 7 : 6}
                         className="py-12 text-center text-muted-foreground"
                       >
-                        {isRealAdmin ? "No subscription plans yet. Create your first plan." : "Chưa có gói dịch vụ nào."}
+                        {isRealAdmin
+                          ? "No subscription plans yet. Create your first plan."
+                          : "Chưa có gói dịch vụ nào."}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -309,7 +327,11 @@ function SubscriptionsContent() {
 
                               {/* Toggle active pill button */}
                               <button
-                                title={sub.is_active ? "Nhấn để vô hiệu hóa" : "Nhấn để kích hoạt"}
+                                title={
+                                  sub.is_active
+                                    ? "Nhấn để vô hiệu hóa"
+                                    : "Nhấn để kích hoạt"
+                                }
                                 onClick={() => handleToggle(sub)}
                                 disabled={togglingId === sub.id}
                                 className={`
@@ -317,9 +339,11 @@ function SubscriptionsContent() {
                                   rounded-full border-2 border-transparent transition-colors duration-200
                                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
                                   disabled:cursor-not-allowed disabled:opacity-50
-                                  ${sub.is_active
-                                    ? "bg-green-500 hover:bg-green-600"
-                                    : "bg-input hover:bg-muted-foreground/30"}
+                                  ${
+                                    sub.is_active
+                                      ? "bg-green-500 hover:bg-green-600"
+                                      : "bg-input hover:bg-muted-foreground/30"
+                                  }
                                 `}
                               >
                                 <span

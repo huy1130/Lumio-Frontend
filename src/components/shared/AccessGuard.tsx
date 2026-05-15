@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import type { Role } from "@/config/roles";
+import type { Role } from "@/lib/roles";
 
 interface AccessGuardProps {
   roles: Role[];

@@ -5,7 +5,7 @@ import { PlaceholderPage } from "@/components/shared/PlaceholderPage";
 import { AccessGuard } from "@/components/shared/AccessGuard";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { ROLE_LABELS } from "@/config/roles";
+import { ROLE_LABELS } from "@/lib/roles";
 
 const STATS_BY_ROLE = {
   admin: [

@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type Column } from "@/components/shared/DataTable";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import type { Role } from "@/config/roles";
+import type { Role } from "@/lib/roles";
 
 interface LogRow extends Record<string, unknown> {
   timestamp: string;

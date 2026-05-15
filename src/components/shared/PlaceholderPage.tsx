@@ -5,7 +5,7 @@ import { StatsCard } from "@/components/shared/stats-card";
 import { DataTable, type Column } from "@/components/shared/DataTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import type { Role } from "@/config/roles";
+import type { Role } from "@/lib/roles";
 
 interface StatItem {
   title: string;

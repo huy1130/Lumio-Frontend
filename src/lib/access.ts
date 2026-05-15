@@ -1,4 +1,4 @@
-import type { Role } from "@/config/roles";
+import type { Role } from "@/lib/roles";
 
 /**
  * Maps each feature route (relative to /dashboard root) to the roles

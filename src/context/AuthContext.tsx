@@ -8,8 +8,8 @@ import React, {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
-import type { Role } from "@/config/roles";
-import { getRoleFromId } from "@/config/roles";
+import type { Role } from "@/lib/roles";
+import { getRoleFromBackend } from "@/lib/roles";
 import type { AuthUser } from "@/types/user";
 import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from "@/lib/api-client";
 
@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const role = useMemo<Role>(() => {
     if (!user) return "user";
-    return user.role ?? getRoleFromId(user.role_id);
+    return getRoleFromBackend(user);
   }, [user]);
 
   const isRealAdmin = useMemo(() => role === "admin", [role]);

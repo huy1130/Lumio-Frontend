@@ -2,25 +2,46 @@
 
 import { useEffect, useState } from "react";
 import {
-  Plus, Pencil, ToggleLeft, ToggleRight, Loader2,
-  AlertCircle, ShieldCheck, Users, UserCheck, UserX,
+  Plus,
+  Pencil,
+  ToggleLeft,
+  ToggleRight,
+  Loader2,
+  AlertCircle,
+  ShieldCheck,
+  Users,
+  UserCheck,
+  UserX,
 } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Card, CardContent, CardHeader, CardTitle, CardDescription,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AccessGuard } from "@/components/shared/AccessGuard";
-import { adminService } from "@/services/adminService";
+import { adminService } from "@/lib/services/adminService";
 import type { ApiAdmin, CreateAdminPayload, UpdateAdminPayload } from "@/types";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -36,7 +57,10 @@ function initials(name: string | null, email: string) {
 }
 
 const EMPTY_CREATE: CreateAdminPayload = {
-  email: "", password: "", full_name: "", phone: "",
+  email: "",
+  password: "",
+  full_name: "",
+  phone: "",
 };
 
 function buildCreatePayload(form: CreateAdminPayload): CreateAdminPayload {
@@ -66,24 +90,25 @@ export default function AdminsPage() {
 // ─── main content ─────────────────────────────────────────────────────────────
 
 function AdminsContent() {
-  const [admins, setAdmins]       = useState<ApiAdmin[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState<string | null>(null);
+  const [admins, setAdmins] = useState<ApiAdmin[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // create modal
-  const [createOpen, setCreateOpen]     = useState(false);
-  const [createForm, setCreateForm]     = useState<CreateAdminPayload>(EMPTY_CREATE);
-  const [createError, setCreateError]   = useState<string | null>(null);
-  const [creating, setCreating]         = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createForm, setCreateForm] =
+    useState<CreateAdminPayload>(EMPTY_CREATE);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
 
   // edit modal
-  const [editTarget, setEditTarget]     = useState<ApiAdmin | null>(null);
-  const [editForm, setEditForm]         = useState<UpdateAdminPayload>({});
-  const [editError, setEditError]       = useState<string | null>(null);
-  const [editing, setEditing]           = useState(false);
+  const [editTarget, setEditTarget] = useState<ApiAdmin | null>(null);
+  const [editForm, setEditForm] = useState<UpdateAdminPayload>({});
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
 
   // toggle
-  const [togglingId, setTogglingId]     = useState<number | null>(null);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
 
   // ── fetch ──────────────────────────────────────────────────────────────────
 
@@ -100,7 +125,9 @@ function AdminsContent() {
     }
   }
 
-  useEffect(() => { fetchAdmins(); }, []);
+  useEffect(() => {
+    fetchAdmins();
+  }, []);
 
   // ── create ─────────────────────────────────────────────────────────────────
 
@@ -138,9 +165,9 @@ function AdminsContent() {
   function openEdit(admin: ApiAdmin) {
     setEditTarget(admin);
     setEditForm({
-      email:     admin.email,
+      email: admin.email,
       full_name: admin.full_name ?? "",
-      phone:     admin.phone ?? "",
+      phone: admin.phone ?? "",
     });
     setEditError(null);
   }
@@ -178,10 +205,10 @@ function AdminsContent() {
 
   // ── stats ──────────────────────────────────────────────────────────────────
 
-  const total    = admins.length;
-  const active   = admins.filter((a) => a.is_active).length;
+  const total = admins.length;
+  const active = admins.filter((a) => a.is_active).length;
   const inactive = admins.filter((a) => !a.is_active).length;
-  const initial  = admins.filter((a) => a.manager_id === null).length;
+  const initial = admins.filter((a) => a.manager_id === null).length;
 
   // ── render ─────────────────────────────────────────────────────────────────
 
@@ -189,13 +216,17 @@ function AdminsContent() {
     <div>
       <Header />
       <div className="p-6 space-y-6">
-
         {/* Error banner */}
         {error && (
           <div className="flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             <AlertCircle className="h-4 w-4 shrink-0" />
             {error}
-            <Button size="sm" variant="ghost" className="ml-auto h-auto px-2 py-0 text-xs" onClick={fetchAdmins}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="ml-auto h-auto px-2 py-0 text-xs"
+              onClick={fetchAdmins}
+            >
               Retry
             </Button>
           </div>
@@ -219,7 +250,9 @@ function AdminsContent() {
                   <CardDescription>Active</CardDescription>
                   <UserCheck className="h-4 w-4 text-green-500" />
                 </div>
-                <CardTitle className="text-3xl text-green-600">{active}</CardTitle>
+                <CardTitle className="text-3xl text-green-600">
+                  {active}
+                </CardTitle>
               </CardHeader>
             </Card>
             <Card>
@@ -228,7 +261,9 @@ function AdminsContent() {
                   <CardDescription>Inactive</CardDescription>
                   <UserX className="h-4 w-4 text-red-400" />
                 </div>
-                <CardTitle className="text-3xl text-muted-foreground">{inactive}</CardTitle>
+                <CardTitle className="text-3xl text-muted-foreground">
+                  {inactive}
+                </CardTitle>
               </CardHeader>
             </Card>
             <Card>
@@ -237,7 +272,9 @@ function AdminsContent() {
                   <CardDescription>Initial Admins</CardDescription>
                   <ShieldCheck className="h-4 w-4 text-purple-500" />
                 </div>
-                <CardTitle className="text-3xl text-purple-600">{initial}</CardTitle>
+                <CardTitle className="text-3xl text-purple-600">
+                  {initial}
+                </CardTitle>
               </CardHeader>
             </Card>
           </div>
@@ -278,7 +315,10 @@ function AdminsContent() {
                 <TableBody>
                   {admins.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
+                      <TableCell
+                        colSpan={7}
+                        className="py-12 text-center text-muted-foreground"
+                      >
                         No admins found.
                       </TableCell>
                     </TableRow>
@@ -294,7 +334,9 @@ function AdminsContent() {
                               <p className="font-medium text-sm">
                                 {admin.full_name ?? "—"}
                               </p>
-                              <p className="text-xs text-muted-foreground">#{admin.id}</p>
+                              <p className="text-xs text-muted-foreground">
+                                #{admin.id}
+                              </p>
                             </div>
                           </div>
                         </TableCell>
@@ -304,7 +346,10 @@ function AdminsContent() {
                         </TableCell>
                         <TableCell>
                           {admin.manager_id === null ? (
-                            <Badge variant="outline" className="gap-1 border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-300">
+                            <Badge
+                              variant="outline"
+                              className="gap-1 border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-300"
+                            >
                               <ShieldCheck className="h-3 w-3" />
                               Initial
                             </Badge>
@@ -313,7 +358,9 @@ function AdminsContent() {
                           )}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={admin.is_active ? "success" : "secondary"}>
+                          <Badge
+                            variant={admin.is_active ? "success" : "secondary"}
+                          >
                             {admin.is_active ? "Active" : "Inactive"}
                           </Badge>
                         </TableCell>
@@ -337,7 +384,9 @@ function AdminsContent() {
                               size="sm"
                               variant="ghost"
                               className={`h-8 w-8 p-0 ${admin.is_active ? "text-green-600 hover:text-green-700" : "text-muted-foreground"}`}
-                              title={admin.is_active ? "Deactivate" : "Activate"}
+                              title={
+                                admin.is_active ? "Deactivate" : "Activate"
+                              }
                               onClick={() => handleToggle(admin)}
                               disabled={togglingId === admin.id}
                             >
@@ -382,17 +431,23 @@ function AdminsContent() {
                   id="c-email"
                   type="email"
                   value={createForm.email}
-                  onChange={(e) => setCreateForm((f) => ({ ...f, email: e.target.value }))}
+                  onChange={(e) =>
+                    setCreateForm((f) => ({ ...f, email: e.target.value }))
+                  }
                   placeholder="admin@lumio.app"
                 />
               </div>
               <div className="col-span-2 space-y-1.5">
-                <Label htmlFor="c-password">Mật khẩu * (tối thiểu 6 ký tự)</Label>
+                <Label htmlFor="c-password">
+                  Mật khẩu * (tối thiểu 6 ký tự)
+                </Label>
                 <Input
                   id="c-password"
                   type="password"
                   value={createForm.password}
-                  onChange={(e) => setCreateForm((f) => ({ ...f, password: e.target.value }))}
+                  onChange={(e) =>
+                    setCreateForm((f) => ({ ...f, password: e.target.value }))
+                  }
                   placeholder="••••••••"
                 />
               </div>
@@ -401,7 +456,9 @@ function AdminsContent() {
                 <Input
                   id="c-name"
                   value={createForm.full_name ?? ""}
-                  onChange={(e) => setCreateForm((f) => ({ ...f, full_name: e.target.value }))}
+                  onChange={(e) =>
+                    setCreateForm((f) => ({ ...f, full_name: e.target.value }))
+                  }
                   placeholder="Nguyen Van A"
                 />
               </div>
@@ -410,7 +467,9 @@ function AdminsContent() {
                 <Input
                   id="c-phone"
                   value={createForm.phone ?? ""}
-                  onChange={(e) => setCreateForm((f) => ({ ...f, phone: e.target.value }))}
+                  onChange={(e) =>
+                    setCreateForm((f) => ({ ...f, phone: e.target.value }))
+                  }
                   placeholder="0901234567"
                 />
               </div>
@@ -418,7 +477,11 @@ function AdminsContent() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={creating}>
+            <Button
+              variant="outline"
+              onClick={() => setCreateOpen(false)}
+              disabled={creating}
+            >
               Cancel
             </Button>
             <Button onClick={handleCreate} disabled={creating}>
@@ -430,7 +493,12 @@ function AdminsContent() {
       </Dialog>
 
       {/* ── Edit Admin Modal ────────────────────────────────────────────────── */}
-      <Dialog open={!!editTarget} onOpenChange={(o) => { if (!o) setEditTarget(null); }}>
+      <Dialog
+        open={!!editTarget}
+        onOpenChange={(o) => {
+          if (!o) setEditTarget(null);
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Admin</DialogTitle>
@@ -450,11 +518,15 @@ function AdminsContent() {
                   id="e-email"
                   type="email"
                   value={editForm.email ?? ""}
-                  onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, email: e.target.value }))
+                  }
                 />
               </div>
               <div className="col-span-2 space-y-1.5">
-                <Label htmlFor="e-password">New Password (để trống nếu không đổi)</Label>
+                <Label htmlFor="e-password">
+                  New Password (để trống nếu không đổi)
+                </Label>
                 <Input
                   id="e-password"
                   type="password"
@@ -472,7 +544,9 @@ function AdminsContent() {
                 <Input
                   id="e-name"
                   value={editForm.full_name ?? ""}
-                  onChange={(e) => setEditForm((f) => ({ ...f, full_name: e.target.value }))}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, full_name: e.target.value }))
+                  }
                 />
               </div>
               <div className="space-y-1.5">
@@ -480,14 +554,20 @@ function AdminsContent() {
                 <Input
                   id="e-phone"
                   value={editForm.phone ?? ""}
-                  onChange={(e) => setEditForm((f) => ({ ...f, phone: e.target.value }))}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, phone: e.target.value }))
+                  }
                 />
               </div>
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditTarget(null)} disabled={editing}>
+            <Button
+              variant="outline"
+              onClick={() => setEditTarget(null)}
+              disabled={editing}
+            >
               Cancel
             </Button>
             <Button onClick={handleEdit} disabled={editing}>

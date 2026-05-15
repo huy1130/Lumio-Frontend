@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { RoleBadge } from "@/components/shared/RoleBadge";
-import type { Role } from "@/config/roles";
+import type { Role } from "@/lib/roles";
 
 interface Breadcrumb {
   label: string;

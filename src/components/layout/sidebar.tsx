@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { ROLE_LABELS, ROLE_COLORS } from "@/config/roles";
+import { ROLE_LABELS, ROLE_COLORS } from "@/lib/roles";
 import { getNavigationByRole } from "@/config/navigation";
 
 export function Sidebar() {

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import { ROLE_LABELS, ROLE_COLORS } from "@/config/roles";
-import type { Role } from "@/config/roles";
+import { ROLE_LABELS, ROLE_COLORS } from "@/lib/roles";
+import type { Role } from "@/lib/roles";
 
 interface RoleBadgeProps {
   role: Role;

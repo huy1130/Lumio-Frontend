@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { RoleBadge } from "@/components/shared/RoleBadge";
 import { AccessGuard } from "@/components/shared/AccessGuard";
 import { useAuth } from "@/context/AuthContext";
-import { ROLE_COLORS } from "@/config/roles";
+import { ROLE_COLORS } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 export default function ProfilePage() {

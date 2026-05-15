@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { ROLE_LABELS, ROLE_COLORS } from "@/config/roles";
+import { ROLE_LABELS, ROLE_COLORS } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 export function RoleSwitcher() {

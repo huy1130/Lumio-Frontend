@@ -7,7 +7,7 @@ import { StatsCard } from "@/components/shared/stats-card";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AccessGuard } from "@/components/shared/AccessGuard";
 import { useAuth } from "@/context/AuthContext";
-import { ROLE_LABELS } from "@/config/roles";
+import { ROLE_LABELS } from "@/lib/roles";
 
 export default function AIChartsPage() {
   return (
