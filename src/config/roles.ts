@@ -31,15 +31,38 @@ export const REDIRECT_MAP: Record<Role, string> = {
 
 export const ALL_ROLES: Role[] = ["manager", "admin", "shop_owner", "staff", "cashier", "user"];
 
-// Update these IDs to match your roles table.
-export const ROLE_ID_MAP: Record<number, Role> = {
-  1: "manager",
-  2: "admin",
-  3: "shop_owner",
-  4: "staff",
-  5: "cashier",
-  6: "user",
-};
+/**
+ * Map `users.role_id` → UI role.
+ * Backend dùng `roles.id` tự tăng: role `SHOPOWNER` (đăng ký / PayOS) thường là hàng thứ 4 → id 4,
+ * không phải “staff”. Các `role_id` khác (vd. staff) dùng `NEXT_PUBLIC_ROLE_ID_MAP_JSON`
+ * để map đúng với bảng `roles` của bạn.
+ */
+function buildRoleIdMap(): Record<number, Role> {
+  const base: Record<number, Role> = {
+    1: "manager",
+    2: "admin",
+    3: "shop_owner",
+    4: "shop_owner",
+    5: "cashier",
+    6: "user",
+  };
+  const raw = process.env.NEXT_PUBLIC_ROLE_ID_MAP_JSON;
+  if (!raw?.trim()) return base;
+  try {
+    const parsed = JSON.parse(raw) as Record<string, string>;
+    const merged = { ...base };
+    for (const [idStr, slug] of Object.entries(parsed)) {
+      const id = Number(idStr);
+      if (!Number.isFinite(id) || !ALL_ROLES.includes(slug as Role)) continue;
+      merged[id] = slug as Role;
+    }
+    return merged;
+  } catch {
+    return base;
+  }
+}
+
+export const ROLE_ID_MAP: Record<number, Role> = buildRoleIdMap();
 
 export function getRoleFromId(roleId?: number | null): Role {
   if (roleId == null) return "user";

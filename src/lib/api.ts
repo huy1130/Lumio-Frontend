@@ -26,7 +26,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     ...(options.headers as Record<string, string>),
   };
 
-  if (token) {
+  const isPublicAdminBootstrap =
+    path === "/admins/initial" || path.startsWith("/admins/initial?");
+
+  if (token && !isPublicAdminBootstrap) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
@@ -37,7 +40,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(error.message ?? `Request failed: ${res.status}`);
+    const raw = error.message ?? `Request failed: ${res.status}`;
+    const message = Array.isArray(raw) ? raw.join(", ") : String(raw);
+    throw new Error(message);
   }
 
   if (res.status === 204) return undefined as T;

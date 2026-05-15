@@ -39,6 +39,20 @@ const EMPTY_CREATE: CreateAdminPayload = {
   email: "", password: "", full_name: "", phone: "",
 };
 
+function buildCreatePayload(form: CreateAdminPayload): CreateAdminPayload {
+  const payload: CreateAdminPayload = {
+    email: form.email.trim(),
+    password: form.password,
+  };
+  const name = form.full_name?.trim();
+  const phone = form.phone?.trim();
+  if (name) payload.full_name = name;
+  if (phone) payload.phone = phone;
+  const avatar = form.avatar?.trim();
+  if (avatar) payload.avatar = avatar;
+  return payload;
+}
+
 // ─── page shell ───────────────────────────────────────────────────────────────
 
 export default function AdminsPage() {
@@ -97,10 +111,19 @@ function AdminsContent() {
   }
 
   async function handleCreate() {
+    const payload = buildCreatePayload(createForm);
+    if (!payload.email || !payload.password) {
+      setCreateError("Vui lòng nhập email và mật khẩu.");
+      return;
+    }
+    if (payload.password.length < 6) {
+      setCreateError("Mật khẩu tối thiểu 6 ký tự (theo backend).");
+      return;
+    }
     setCreating(true);
     setCreateError(null);
     try {
-      const created = await adminService.create(createForm);
+      const created = await adminService.create(payload);
       setAdmins((prev) => [...prev, created]);
       setCreateOpen(false);
     } catch (e: unknown) {
@@ -295,8 +318,8 @@ function AdminsContent() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground text-sm">
-                          {admin.last_login_at
-                            ? new Date(admin.last_login_at).toLocaleString("vi-VN")
+                          {admin.last_login
+                            ? new Date(admin.last_login).toLocaleString("vi-VN")
                             : "Never"}
                         </TableCell>
                         <TableCell className="text-right">
@@ -364,7 +387,7 @@ function AdminsContent() {
                 />
               </div>
               <div className="col-span-2 space-y-1.5">
-                <Label htmlFor="c-password">Password * (min 8 ký tự)</Label>
+                <Label htmlFor="c-password">Mật khẩu * (tối thiểu 6 ký tự)</Label>
                 <Input
                   id="c-password"
                   type="password"

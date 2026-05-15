@@ -136,9 +136,9 @@ export interface ApiAdmin {
   avatar: string | null;
   is_active: boolean;
   manager_id: number | null;
-  last_login_at: string | null;
+  /** Backend Prisma field `last_login` (ISO string) */
+  last_login: string | null;
   created_at: string;
-  updated_at: string;
 }
 
 export interface AdminLoginResponse {

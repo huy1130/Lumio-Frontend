@@ -29,7 +29,6 @@ const managerNav: NavSection[] = [
   {
     title: "Management",
     items: [
-      { title: "Manage Admins",  href: "/admins",   icon: UserCog   },
       { title: "Manage Tenants", href: "/tenants",  icon: Building2 },
     ],
   },
@@ -63,20 +62,10 @@ const adminNav: NavSection[] = [
       { title: "Subscriptions", href: "/subscriptions", icon: Tag       },
       { title: "Tenants",       href: "/tenants",       icon: Building2 },
       { title: "Users",         href: "/users",         icon: Users     },
+      { title: "Manage Admins", href: "/admins",        icon: UserCog   },
     ],
   },
-  {
-    title: "Store",
-    items: [
-      { title: "Products",     href: "/products",     icon: Package   },
-      { title: "Inventory",    href: "/inventory",    icon: Warehouse },
-      { title: "Merchandises", href: "/merchandises", icon: Store     },
-    ],
-  },
-  {
-    title: "Operations",
-    items: [{ title: "Orders", href: "/orders", icon: ShoppingCart }],
-  },
+  
   {
     title: "Analytics & AI",
     items: [
