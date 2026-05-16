@@ -11,7 +11,7 @@ interface AccessGuardProps {
 }
 
 /**
- * Client-side access guard. Redirects to /dashboard if the current role
+ * Client-side access guard. Redirects to the home page if the current role
  * is not in the allowed list. Renders nothing until access is confirmed.
  */
 export function AccessGuard({ roles, children }: AccessGuardProps) {
@@ -19,7 +19,7 @@ export function AccessGuard({ roles, children }: AccessGuardProps) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !roles.includes(role)) router.push("/dashboard");
+    if (!loading && !roles.includes(role)) router.replace("/");
   }, [role, router, roles, loading]);
 
   if (loading || !roles.includes(role)) return null;
