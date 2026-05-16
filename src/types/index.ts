@@ -12,6 +12,32 @@ export interface User {
   createdAt: string;
 }
 
+// ── Customer ─────────────────────────────────────────────────────────────────
+export interface Customer {
+  id: number;
+  tenant_id: number;
+  phone: string;
+  full_name: string;
+  member_rank: string | null;
+  loyalty_point: number;
+  created_at: string;
+}
+
+export interface CreateCustomerPayload {
+  phone: string;
+  full_name: string;
+  tenant_id?: number;
+}
+
+export type UpdateCustomerPayload = Partial<CreateCustomerPayload>;
+
+export interface Tenant {
+  id: number;
+  tenant_name: string;
+  is_active: boolean;
+  admin_id?: number | null;
+}
+
 // ── Product ───────────────────────────────────────────────────────────────────
 export interface Product {
   id: string;
