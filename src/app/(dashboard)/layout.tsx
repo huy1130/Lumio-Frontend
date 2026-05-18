@@ -1,4 +1,5 @@
 import { Sidebar } from "@/components/layout/sidebar";
+import { TenantSubscriptionBanner } from "@/components/tenant/TenantSubscriptionBanner";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -6,6 +7,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <main className="flex-1 overflow-y-auto">
+          <div className="px-6 pt-4">
+            <TenantSubscriptionBanner />
+          </div>
           {children}
         </main>
       </div>

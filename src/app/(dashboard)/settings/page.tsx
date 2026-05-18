@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Save, Bell, Shield, Palette, Store, Users, Globe } from "lucide-react";
 import { Header } from "@/components/layout/header";
+import { ShopOwnerSubscriptionCard } from "@/components/tenant/ShopOwnerSubscriptionCard";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +22,8 @@ const settingsSections = [
 ];
 
 export default function SettingsPage() {
+  const { role } = useAuth();
+  const isShopOwner = role === "shop_owner";
   const [activeSection, setActiveSection] = useState("store");
 
   return (
@@ -55,46 +59,11 @@ export default function SettingsPage() {
           <div className="flex-1 space-y-6 max-w-2xl">
             {activeSection === "store" && (
               <>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Store Information</CardTitle>
-                    <CardDescription>General information about your store</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Store Name</Label>
-                        <Input defaultValue="My Coffee Shop" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Store Code</Label>
-                        <Input defaultValue="STORE-001" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Address</Label>
-                      <Input defaultValue="123 Main Street, Ho Chi Minh City" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Phone</Label>
-                        <Input defaultValue="+84 123 456 789" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Email</Label>
-                        <Input defaultValue="info@mycoffeeshop.com" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Tax Rate (%)</Label>
-                      <Input type="number" defaultValue="8" className="w-32" />
-                    </div>
-                    <Button className="gap-2">
-                      <Save className="h-4 w-4" /> Save Changes
-                    </Button>
-                  </CardContent>
-                </Card>
+                
 
+                {isShopOwner ? (
+                  <ShopOwnerSubscriptionCard />
+                ) : (
                 <Card>
                   <CardHeader>
                     <CardTitle>Subscription</CardTitle>
@@ -125,6 +94,7 @@ export default function SettingsPage() {
                     </div>
                   </CardContent>
                 </Card>
+                )}
               </>
             )}
 
