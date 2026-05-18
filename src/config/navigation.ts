@@ -65,6 +65,7 @@ const shopOwnerNav: NavSection[] = [
     title: "Store",
     items: [
       { title: "Cửa hàng",      href: "/shop",         icon: Store     },
+      { title: "Khách hàng",    href: "/customers",    icon: Users     },
       { title: "Products",      href: "/products",     icon: Package   },
       { title: "Inventory",     href: "/inventory",    icon: Warehouse },
       { title: "Merchandises",  href: "/merchandises", icon: Store     },
@@ -130,7 +131,7 @@ const cashierNav: NavSection[] = [
     items: [
       { title: "Payments",  href: "/payments",  icon: CreditCard  },
       { title: "Checkout",  href: "/checkout",  icon: ShoppingBag },
-      { title: "Customers", href: "/customers", icon: Users       },
+      { title: "Khách hàng",href: "/customers", icon: Users       },
     ],
   },
   {

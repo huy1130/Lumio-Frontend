@@ -23,7 +23,7 @@ export const FEATURE_ACCESS: Record<string, Role[]> = {
   trends: ["admin"],
   payments: ["cashier"],
   checkout: ["cashier"],
-  customers: ["cashier"],
+  customers: ["admin", "shop_owner", "cashier"],
   profile: ["inventory_staff", "cashier"],
   settings: ["admin", "shop_owner", "inventory_staff", "cashier"],
   "ai/charts": ["admin", "shop_owner", "inventory_staff"],

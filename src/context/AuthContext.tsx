@@ -73,12 +73,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(AUTH_TOKEN_KEY);
     localStorage.removeItem(AUTH_USER_KEY);
     clearShopSessionCache();
-    router.push("/login");
+    router.replace("/");
   }
 
   return (
     <AuthContext.Provider
-      value={{ accessToken, user, role, isRealAdmin, loading, setSession, logout }}
+      value={{
+        accessToken,
+        user,
+        role,
+        isRealAdmin,
+        loading,
+        setSession,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
