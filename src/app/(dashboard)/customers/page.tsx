@@ -100,6 +100,8 @@ function normalizeTenantList(payload: unknown): Tenant[] {
 
 export default function CustomersPage() {
   const { user, role } = useAuth();
+  const isTenantScoped = role !== "admin" && user?.tenant_id != null;
+  const scopedTenantId = isTenantScoped ? Number(user!.tenant_id) : null;
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -135,7 +137,7 @@ export default function CustomersPage() {
   const canSubmit = Boolean(
     form.full_name.trim() &&
     form.phone.trim() &&
-    form.tenant_id.trim() &&
+    (isTenantScoped || form.tenant_id.trim()) &&
     !saving,
   );
 
@@ -200,14 +202,24 @@ export default function CustomersPage() {
 
   useEffect(() => {
     void loadCustomers();
-    void loadTenants();
-  }, []);
+    if (!isTenantScoped) {
+      void loadTenants();
+    } else {
+      setTenantLoading(false);
+    }
+  }, [isTenantScoped]);
+
+  const tenantScopedCustomers = useMemo(() => {
+    if (!isTenantScoped || scopedTenantId == null) return customers;
+    return customers.filter((c) => c.tenant_id === scopedTenantId);
+  }, [customers, isTenantScoped, scopedTenantId]);
 
   const filteredCustomers = useMemo(() => {
     const keyword = search.trim().toLowerCase();
-    if (!keyword) return customers;
+    const base = tenantScopedCustomers;
+    if (!keyword) return base;
 
-    return customers.filter((customer) => {
+    return base.filter((customer) => {
       return [
         customer.full_name,
         customer.phone,
@@ -218,7 +230,7 @@ export default function CustomersPage() {
         .toLowerCase()
         .includes(keyword);
     });
-  }, [customers, search]);
+  }, [tenantScopedCustomers, search]);
 
   const totalPages = Math.max(
     1,
@@ -236,20 +248,22 @@ export default function CustomersPage() {
   }, [currentPage, totalPages]);
 
   const stats = useMemo(() => {
-    const totalPoints = customers.reduce(
+    const totalPoints = tenantScopedCustomers.reduce(
       (sum, customer) => sum + (customer.loyalty_point ?? 0),
       0,
     );
-    const loyalCustomers = customers.filter(
+    const loyalCustomers = tenantScopedCustomers.filter(
       (customer) => (customer.loyalty_point ?? 0) > 0,
     ).length;
     const avgPoints =
-      customers.length > 0 ? Math.round(totalPoints / customers.length) : 0;
+      tenantScopedCustomers.length > 0
+        ? Math.round(totalPoints / tenantScopedCustomers.length)
+        : 0;
 
     return [
       {
         title: "Tổng khách hàng",
-        value: customers.length,
+        value: tenantScopedCustomers.length,
         description: "Đang được quản lý",
         icon: Users,
       },
@@ -272,7 +286,7 @@ export default function CustomersPage() {
         icon: UserRound,
       },
     ];
-  }, [customers]);
+  }, [tenantScopedCustomers]);
 
   const pageStart =
     filteredCustomers.length === 0
@@ -288,7 +302,7 @@ export default function CustomersPage() {
     setForm({
       full_name: "",
       phone: "",
-      tenant_id: String(visibleTenants[0]?.id ?? user?.tenant_id ?? ""),
+      tenant_id: String(scopedTenantId ?? visibleTenants[0]?.id ?? ""),
     });
     setFormErrors({});
     setIsFormOpen(true);
@@ -309,7 +323,9 @@ export default function CustomersPage() {
     const nextErrors: FormErrors = {};
     const fullName = form.full_name.trim();
     const phone = form.phone.trim();
-    const tenantId = form.tenant_id.trim();
+    const tenantId = isTenantScoped
+      ? String(scopedTenantId ?? "")
+      : form.tenant_id.trim();
 
     if (!fullName) {
       nextErrors.full_name = "Vui lòng nhập họ tên";
@@ -324,9 +340,9 @@ export default function CustomersPage() {
         "Số điện thoại chưa hợp lệ. Vui lòng nhập số điện thoại từ 8 đến 15 chữ số!";
     }
 
-    if (!tenantId) {
+    if (!isTenantScoped && !tenantId) {
       nextErrors.tenant_id = "Vui lòng chọn tenant";
-    } else {
+    } else if (tenantId) {
       const tenantNumber = Number(tenantId);
       if (!Number.isInteger(tenantNumber) || tenantNumber < 1) {
         nextErrors.tenant_id = "Tenant không hợp lệ";
@@ -355,8 +371,13 @@ export default function CustomersPage() {
         phone: form.phone.trim(),
       };
 
-      if (form.tenant_id.trim()) {
-        payload.tenant_id = Number(form.tenant_id.trim());
+      const resolvedTenantId = isTenantScoped
+        ? scopedTenantId
+        : form.tenant_id.trim()
+          ? Number(form.tenant_id.trim())
+          : undefined;
+      if (resolvedTenantId != null) {
+        payload.tenant_id = resolvedTenantId;
       }
 
       const response = await fetch(
@@ -417,7 +438,10 @@ export default function CustomersPage() {
   };
 
   const cardTone = loading ? "animate-pulse" : "";
-  const tenantReady = !tenantLoading && visibleTenants.length > 0;
+  const tenantReady =
+    isTenantScoped && scopedTenantId != null
+      ? true
+      : !tenantLoading && visibleTenants.length > 0;
 
   return (
     <AccessGuard roles={["admin", "shop_owner", "cashier"]}>
@@ -545,7 +569,9 @@ export default function CustomersPage() {
                         <th className="px-6 py-4 font-semibold">
                           Số điện thoại
                         </th>
-                        <th className="px-6 py-4 font-semibold">Tenant</th>
+                        {!isTenantScoped ? (
+                          <th className="px-6 py-4 font-semibold">Tenant</th>
+                        ) : null}
                         <th className="px-6 py-4 font-semibold">Rank</th>
                         <th className="px-6 py-4 font-semibold">Tích điểm</th>
                         <th className="px-6 py-4 font-semibold">Ngày tạo</th>
@@ -582,11 +608,13 @@ export default function CustomersPage() {
                                 {customer.phone}
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
-                              {tenantById.get(customer.tenant_id)
-                                ?.tenant_name ??
-                                `Tenant #${customer.tenant_id}`}
-                            </td>
+                            {!isTenantScoped ? (
+                              <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
+                                {tenantById.get(customer.tenant_id)
+                                  ?.tenant_name ??
+                                  `Tenant #${customer.tenant_id}`}
+                              </td>
+                            ) : null}
                             <td className="px-6 py-4">
                               <Badge
                                 variant="outline"
@@ -740,35 +768,37 @@ export default function CustomersPage() {
                   )}
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="tenant_id">Tenant *</Label>
-                  <select
-                    id="tenant_id"
-                    value={form.tenant_id}
-                    onChange={(event) =>
-                      setForm((current) => ({
-                        ...current,
-                        tenant_id: event.target.value,
-                      }))
-                    }
-                    className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus-visible:ring-offset-gray-900"
-                    disabled={!tenantReady}
-                  >
-                    {!tenantReady ? (
-                      <option value="">Đang tải tenant...</option>
-                    ) : null}
-                    {visibleTenants.map((tenant) => (
-                      <option key={tenant.id} value={tenant.id}>
-                        {tenant.tenant_name}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.tenant_id && (
-                    <p className="text-xs text-red-600">
-                      {formErrors.tenant_id}
-                    </p>
-                  )}
-                </div>
+                {!isTenantScoped ? (
+                  <div className="grid gap-2">
+                    <Label htmlFor="tenant_id">Tenant *</Label>
+                    <select
+                      id="tenant_id"
+                      value={form.tenant_id}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          tenant_id: event.target.value,
+                        }))
+                      }
+                      className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus-visible:ring-offset-gray-900"
+                      disabled={!tenantReady}
+                    >
+                      {!tenantReady ? (
+                        <option value="">Đang tải tenant...</option>
+                      ) : null}
+                      {visibleTenants.map((tenant) => (
+                        <option key={tenant.id} value={tenant.id}>
+                          {tenant.tenant_name}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.tenant_id && (
+                      <p className="text-xs text-red-600">
+                        {formErrors.tenant_id}
+                      </p>
+                    )}
+                  </div>
+                ) : null}
               </div>
 
               <DialogFooter>
