@@ -1,6 +1,5 @@
 import { getRoleFromBackend } from "@/lib/roles";
 import { needsShopSelection, pickPrimaryShop } from "@/lib/pick-primary-shop";
-import { getStoredShopForTenant } from "@/lib/shop-storage";
 import { bindActiveShopToUser } from "@/lib/shop-session";
 import { resolveTenantShops } from "@/lib/resolve-tenant-shop";
 import type { AuthUser } from "@/types/user";

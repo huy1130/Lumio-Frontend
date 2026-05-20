@@ -1,4 +1,4 @@
-/** BFF GET /api/tenant/subscription — gói đăng ký active của tenant (JWT.tenant_id) */
+/** Nest GET /tenants/me/subscription — gói đăng ký của tenant (JWT.tenant_id) */
 export interface TenantSubscriptionInfo {
   tenant_id: number;
   tenant_name: string;
