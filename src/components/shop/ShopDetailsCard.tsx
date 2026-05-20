@@ -64,7 +64,7 @@ export function ShopDetailsCard({ shop, shopId }: ShopDetailsCardProps) {
         </dl>
         {!resolvedId && shop ? (
           <p className="text-xs text-amber-600 dark:text-amber-400">
-            Không lấy được mã cửa hàng. Kiểm tra kết nối DATABASE_URL trên frontend.
+            Không lấy được mã cửa hàng. Thử đăng xuất và đăng nhập lại, hoặc liên hệ hỗ trợ.
           </p>
         ) : null}
       </CardContent>

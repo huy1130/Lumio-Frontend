@@ -1,4 +1,4 @@
-/** BFF GET /api/shops/quota — giới hạn MAX_SHOPS theo gói subscription active của tenant */
+/** Nest GET /shops/quota — giới hạn MAX_SHOPS theo gói subscription active của tenant */
 export interface ShopQuota {
   current_count: number;
   max_shops: number | null;
