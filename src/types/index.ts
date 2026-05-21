@@ -36,6 +36,20 @@ export interface Tenant {
   tenant_name: string;
   is_active: boolean;
   admin_id?: number | null;
+  tax_percentage?: number | string | null;
+  loyal_point_per_unit?: number | string | null;
+  created_at?: string;
+  update_at?: string;
+}
+
+export interface CreateTenantPayload {
+  tenant_name: string;
+  admin_id?: number;
+  tax_percentage?: number;
+  loyal_point_per_unit?: number;
+}
+
+export type UpdateTenantPayload = Partial<CreateTenantPayload>;
 }
 
 // ── Product ───────────────────────────────────────────────────────────────────
