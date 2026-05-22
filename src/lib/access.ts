@@ -14,6 +14,8 @@ export const FEATURE_ACCESS: Record<string, Role[]> = {
   "audit-logs": ["admin", "shop_owner"],
   users: ["admin"],
   subscriptions: ["admin"],
+  "plan-features": ["admin"],
+  roles: ["admin"],
   tenants: ["admin"],
   admins: ["admin"],
   reports: ["admin", "shop_owner"],

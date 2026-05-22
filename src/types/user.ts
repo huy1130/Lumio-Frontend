@@ -12,6 +12,8 @@ export interface AuthUser {
   shop_id?: number | null;
   full_name?: string | null;
   phone?: string | null;
+  /** Admin: null = initial, number = sub-admin */
+  manager_id?: number | null;
 }
 
 export interface AuthResponse {

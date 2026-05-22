@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { applyRoleCookie, resolveRoleFromAuthPayload } from "@/lib/auth-cookies";
 
 const BACKEND_URL =
   process.env.API_BACKEND_URL ??
@@ -41,7 +42,10 @@ export async function forwardAuthPost(
       );
     }
 
-    return NextResponse.json(data, { status: response.status });
+    const json = NextResponse.json(data, { status: response.status });
+    const role = resolveRoleFromAuthPayload(data);
+    if (role) applyRoleCookie(json, role);
+    return json;
   } catch (error) {
     console.error(`[auth proxy] ${targetPath} error:`, error);
     return NextResponse.json(
