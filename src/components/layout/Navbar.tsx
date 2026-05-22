@@ -8,6 +8,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import { isRoleRestrictedFromPublic } from "@/lib/role-route-access";
 
 const NAV_LINKS = [
   { label: "Tính năng", href: "/features" },
@@ -19,6 +21,9 @@ const NAV_LINKS = [
 export function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, role } = useAuth();
+  const isManagementUser = !!user && isRoleRestrictedFromPublic(role);
+  const homeHref = isManagementUser ? "/dashboard" : "/";
 
   const isHome = pathname === "/";
 
@@ -36,7 +41,7 @@ export function Navbar() {
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0 h-10">
+        <Link href={homeHref} className="flex items-center gap-2 shrink-0 h-10">
           <Image
             src="/images/lumio-icon.png"
             alt="Lumio Logo"
@@ -52,7 +57,16 @@ export function Navbar() {
 
         {/* Desktop nav links */}
         <div className="hidden items-center gap-1 md:flex">
-          {NAV_LINKS.map(({ label, href }) => {
+          {isManagementUser ? (
+            <Link
+              href="/dashboard"
+              className="relative rounded-full bg-indigo-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm"
+            >
+              Bảng điều khiển
+            </Link>
+          ) : null}
+          {!isManagementUser &&
+            NAV_LINKS.map(({ label, href }) => {
             const isActive =
               pathname === href || pathname.startsWith(href + "/");
             return (
@@ -77,6 +91,7 @@ export function Navbar() {
           <ThemeToggle />
 
           {/* Login — filled when active */}
+          {!isManagementUser ? (
           <Link href="/login" className="hidden md:block">
             <Button
               variant={pathname === "/login" ? "default" : "outline"}
@@ -91,6 +106,13 @@ export function Navbar() {
               Đăng nhập
             </Button>
           </Link>
+          ) : (
+            <Link href="/settings" className="hidden md:block">
+              <Button size="sm" variant="outline">
+                Cài đặt
+              </Button>
+            </Link>
+          )}
 
           {/* Mobile hamburger */}
           <button
@@ -110,7 +132,17 @@ export function Navbar() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="border-t border-gray-200/60 dark:border-gray-800/60 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md px-4 py-3 space-y-1 md:hidden">
-          {NAV_LINKS.map(({ label, href }) => {
+          {isManagementUser ? (
+            <Link
+              href="/dashboard"
+              onClick={() => setMobileOpen(false)}
+              className="flex rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white"
+            >
+              Bảng điều khiển
+            </Link>
+          ) : null}
+          {!isManagementUser &&
+            NAV_LINKS.map(({ label, href }) => {
             const isActive =
               pathname === href || pathname.startsWith(href + "/");
             return (
@@ -133,25 +165,27 @@ export function Navbar() {
             );
           })}
 
-          <div className="pt-2 pb-1 flex gap-2">
-            <Link
-              href="/login"
-              className="flex-1"
-              onClick={() => setMobileOpen(false)}
-            >
-              <Button
-                variant="outline"
-                size="sm"
-                className={cn(
-                  "w-full transition-all",
-                  pathname === "/login" &&
-                    "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400",
-                )}
+          {!isManagementUser ? (
+            <div className="pt-2 pb-1 flex gap-2">
+              <Link
+                href="/login"
+                className="flex-1"
+                onClick={() => setMobileOpen(false)}
               >
-                Đăng nhập
-              </Button>
-            </Link>
-          </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "w-full transition-all",
+                    pathname === "/login" &&
+                      "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400",
+                  )}
+                >
+                  Đăng nhập
+                </Button>
+              </Link>
+            </div>
+          ) : null}
         </div>
       )}
     </nav>

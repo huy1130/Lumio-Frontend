@@ -31,6 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useAuth } from "@/context/AuthContext";
 import { subscriptionService } from "@/lib/services/subscriptionService";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { SubscriptionStatsResponse } from "@/types";
@@ -61,11 +62,13 @@ function StatsSkeleton() {
 }
 
 export function AdminDashboard() {
+  const { accessToken } = useAuth();
   const [stats, setStats] = useState<SubscriptionStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadStats = useCallback(async () => {
+    if (!accessToken) return;
     setLoading(true);
     setError(null);
     try {
@@ -79,7 +82,7 @@ export function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [accessToken]);
 
   useEffect(() => {
     loadStats();

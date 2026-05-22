@@ -12,6 +12,7 @@ import type { Role } from "@/lib/roles";
 import { getRoleFromBackend } from "@/lib/roles";
 import type { AuthUser } from "@/types/user";
 import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from "@/lib/api-client";
+import { clearAuthRoleCookie, syncAuthRoleCookie } from "@/lib/auth-cookies";
 import { clearShopSessionCache } from "@/lib/resolve-tenant-shop";
 
 interface AuthContextValue {
@@ -42,16 +43,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const parsedUser = JSON.parse(storedUser) as AuthUser;
         setAccessToken(storedToken);
         setUser(parsedUser);
+        syncAuthRoleCookie(parsedUser);
       } catch {
         localStorage.removeItem(AUTH_TOKEN_KEY);
         localStorage.removeItem(AUTH_USER_KEY);
+        syncAuthRoleCookie(null);
       }
     } else if (storedToken || storedUser) {
       localStorage.removeItem(AUTH_TOKEN_KEY);
       localStorage.removeItem(AUTH_USER_KEY);
+      syncAuthRoleCookie(null);
     }
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (loading) return;
+    syncAuthRoleCookie(user);
+  }, [loading, user]);
 
   const role = useMemo<Role>(() => {
     if (!user) return "user";
@@ -65,15 +74,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(nextUser);
     localStorage.setItem(AUTH_TOKEN_KEY, token);
     localStorage.setItem(AUTH_USER_KEY, JSON.stringify(nextUser));
+    syncAuthRoleCookie(nextUser);
   }
 
   function logout() {
-    setAccessToken(null);
-    setUser(null);
-    localStorage.removeItem(AUTH_TOKEN_KEY);
-    localStorage.removeItem(AUTH_USER_KEY);
-    clearShopSessionCache();
-    router.replace("/");
+    void (async () => {
+      setAccessToken(null);
+      setUser(null);
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      localStorage.removeItem(AUTH_USER_KEY);
+      clearShopSessionCache();
+      await clearAuthRoleCookie();
+      router.replace("/login");
+    })();
   }
 
   return (
