@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { CreditCard, Loader2 } from "lucide-react";
+import { CreditCard, ExternalLink, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,8 +22,9 @@ import type { TenantSubscriptionInfo } from "@/types/tenant-subscription";
 function formatPriceVnd(price: number | null, cycle: string | null) {
   if (price == null) return "—";
   const formatted = new Intl.NumberFormat("vi-VN").format(price);
+  const normalized = cycle?.toUpperCase() ?? "";
   const suffix =
-    cycle === "MONTHLY" ? "/tháng" : cycle === "YEARLY" ? "/năm" : "";
+    normalized === "MONTHLY" ? "/tháng" : normalized === "YEARLY" ? "/năm" : "";
   return `${formatted} ₫${suffix}`;
 }
 
@@ -57,6 +58,11 @@ export function ShopOwnerSubscriptionCard() {
   }, [load]);
 
   const view = getTenantSubscriptionStatusView(info);
+  const showRenewCta =
+    !!info?.subscription_id &&
+    (view.status === "expired" ||
+      view.status === "expiring_soon" ||
+      view.status === "active");
 
   return (
     <Card>
@@ -76,7 +82,12 @@ export function ShopOwnerSubscriptionCard() {
             Đang tải…
           </div>
         ) : error ? (
-          <p className="text-sm text-red-600">{error}</p>
+          <div className="space-y-2">
+            <p className="text-sm text-red-600">{error}</p>
+            <Button variant="outline" size="sm" onClick={() => void load()}>
+              Thử lại
+            </Button>
+          </div>
         ) : (
           <>
             <div className="flex flex-wrap items-start justify-between gap-3 rounded-lg border p-4">
@@ -123,12 +134,16 @@ export function ShopOwnerSubscriptionCard() {
               </div>
             </div>
 
-            {(view.status === "expired" ||
-              view.status === "expiring_soon" ||
-              view.status === "none") && (
-              <Button asChild variant="outline" className="w-full sm:w-auto">
-                <Link href="/pricing">Xem gói & gia hạn</Link>
-              </Button>
+            {showRenewCta && (
+              <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
+               
+                <Button asChild className="gap-2">
+                  <Link href="/subscription/renew">
+                    <ExternalLink className="h-4 w-4" />
+                    Gia hạn / thanh toán PayOS
+                  </Link>
+                </Button>
+              </div>
             )}
           </>
         )}
@@ -136,4 +151,3 @@ export function ShopOwnerSubscriptionCard() {
     </Card>
   );
 }
-

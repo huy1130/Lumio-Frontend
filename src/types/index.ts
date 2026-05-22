@@ -50,7 +50,38 @@ export interface CreateTenantPayload {
 }
 
 export type UpdateTenantPayload = Partial<CreateTenantPayload>;
+
+// ── Role (backend `roles` table) ─────────────────────────────────────────────
+export interface ApiRole {
+  id: number;
+  role_code: string;
+  description: string | null;
+  permissions: Record<string, unknown> | null;
 }
+
+export interface CreateRolePayload {
+  role_code: string;
+  description?: string;
+  permissions?: Record<string, unknown>;
+}
+
+export type UpdateRolePayload = Partial<CreateRolePayload>;
+
+// ── Feature (backend `features` table) ─────────────────────────────────────────
+export interface ApiFeature {
+  id: number;
+  feature_code: string;
+  description: string | null;
+  is_active: boolean;
+}
+
+export interface CreateFeaturePayload {
+  feature_code: string;
+  description?: string;
+  is_active?: boolean;
+}
+
+export type UpdateFeaturePayload = Partial<CreateFeaturePayload>;
 
 // ── Product ───────────────────────────────────────────────────────────────────
 export interface Product {
@@ -164,6 +195,8 @@ export interface CreateSubscriptionPayload {
   price: number;
   billing_cycle: string;
   is_active?: boolean;
+  /** Gắn feature MAX_SHOPS trên BE khi tạo gói */
+  max_shops?: number;
 }
 
 export type UpdateSubscriptionPayload = Partial<CreateSubscriptionPayload>;

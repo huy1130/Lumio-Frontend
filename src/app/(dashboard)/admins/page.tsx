@@ -41,7 +41,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AccessGuard } from "@/components/shared/AccessGuard";
+import { useAuth } from "@/context/AuthContext";
+import { canManageAdmins } from "@/lib/admin-access";
 import { adminService } from "@/lib/services/adminService";
+import {
+  ADMIN_PASSWORD_HINT,
+  ADMIN_PASSWORD_MIN_LENGTH,
+  validateAdminPassword,
+} from "@/lib/admin-password";
 import type { ApiAdmin, CreateAdminPayload, UpdateAdminPayload } from "@/types";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -90,6 +97,7 @@ export default function AdminsPage() {
 // ─── main content ─────────────────────────────────────────────────────────────
 
 function AdminsContent() {
+  const { user } = useAuth();
   const [admins, setAdmins] = useState<ApiAdmin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -143,8 +151,9 @@ function AdminsContent() {
       setCreateError("Vui lòng nhập email và mật khẩu.");
       return;
     }
-    if (payload.password.length < 6) {
-      setCreateError("Mật khẩu tối thiểu 6 ký tự (theo backend).");
+    const pwdError = validateAdminPassword(payload.password, { required: true });
+    if (pwdError) {
+      setCreateError(pwdError);
       return;
     }
     setCreating(true);
@@ -174,6 +183,11 @@ function AdminsContent() {
 
   async function handleEdit() {
     if (!editTarget) return;
+    const pwdError = validateAdminPassword(editForm.password);
+    if (pwdError) {
+      setEditError(pwdError);
+      return;
+    }
     setEditing(true);
     setEditError(null);
     try {
@@ -204,6 +218,16 @@ function AdminsContent() {
   }
 
   // ── stats ──────────────────────────────────────────────────────────────────
+
+  const createPasswordInvalid =
+    createForm.password.length > 0 &&
+    createForm.password.length < ADMIN_PASSWORD_MIN_LENGTH;
+  const editPasswordInvalid =
+    !!editForm.password &&
+    editForm.password.length < ADMIN_PASSWORD_MIN_LENGTH;
+
+  const canManage = canManageAdmins(user, admins);
+  const tableColSpan = canManage ? 7 : 6;
 
   const total = admins.length;
   const active = admins.filter((a) => a.is_active).length;
@@ -289,9 +313,11 @@ function AdminsContent() {
                 {loading ? "Loading…" : `${total} admins`}
               </CardDescription>
             </div>
-            <Button className="gap-2" onClick={openCreate} disabled={loading}>
-              <Plus className="h-4 w-4" /> New Admin
-            </Button>
+            {canManage && (
+              <Button className="gap-2" onClick={openCreate} disabled={loading}>
+                <Plus className="h-4 w-4" /> New Admin
+              </Button>
+            )}
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -309,14 +335,16 @@ function AdminsContent() {
                     <TableHead>Type</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Last Login</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    {canManage && (
+                      <TableHead className="text-right">Actions</TableHead>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {admins.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
+                        colSpan={tableColSpan}
                         className="py-12 text-center text-muted-foreground"
                       >
                         No admins found.
@@ -369,37 +397,39 @@ function AdminsContent() {
                             ? new Date(admin.last_login).toLocaleString("vi-VN")
                             : "Never"}
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 w-8 p-0"
-                              title="Edit"
-                              onClick={() => openEdit(admin)}
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className={`h-8 w-8 p-0 ${admin.is_active ? "text-green-600 hover:text-green-700" : "text-muted-foreground"}`}
-                              title={
-                                admin.is_active ? "Deactivate" : "Activate"
-                              }
-                              onClick={() => handleToggle(admin)}
-                              disabled={togglingId === admin.id}
-                            >
-                              {togglingId === admin.id ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : admin.is_active ? (
-                                <ToggleRight className="h-4 w-4" />
-                              ) : (
-                                <ToggleLeft className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </TableCell>
+                        {canManage && (
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0"
+                                title="Edit"
+                                onClick={() => openEdit(admin)}
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className={`h-8 w-8 p-0 ${admin.is_active ? "text-green-600 hover:text-green-700" : "text-muted-foreground"}`}
+                                title={
+                                  admin.is_active ? "Deactivate" : "Activate"
+                                }
+                                onClick={() => handleToggle(admin)}
+                                disabled={togglingId === admin.id}
+                              >
+                                {togglingId === admin.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : admin.is_active ? (
+                                  <ToggleRight className="h-4 w-4" />
+                                ) : (
+                                  <ToggleLeft className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))
                   )}
@@ -410,7 +440,8 @@ function AdminsContent() {
         </Card>
       </div>
 
-      {/* ── Create Admin Modal ──────────────────────────────────────────────── */}
+      {/* ── Create Admin Modal (initial admin only) ───────────────────────────── */}
+      {canManage && (
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -439,7 +470,7 @@ function AdminsContent() {
               </div>
               <div className="col-span-2 space-y-1.5">
                 <Label htmlFor="c-password">
-                  Mật khẩu * (tối thiểu 6 ký tự)
+                  Mật khẩu * ({ADMIN_PASSWORD_HINT})
                 </Label>
                 <Input
                   id="c-password"
@@ -449,7 +480,16 @@ function AdminsContent() {
                     setCreateForm((f) => ({ ...f, password: e.target.value }))
                   }
                   placeholder="••••••••"
+                  minLength={ADMIN_PASSWORD_MIN_LENGTH}
+                  autoComplete="new-password"
                 />
+                {createForm.password.length > 0 &&
+                  createForm.password.length < ADMIN_PASSWORD_MIN_LENGTH && (
+                    <p className="text-xs text-destructive">
+                      Mật khẩu phải có ít nhất {ADMIN_PASSWORD_MIN_LENGTH} ký
+                      tự.
+                    </p>
+                  )}
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="c-name">Full Name</Label>
@@ -484,15 +524,20 @@ function AdminsContent() {
             >
               Cancel
             </Button>
-            <Button onClick={handleCreate} disabled={creating}>
+            <Button
+              onClick={handleCreate}
+              disabled={creating || createPasswordInvalid}
+            >
               {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Admin
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      )}
 
-      {/* ── Edit Admin Modal ────────────────────────────────────────────────── */}
+      {/* ── Edit Admin Modal (initial admin only) ─────────────────────────────── */}
+      {canManage && (
       <Dialog
         open={!!editTarget}
         onOpenChange={(o) => {
@@ -525,19 +570,31 @@ function AdminsContent() {
               </div>
               <div className="col-span-2 space-y-1.5">
                 <Label htmlFor="e-password">
-                  New Password (để trống nếu không đổi)
+                  Mật khẩu mới (để trống nếu không đổi — {ADMIN_PASSWORD_HINT})
                 </Label>
                 <Input
                   id="e-password"
                   type="password"
+                  value={editForm.password ?? ""}
                   placeholder="••••••••"
-                  onChange={(e) =>
+                  minLength={ADMIN_PASSWORD_MIN_LENGTH}
+                  autoComplete="new-password"
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setEditForm((f) => ({
                       ...f,
-                      password: e.target.value || undefined,
-                    }))
-                  }
+                      password: value === "" ? undefined : value,
+                    }));
+                    if (editError?.includes("Mật khẩu")) setEditError(null);
+                  }}
                 />
+                {editForm.password &&
+                  editForm.password.length < ADMIN_PASSWORD_MIN_LENGTH && (
+                    <p className="text-xs text-destructive">
+                      Mật khẩu phải có ít nhất {ADMIN_PASSWORD_MIN_LENGTH} ký
+                      tự.
+                    </p>
+                  )}
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="e-name">Full Name</Label>
@@ -570,13 +627,14 @@ function AdminsContent() {
             >
               Cancel
             </Button>
-            <Button onClick={handleEdit} disabled={editing}>
+            <Button onClick={handleEdit} disabled={editing || editPasswordInvalid}>
               {editing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      )}
     </div>
   );
 }

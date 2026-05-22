@@ -17,11 +17,17 @@ export default function SubscriptionSuccessPage({ searchParams }: Props) {
       : undefined;
   const status =
     typeof searchParams.status === "string" ? searchParams.status : undefined;
+  const isRenew =
+    searchParams.renew === "1" || searchParams.renew === "true";
+  const payosCode =
+    typeof searchParams.code === "string" ? searchParams.code : undefined;
 
   return (
     <SubscriptionSuccessClient
       orderCodeFromUrl={orderCode}
       statusFromUrl={status}
+      payosCodeFromUrl={payosCode}
+      isRenew={isRenew}
     />
   );
 }

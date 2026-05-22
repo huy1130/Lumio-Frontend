@@ -5,7 +5,7 @@ import {
   LayoutDashboard, ShoppingCart, Package, Warehouse, CreditCard,
   Settings, Tag, BarChart3, Store, Users, UserCog, Building2,
   BrainCircuit, TrendingUp, ClipboardList, FileDown, DollarSign,
-  Gift, ShoppingBag, UserCircle,
+  Gift, ShoppingBag, UserCircle, Shield, Sparkles,
 } from "lucide-react";
 
 export interface NavItem {
@@ -31,6 +31,8 @@ const adminNav: NavSection[] = [
     title: "Admin",
     items: [
       { title: "Subscriptions", href: "/subscriptions", icon: Tag       },
+      { title: "Plan Features", href: "/plan-features", icon: Sparkles  },
+      { title: "Roles",         href: "/roles",         icon: Shield    },
       { title: "Tenants",       href: "/tenants",       icon: Building2 },
       { title: "Users",         href: "/users",         icon: Users     },
       { title: "Manage Admins", href: "/admins",        icon: UserCog   },

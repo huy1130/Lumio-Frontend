@@ -8,6 +8,7 @@ interface AdminLoginResponse {
     email: string;
     full_name?: string | null;
     phone?: string | null;
+    manager_id?: number | null;
   };
 }
 
@@ -38,6 +39,7 @@ function normalizeAuthResponse(payload: AdminLoginResponse | UserLoginResponse):
          username: data.admin.email,
          full_name: data.admin.full_name ?? null,
          phone: data.admin.phone ?? null,
+         manager_id: data.admin.manager_id ?? null,
          role: "admin",
          role_id: null,
        },

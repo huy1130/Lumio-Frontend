@@ -30,6 +30,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { subscriptionService } from "@/lib/services/subscriptionService";
+import {
+  BILLING_CYCLE_OPTIONS,
+  normalizeBillingCycle,
+} from "@/lib/billing-cycle";
 import { formatCurrency } from "@/lib/utils";
 import type { ApiSubscription, CreateSubscriptionPayload } from "@/types";
 import { toast } from "sonner";
@@ -45,8 +49,9 @@ const EMPTY_FORM: CreateSubscriptionPayload = {
   package_code: "",
   description: "",
   price: 0,
-  billing_cycle: "monthly",
+  billing_cycle: "MONTHLY",
   is_active: true,
+  max_shops: undefined,
 };
 
 // ─── page shell ───────────────────────────────────────────────────────────────
@@ -122,8 +127,9 @@ function SubscriptionsContent() {
       package_code: sub.package_code,
       description: sub.description ?? "",
       price: parseFloat(sub.price),
-      billing_cycle: sub.billing_cycle,
+      billing_cycle: normalizeBillingCycle(sub.billing_cycle),
       is_active: sub.is_active,
+      max_shops: undefined,
     });
     setFormError(null);
     setModalOpen(true);
@@ -134,7 +140,10 @@ function SubscriptionsContent() {
     setFormError(null);
     try {
       if (editing) {
-        const updated = await subscriptionService.update(editing.id, form);
+        const updated = await subscriptionService.update(editing.id, {
+          ...form,
+          billing_cycle: normalizeBillingCycle(form.billing_cycle),
+        });
         setSubscriptions((prev) =>
           prev.map((s) => (s.id === updated.id ? updated : s)),
         );
@@ -142,7 +151,15 @@ function SubscriptionsContent() {
           description: `Gói "${updated.package_code}" đã được cập nhật.`,
         });
       } else {
-        const created = await subscriptionService.create(form);
+        const payload: CreateSubscriptionPayload = {
+          ...form,
+          billing_cycle: normalizeBillingCycle(form.billing_cycle),
+          max_shops:
+            form.max_shops != null && form.max_shops > 0
+              ? form.max_shops
+              : undefined,
+        };
+        const created = await subscriptionService.create(payload);
         setSubscriptions((prev) => [...prev, created]);
         toast.success("Tạo gói thành công", {
           description: `Gói "${created.package_code}" đã được tạo.`,
@@ -433,16 +450,45 @@ function SubscriptionsContent() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="billing_cycle">Billing Cycle *</Label>
-                <Input
+                <select
                   id="billing_cycle"
-                  value={form.billing_cycle}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={normalizeBillingCycle(form.billing_cycle)}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, billing_cycle: e.target.value }))
                   }
-                  placeholder="monthly / yearly"
-                />
+                >
+                  {BILLING_CYCLE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
+
+            {!editing && (
+              <div className="space-y-1.5">
+                <Label htmlFor="max_shops">Số cửa hàng tối đa (MAX_SHOPS)</Label>
+                <Input
+                  id="max_shops"
+                  type="number"
+                  min={1}
+                  placeholder="vd. 3 — để trống nếu không giới hạn"
+                  value={form.max_shops ?? ""}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setForm((f) => ({
+                      ...f,
+                      max_shops: raw === "" ? undefined : Number(raw),
+                    }));
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Khi tạo gói, BE tự gắn feature MAX_SHOPS với limit này.
+                </p>
+              </div>
+            )}
 
             <div className="flex items-center gap-3">
               <input
