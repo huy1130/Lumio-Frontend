@@ -7,7 +7,6 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useRouter } from "next/navigation";
 import type { Role } from "@/lib/roles";
 import { getRoleFromBackend } from "@/lib/roles";
 import type { AuthUser } from "@/types/user";
@@ -29,7 +28,6 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem(AUTH_USER_KEY);
       clearShopSessionCache();
       await clearAuthRoleCookie();
-      router.replace("/login");
+      window.location.replace("/login");
     })();
   }
 

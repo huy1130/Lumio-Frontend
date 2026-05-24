@@ -8,6 +8,7 @@ export const FEATURE_ACCESS: Record<string, Role[]> = {
   dashboard: ["admin", "shop_owner", "inventory_staff", "cashier"],
   shop: ["shop_owner"],
   products: ["admin", "shop_owner"],
+  "product-categories": ["shop_owner", "cashier"],
   inventory: ["admin", "shop_owner"],
   orders: ["admin", "shop_owner", "inventory_staff"],
   merchandises: ["admin", "shop_owner"],
