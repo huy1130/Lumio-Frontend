@@ -5,14 +5,14 @@ import {
   LayoutDashboard, ShoppingCart, Package, Warehouse, CreditCard,
   Settings, Tag, BarChart3, Store, Users, UserCog, Building2,
   BrainCircuit, TrendingUp, ClipboardList, FileDown, DollarSign,
-  Gift, ShoppingBag, UserCircle, Shield, Sparkles,
+  Gift, ShoppingBag, UserCircle, Shield, Sparkles, FlaskConical,
 } from "lucide-react";
 
 export interface NavItem {
   title: string;
-  href:  string;
+  href: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon:  ComponentType<any>;
+  icon: ComponentType<any>;
   badge?: string | number;
 }
 
@@ -30,25 +30,25 @@ const adminNav: NavSection[] = [
   {
     title: "Admin",
     items: [
-      { title: "Subscriptions", href: "/subscriptions", icon: Tag       },
-      { title: "Plan Features", href: "/plan-features", icon: Sparkles  },
-      { title: "Roles",         href: "/roles",         icon: Shield    },
-      { title: "Tenants",       href: "/tenants",       icon: Building2 },
-      { title: "Users",         href: "/users",         icon: Users     },
-      { title: "Manage Admins", href: "/admins",        icon: UserCog   },
+      { title: "Subscriptions", href: "/subscriptions", icon: Tag },
+      { title: "Plan Features", href: "/plan-features", icon: Sparkles },
+      { title: "Roles", href: "/roles", icon: Shield },
+      { title: "Tenants", href: "/tenants", icon: Building2 },
+      { title: "Users", href: "/users", icon: Users },
+      { title: "Manage Admins", href: "/admins", icon: UserCog },
     ],
   },
-  
+
   {
     title: "Analytics & AI",
     items: [
-      { title: "Configure AI",  href: "/ai/config",   icon: BrainCircuit  },
-      { title: "AI Statistics", href: "/ai/stats",    icon: BarChart3     },
-      { title: "AI Charts",     href: "/ai/charts",   icon: BrainCircuit  },
-      { title: "Trends",        href: "/trends",      icon: TrendingUp    },
-      { title: "Reports",       href: "/reports",     icon: BarChart3     },
-      { title: "Audit Logs",    href: "/audit-logs",  icon: ClipboardList },
-      { title: "Export Data",   href: "/export",      icon: FileDown      },
+      { title: "Configure AI", href: "/ai/config", icon: BrainCircuit },
+      { title: "AI Statistics", href: "/ai/stats", icon: BarChart3 },
+      { title: "AI Charts", href: "/ai/charts", icon: BrainCircuit },
+      { title: "Trends", href: "/trends", icon: TrendingUp },
+      { title: "Reports", href: "/reports", icon: BarChart3 },
+      { title: "Audit Logs", href: "/audit-logs", icon: ClipboardList },
+      { title: "Export Data", href: "/export", icon: FileDown },
     ],
   },
   {
@@ -66,29 +66,21 @@ const shopOwnerNav: NavSection[] = [
   {
     title: "Store",
     items: [
-      { title: "Cửa hàng",      href: "/shop",         icon: Store     },
-      { title: "Khách hàng",    href: "/customers",    icon: Users     },
-      { title: "Products",      href: "/products",     icon: Package   },
-      { title: "Danh mục",      href: "/product-categories", icon: Tag },
-      { title: "Inventory",     href: "/inventory",    icon: Warehouse },
-      { title: "Merchandises",  href: "/merchandises", icon: Store     },
-      { title: "Merch Program", href: "/programs",     icon: Gift      },
+      { title: "Cửa hàng", href: "/shop", icon: Store },
+      { title: "Khách hàng", href: "/customers", icon: Users },
+      { title: "Products", href: "/products", icon: Package },
+      { title: "Danh mục", href: "/product-categories", icon: Tag },
+      { title: "Nguyên liệu", href: "/ingredients", icon: FlaskConical },
+      { title: "Tồn kho", href: "/inventory", icon: Warehouse },
+      { title: "Merchandises", href: "/merchandises", icon: Store },
+      { title: "Merch Program", href: "/programs", icon: Gift },
     ],
   },
   {
     title: "Orders",
     items: [{ title: "Orders", href: "/orders", icon: ShoppingCart }],
   },
-  {
-    title: "Analytics & AI",
-    items: [
-      { title: "Financial Stats", href: "/financials",  icon: DollarSign    },
-      { title: "AI Charts",       href: "/ai/charts",   icon: BrainCircuit  },
-      { title: "Reports",         href: "/reports",     icon: BarChart3     },
-      { title: "Audit Logs",      href: "/audit-logs",  icon: ClipboardList },
-      { title: "Export Data",     href: "/export",      icon: FileDown      },
-    ],
-  },
+
   {
     title: "System",
     items: [{ title: "Settings", href: "/settings", icon: Settings }],
@@ -110,15 +102,15 @@ const staffNav: NavSection[] = [
   {
     title: "Analytics & AI",
     items: [
-      { title: "AI Charts",   href: "/ai/charts", icon: BrainCircuit },
-      { title: "Export Data", href: "/export",    icon: FileDown     },
+      { title: "AI Charts", href: "/ai/charts", icon: BrainCircuit },
+      { title: "Export Data", href: "/export", icon: FileDown },
     ],
   },
   {
     title: "System",
     items: [
-      { title: "My Profile", href: "/profile",  icon: UserCircle },
-      { title: "Settings",   href: "/settings", icon: Settings   },
+      { title: "My Profile", href: "/profile", icon: UserCircle },
+      { title: "Settings", href: "/settings", icon: Settings },
     ],
   },
 ];
@@ -132,10 +124,10 @@ const cashierNav: NavSection[] = [
   {
     title: "Operations",
     items: [
-      { title: "Payments",  href: "/payments",  icon: CreditCard  },
-      { title: "Checkout",  href: "/checkout",  icon: ShoppingBag },
-      { title: "Khách hàng",href: "/customers", icon: Users       },
-      { title: "Danh mục",   href: "/product-categories", icon: Tag },
+      { title: "Payments", href: "/payments", icon: CreditCard },
+      { title: "Checkout", href: "/checkout", icon: ShoppingBag },
+      { title: "Khách hàng", href: "/customers", icon: Users },
+      { title: "Danh mục", href: "/product-categories", icon: Tag },
     ],
   },
   {
@@ -145,19 +137,19 @@ const cashierNav: NavSection[] = [
   {
     title: "System",
     items: [
-      { title: "My Profile", href: "/profile",  icon: UserCircle },
-      { title: "Settings",   href: "/settings", icon: Settings   },
+      { title: "My Profile", href: "/profile", icon: UserCircle },
+      { title: "Settings", href: "/settings", icon: Settings },
     ],
   },
 ];
 
 // ── Lookup ────────────────────────────────────────────────────────────────────
 const NAV_MAP: Record<Role, NavSection[]> = {
-  admin:            adminNav,
-  shop_owner:       shopOwnerNav,
-  inventory_staff:  staffNav,
-  cashier:          cashierNav,
-  user:             [],
+  admin: adminNav,
+  shop_owner: shopOwnerNav,
+  inventory_staff: staffNav,
+  cashier: cashierNav,
+  user: [],
 };
 
 export function getNavigationByRole(role: Role): NavSection[] {

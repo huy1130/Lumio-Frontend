@@ -17,9 +17,8 @@ import { StatsCard } from "@/components/shared/stats-card";
 import { PlaceholderPage } from "@/components/shared/PlaceholderPage";
 import { AccessGuard } from "@/components/shared/AccessGuard";
 import { useAuth } from "@/context/AuthContext";
-import { mockOrders, mockProducts } from "@/lib/mock-data";
 import { formatCurrency, formatDate, cn } from "@/lib/utils";
-import type { Product } from "@/types";
+import type { Product, Order } from "@/types";
 
 export default function OrdersPage() {
   return (
@@ -47,16 +46,18 @@ const paymentVariant: Record<string, "success" | "warning" | "destructive" | "se
 };
 
 function AdminOrdersView() {
-  const total     = mockOrders.reduce((s, o) => s + o.total, 0);
-  const completed = mockOrders.filter((o) => o.status === "completed").length;
-  const pending   = mockOrders.filter((o) => o.status === "pending").length;
+  const orders: Order[] = [];
+
+  const total     = orders.reduce((s, o) => s + o.total, 0);
+  const completed = orders.filter((o) => o.status === "completed").length;
+  const pending   = orders.filter((o) => o.status === "pending").length;
 
   return (
     <div>
       <Header />
       <div className="p-6 space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatsCard title="Total Orders"  value={mockOrders.length} icon={<ShoppingCart className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" />
+          <StatsCard title="Total Orders"  value={orders.length} icon={<ShoppingCart className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" />
           <StatsCard title="Total Revenue" value={formatCurrency(total)} icon={<DollarSign className="h-4 w-4" />}  iconClassName="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" />
           <StatsCard title="Completed"     value={completed} icon={<CheckCircle className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-300" />
           <StatsCard title="Pending"       value={pending}   icon={<Clock className="h-4 w-4" />}       iconClassName="bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300" />
@@ -80,26 +81,34 @@ function AdminOrdersView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-mono font-semibold">{order.orderNumber}</TableCell>
-                    <TableCell>{order.customerName}</TableCell>
-                    <TableCell className="text-muted-foreground">{order.items.length} item(s)</TableCell>
-                    <TableCell className="font-semibold">{formatCurrency(order.total)}</TableCell>
-                    <TableCell>
-                      <Badge variant={orderStatusVariant[order.status]} className="capitalize">{order.status}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={paymentVariant[order.paymentStatus]} className="capitalize">{order.paymentStatus}</Badge>
-                    </TableCell>
-                    <TableCell className="capitalize text-muted-foreground">{order.paymentMethod ?? "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{order.createdBy}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{formatDate(order.createdAt)}</TableCell>
-                    <TableCell className="text-right">
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><Eye className="h-3.5 w-3.5" /></Button>
+                {orders.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={10} className="py-16 text-center text-muted-foreground text-sm">
+                      No orders yet. Orders will appear here once data is connected.
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  orders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-mono font-semibold">{order.orderNumber}</TableCell>
+                      <TableCell>{order.customerName}</TableCell>
+                      <TableCell className="text-muted-foreground">{order.items.length} item(s)</TableCell>
+                      <TableCell className="font-semibold">{formatCurrency(order.total)}</TableCell>
+                      <TableCell>
+                        <Badge variant={orderStatusVariant[order.status]} className="capitalize">{order.status}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={paymentVariant[order.paymentStatus]} className="capitalize">{order.paymentStatus}</Badge>
+                      </TableCell>
+                      <TableCell className="capitalize text-muted-foreground">{order.paymentMethod ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{order.createdBy}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{formatDate(order.createdAt)}</TableCell>
+                      <TableCell className="text-right">
+                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><Eye className="h-3.5 w-3.5" /></Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>
@@ -120,9 +129,9 @@ function ShopOwnerOrdersView() {
       role="shop_owner"
       breadcrumbs={[{ label: "Shop Owner" }, { label: "Orders" }]}
       stats={[
-        { title: "Total Orders", value: "56",  change: 3.1, changeLabel: "today", icon: <ShoppingCart className="h-4 w-4" />, iconClassName: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"    },
-        { title: "Completed",    value: "38",  change: 5,   changeLabel: "today", icon: <CheckCircle className="h-4 w-4" />,  iconClassName: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300"  },
-        { title: "Pending",      value: "12",  change: -2,  changeLabel: "today", icon: <Clock className="h-4 w-4" />,        iconClassName: "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300"  },
+        { title: "Total Orders", value: "—", change: 0, changeLabel: "today", icon: <ShoppingCart className="h-4 w-4" />, iconClassName: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" },
+        { title: "Completed",    value: "—", change: 0, changeLabel: "today", icon: <CheckCircle className="h-4 w-4" />, iconClassName: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" },
+        { title: "Pending",      value: "—", change: 0, changeLabel: "today", icon: <Clock className="h-4 w-4" />,       iconClassName: "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300" },
       ]}
       tableTitle="Order List"
     />
@@ -130,30 +139,15 @@ function ShopOwnerOrdersView() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// STAFF VIEW  —  full POS cart interface
+// STAFF VIEW  —  POS cart interface (products loaded from API later)
 // ─────────────────────────────────────────────────────────────────────────────
 interface POSProduct extends Product { emoji: string; description: string; emojiBg: string; }
 
-const POS_ENRICHED: Record<string, { emoji: string; description: string; emojiBg: string }> = {
-  "1": { emoji: "☕", description: "Premium arabica espresso beans, 1 kg bag", emojiBg: "bg-amber-100 dark:bg-amber-900/40"  },
-  "2": { emoji: "🥛", description: "Fresh whole cow milk, 1 litre bottle",    emojiBg: "bg-sky-100 dark:bg-sky-900/40"     },
-  "3": { emoji: "🫐", description: "Freshly baked blueberry muffin, daily",   emojiBg: "bg-purple-100 dark:bg-purple-900/40"},
-  "4": { emoji: "🍵", description: "Premium green tea bags, 20-count box",    emojiBg: "bg-green-100 dark:bg-green-900/40" },
-  "5": { emoji: "🥐", description: "Buttery classic croissant, baked fresh",  emojiBg: "bg-orange-100 dark:bg-orange-900/40"},
-  "6": { emoji: "🌾", description: "Plant-based oat milk, barista edition",   emojiBg: "bg-lime-100 dark:bg-lime-900/40"   },
-};
-
-const posProducts: POSProduct[] = mockProducts.map((p) => ({
-  ...p, ...(POS_ENRICHED[p.id] ?? { emoji: "📦", description: p.name, emojiBg: "bg-gray-100" }),
-}));
-
-const CATEGORY_ICONS: Record<string, string> = { All: "🛍️", Beverages: "☕", Dairy: "🥛", Bakery: "🥐" };
+interface CartItem { product: POSProduct; qty: number }
 
 const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
   completed: "success", processing: "warning", pending: "secondary", cancelled: "destructive",
 };
-
-interface CartItem { product: POSProduct; qty: number }
 
 function StaffOrdersView() {
   const [search, setSearch]               = useState("");
@@ -161,14 +155,18 @@ function StaffOrdersView() {
   const [cart, setCart]                   = useState<CartItem[]>([]);
   const [showRecentOrders, setShowRecentOrders] = useState(false);
 
-  const categories = useMemo(() => ["All", ...Array.from(new Set(posProducts.map((p) => p.category)))], []);
+  // Products will be loaded from API — empty until connected
+  const posProducts: POSProduct[] = [];
+  const recentOrders: Order[]     = [];
+
+  const categories = useMemo(() => ["All", ...Array.from(new Set(posProducts.map((p) => p.category)))], [posProducts]);
 
   const visibleProducts = useMemo(() =>
     posProducts.filter((p) => {
       const catOk  = activeCategory === "All" || p.category === activeCategory;
-      const textOk = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase());
+      const textOk = !search || p.name.toLowerCase().includes(search.toLowerCase());
       return catOk && textOk;
-    }), [search, activeCategory]);
+    }), [posProducts, search, activeCategory]);
 
   const addToCart = (product: POSProduct) =>
     setCart((prev) => {
@@ -196,7 +194,7 @@ function StaffOrdersView() {
         <div className="shrink-0 px-6 pt-6 pb-4 bg-gray-50 dark:bg-gray-950">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Welcome, Carol 👋</h1>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Welcome 👋</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Discover whatever you need easily</p>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-80">
@@ -219,7 +217,6 @@ function StaffOrdersView() {
                     isActive
                       ? "bg-orange-500 text-white shadow-sm shadow-orange-200 dark:shadow-orange-900/40"
                       : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-orange-300 hover:text-orange-600")}>
-                  <span>{CATEGORY_ICONS[cat] ?? "📦"}</span>
                   <span>{cat}</span>
                 </button>
               );
@@ -245,10 +242,10 @@ function StaffOrdersView() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="text-5xl mb-4">🔍</div>
-              <p className="text-base font-semibold text-gray-700 dark:text-gray-300">No products found</p>
+              <div className="text-5xl mb-4">📦</div>
+              <p className="text-base font-semibold text-gray-700 dark:text-gray-300">No products available</p>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                {search ? `No results for "${search}"` : `No products in "${activeCategory}" category`}
+                Products will appear here once the API is connected.
               </p>
             </div>
           )}
@@ -259,7 +256,7 @@ function StaffOrdersView() {
               <span className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-orange-500" />
                 Recent Orders
-                <Badge variant="secondary" className="text-xs">{mockOrders.length}</Badge>
+                <Badge variant="secondary" className="text-xs">{recentOrders.length}</Badge>
               </span>
               {showRecentOrders ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
             </button>
@@ -273,15 +270,23 @@ function StaffOrdersView() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockOrders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-mono font-semibold text-sm">{order.orderNumber}</TableCell>
-                        <TableCell>{order.customerName}</TableCell>
-                        <TableCell className="font-semibold">{formatCurrency(order.total)}</TableCell>
-                        <TableCell><Badge variant={STATUS_VARIANT[order.status]} className="capitalize">{order.status}</Badge></TableCell>
-                        <TableCell className="text-gray-500 dark:text-gray-400 text-sm">{formatDate(order.createdAt)}</TableCell>
+                    {recentOrders.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
+                          No recent orders.
+                        </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      recentOrders.map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="font-mono font-semibold text-sm">{order.orderNumber}</TableCell>
+                          <TableCell>{order.customerName}</TableCell>
+                          <TableCell className="font-semibold">{formatCurrency(order.total)}</TableCell>
+                          <TableCell><Badge variant={STATUS_VARIANT[order.status]} className="capitalize">{order.status}</Badge></TableCell>
+                          <TableCell className="text-gray-500 dark:text-gray-400 text-sm">{formatDate(order.createdAt)}</TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -356,8 +361,8 @@ function POSProductCard({ product, inCart, onAdd }: { product: POSProduct; inCar
   return (
     <div onClick={onAdd} className={cn("group relative flex flex-col rounded-2xl bg-white dark:bg-gray-800 border cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5",
       inCart > 0 ? "border-orange-300 dark:border-orange-600 ring-1 ring-orange-200 dark:ring-orange-900" : "border-gray-200 dark:border-gray-700")}>
-      <div className={cn("relative flex items-center justify-center rounded-t-2xl h-32 text-5xl select-none", product.emojiBg)}>
-        {product.emoji}
+      <div className={cn("relative flex items-center justify-center rounded-t-2xl h-32 text-5xl select-none bg-gray-100 dark:bg-gray-700")}>
+        📦
         {inCart > 0 && (
           <span className="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white">{inCart}</span>
         )}
@@ -369,7 +374,6 @@ function POSProductCard({ product, inCart, onAdd }: { product: POSProduct; inCar
       <div className="p-3 flex flex-col gap-1">
         <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{product.category}</p>
         <p className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-snug line-clamp-1">{product.name}</p>
-        <p className="text-[11px] text-gray-400 dark:text-gray-500 line-clamp-2 leading-snug">{product.description}</p>
         <div className="flex items-baseline gap-1 mt-1">
           <span className="text-sm font-extrabold text-orange-500">{formatCurrency(product.price)}</span>
           <span className="text-[10px] text-gray-400 dark:text-gray-500">/ {product.unit}</span>
@@ -382,7 +386,7 @@ function POSProductCard({ product, inCart, onAdd }: { product: POSProduct; inCar
 function POSCartRow({ product, qty, onIncrease, onDecrease, onRemove }: { product: POSProduct; qty: number; onIncrease: () => void; onDecrease: () => void; onRemove: () => void }) {
   return (
     <div className="flex items-center gap-3 rounded-xl p-2.5 hover:bg-gray-50 dark:hover:bg-gray-800/60 group transition-colors">
-      <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xl select-none", product.emojiBg)}>{product.emoji}</div>
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xl select-none bg-gray-100 dark:bg-gray-700">📦</div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">{product.name}</p>
         <p className="text-xs font-bold text-orange-500 mt-0.5">{formatCurrency(product.price)}</p>

@@ -17,7 +17,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { PlaceholderPage } from "@/components/shared/PlaceholderPage";
 import { AccessGuard } from "@/components/shared/AccessGuard";
 import { useAuth } from "@/context/AuthContext";
-import { mockProducts } from "@/lib/mock-data";
 import { formatCurrency, cn } from "@/lib/utils";
 import type { Product } from "@/types";
 
@@ -40,10 +39,10 @@ function ProductsContent() {
         role="shop_owner"
         breadcrumbs={[{ label: "Shop Owner" }, { label: "Products" }]}
         stats={[
-          { title: "Total Products", value: "142", change: 7,  changeLabel: "this month", icon: <Package className="h-4 w-4" />,     iconClassName: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"    },
-          { title: "Active",         value: "130", change: 5,  changeLabel: "this month", icon: <CheckCircle className="h-4 w-4" />, iconClassName: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300"  },
-          { title: "Inactive",       value: "12",  change: 2,  changeLabel: "this month", icon: <XCircle className="h-4 w-4" />,     iconClassName: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"          },
-          { title: "Categories",     value: "8",   change: 1,  changeLabel: "total",      icon: <Tag className="h-4 w-4" />,         iconClassName: "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300"  },
+          { title: "Total Products", value: "—", change: 0, changeLabel: "this month", icon: <Package className="h-4 w-4" />,     iconClassName: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"    },
+          { title: "Active",         value: "—", change: 0, changeLabel: "this month", icon: <CheckCircle className="h-4 w-4" />, iconClassName: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300"  },
+          { title: "Inactive",       value: "—", change: 0, changeLabel: "this month", icon: <XCircle className="h-4 w-4" />,     iconClassName: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"          },
+          { title: "Categories",     value: "—", change: 0, changeLabel: "total",      icon: <Tag className="h-4 w-4" />,         iconClassName: "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300"  },
         ]}
         tableTitle="Product List"
         actions={<Button size="sm"><Package className="h-4 w-4 mr-1.5" />Add Product</Button>}
@@ -61,12 +60,6 @@ interface CategoryMeta {
   activeBg: string;
   borderColor: string;
 }
-
-const CATEGORY_META: Record<string, CategoryMeta> = {
-  Beverages: { icon: "☕", activeColor: "text-amber-700 dark:text-amber-400",  activeBg: "bg-amber-50 dark:bg-amber-900/30",   borderColor: "border-amber-500" },
-  Dairy:     { icon: "🥛", activeColor: "text-sky-700 dark:text-sky-400",      activeBg: "bg-sky-50 dark:bg-sky-900/30",       borderColor: "border-sky-500"   },
-  Bakery:    { icon: "🥐", activeColor: "text-orange-700 dark:text-orange-400",activeBg: "bg-orange-50 dark:bg-orange-900/30", borderColor: "border-orange-500"},
-};
 
 const FALLBACK_META: CategoryMeta = {
   icon: "📦",
@@ -94,7 +87,9 @@ function StockBadge({ product }: { product: Product }) {
 }
 
 function AdminProductsView() {
-  const [products]                                  = useState<Product[]>(mockProducts);
+  // Products will be fetched from API — empty until connected
+  const products: Product[] = [];
+
   const [search, setSearch]                         = useState("");
   const [selectedCategory, setSelectedCategory]     = useState<string>("all");
   const [viewMode, setViewMode]                     = useState<"grid" | "list">("grid");
@@ -111,7 +106,6 @@ function AdminProductsView() {
     return matchCat && matchText;
   }), [products, selectedCategory, search]);
 
-  const activeMeta    = selectedCategory === "all" ? FALLBACK_META : (CATEGORY_META[selectedCategory] ?? FALLBACK_META);
   const categoryLabel = selectedCategory === "all" ? `All Products (${visibleProducts.length})` : `${selectedCategory} (${visibleProducts.length})`;
 
   return (
@@ -127,15 +121,12 @@ function AdminProductsView() {
             activeColor="text-indigo-700 dark:text-indigo-400" activeBg="bg-indigo-50 dark:bg-indigo-900/30"
             borderColor="border-indigo-500" onClick={() => setSelectedCategory("all")} />
           <div className="my-2 border-t border-gray-100 dark:border-gray-800" />
-          {categories.map(({ name, count }) => {
-            const meta = CATEGORY_META[name] ?? FALLBACK_META;
-            return (
-              <CategoryRow key={name} icon={meta.icon} label={name} count={count}
-                active={selectedCategory === name} activeColor={meta.activeColor}
-                activeBg={meta.activeBg} borderColor={meta.borderColor}
-                onClick={() => setSelectedCategory(name)} />
-            );
-          })}
+          {categories.map(({ name, count }) => (
+            <CategoryRow key={name} icon={FALLBACK_META.icon} label={name} count={count}
+              active={selectedCategory === name} activeColor={FALLBACK_META.activeColor}
+              activeBg={FALLBACK_META.activeBg} borderColor={FALLBACK_META.borderColor}
+              onClick={() => setSelectedCategory(name)} />
+          ))}
         </nav>
         <div className="shrink-0 p-3 border-t border-gray-100 dark:border-gray-800">
           <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs text-gray-500 dark:text-gray-400 border-dashed">
@@ -170,7 +161,7 @@ function AdminProductsView() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-lg">{activeMeta.icon}</span>
+            <span className="text-lg">{FALLBACK_META.icon}</span>
             <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">{categoryLabel}</h2>
           </div>
 
@@ -199,54 +190,58 @@ function AdminProductsView() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {visibleProducts.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2.5">
-                          <ProductAvatar product={product} size="sm" />
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-gray-100">{product.name}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{product.unit}</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-gray-500 dark:text-gray-400">{product.sku}</TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center gap-1 text-sm">
-                          {(CATEGORY_META[product.category] ?? FALLBACK_META).icon} {product.category}
-                        </span>
-                      </TableCell>
-                      <TableCell className="font-semibold">{formatCurrency(product.price)}</TableCell>
-                      <TableCell className="text-gray-500 dark:text-gray-400">{formatCurrency(product.cost)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{product.stock}</span><StockBadge product={product} />
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={product.status === "active" ? "success" : "secondary"}>{product.status}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><Pencil className="h-3.5 w-3.5" /></Button>
-                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
-                        </div>
+                  {visibleProducts.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="py-16 text-center text-sm text-muted-foreground">
+                        No products yet. Add your first product to get started.
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    visibleProducts.map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2.5">
+                            <ProductAvatar product={product} size="sm" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-gray-100">{product.name}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{product.unit}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs text-gray-500 dark:text-gray-400">{product.sku}</TableCell>
+                        <TableCell>{product.category}</TableCell>
+                        <TableCell className="font-semibold">{formatCurrency(product.price)}</TableCell>
+                        <TableCell className="text-gray-500 dark:text-gray-400">{formatCurrency(product.cost)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm">{product.stock}</span><StockBadge product={product} />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={product.status === "active" ? "success" : "secondary"}>{product.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><Pencil className="h-3.5 w-3.5" /></Button>
+                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
           )}
 
-          {visibleProducts.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-24 text-center">
+          {viewMode === "grid" && visibleProducts.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
                 <ShoppingBag className="h-8 w-8 text-gray-400" />
               </div>
               <p className="text-base font-medium text-gray-900 dark:text-gray-100">No products found</p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {search ? `No results for "${search}"` : "This category has no products yet."}
+                {search ? `No results for "${search}"` : "Add your first product to get started."}
               </p>
             </div>
           )}
@@ -271,7 +266,6 @@ function CategoryRow({ icon, label, count, active, activeColor, activeBg, border
 }
 
 function ProductCard({ product }: { product: Product }) {
-  const meta = CATEGORY_META[product.category] ?? FALLBACK_META;
   return (
     <div className="group relative flex flex-col items-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 text-center transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
       <input type="checkbox" className="absolute top-3 left-3 h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-600 accent-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()} />
@@ -290,9 +284,6 @@ function ProductCard({ product }: { product: Product }) {
         </DropdownMenu>
       </div>
       <ProductAvatar product={product} size="md" />
-      <span className={cn("mt-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium", meta.activeBg, meta.activeColor)}>
-        {meta.icon} {product.category}
-      </span>
       <p className="mt-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug line-clamp-2">{product.name}</p>
       <p className="mt-1 text-sm font-bold text-indigo-600 dark:text-indigo-400">{formatCurrency(product.price)}</p>
       <div className="mt-3 w-full"><StockBadge product={product} /></div>

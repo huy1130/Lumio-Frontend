@@ -102,6 +102,43 @@ export interface CreateCategoryPayload {
 
 export type UpdateCategoryPayload = Partial<CreateCategoryPayload>;
 
+// ── Ingredient ────────────────────────────────────────────────────────────────
+export interface ApiIngredient {
+  id: number;
+  tenant_id: number;
+  name: string;
+  unit: string | null;
+  description: string | null;
+  is_active: boolean;
+  created_at: string;
+  update_at: string;
+  ingredient_products?: IngredientProductLink[];
+}
+
+export interface IngredientProductLink {
+  product_id: number;
+  ingredient_id: number;
+  quantity_required: number | string;
+  unit: string | null;
+  ingredient?: ApiIngredient;
+  product?: { id: number; name?: string };
+}
+
+export interface CreateIngredientPayload {
+  name: string;
+  unit?: string;
+  description?: string;
+  is_active?: boolean;
+}
+
+export type UpdateIngredientPayload = Partial<CreateIngredientPayload>;
+
+export interface UpsertIngredientProductPayload {
+  ingredient_id: number;
+  quantity_required: number;
+  unit?: string;
+}
+
 // ── Product ───────────────────────────────────────────────────────────────────
 export interface Product {
   id: string;
@@ -129,7 +166,7 @@ export interface Merchandise {
   status: "active" | "inactive";
 }
 
-// ── Inventory ─────────────────────────────────────────────────────────────────
+// ── Inventory (legacy mock UI) ────────────────────────────────────────────────
 export interface InventoryItem {
   id: string;
   productId: string;
@@ -142,6 +179,46 @@ export interface InventoryItem {
   location: string;
   lastUpdated: string;
   status: "in_stock" | "low_stock" | "out_of_stock";
+}
+
+/** Nest inventory API — tồn nguyên liệu theo shop */
+export interface ApiInventory {
+  id: number;
+  shop_id: number;
+  current_quantity: number;
+  minimum_threshold: number | null;
+  reorder_quantity: number | null;
+  last_restock_at: string | null;
+  update_at: string;
+  inventory_items: ApiInventoryItem[];
+}
+
+export interface ApiInventoryItem {
+  id: number;
+  ingredient_id: number;
+  inventory_id: number;
+  theorical_quantity: number;
+  adjusted_quantity: number | null;
+  actual_quantity: number | null;
+  updated_at: string;
+  ingredient: ApiIngredient;
+}
+
+export interface ConfigureInventoryPayload {
+  minimum_threshold?: number;
+  reorder_quantity?: number;
+}
+
+export interface StockMovementPayload {
+  ingredient_id: number;
+  quantity: number;
+}
+
+export interface UpdateInventoryQuantitiesPayload {
+  ingredient_id: number;
+  theorical_quantity?: number;
+  adjusted_quantity?: number;
+  actual_quantity?: number;
 }
 
 // ── Order ─────────────────────────────────────────────────────────────────────
@@ -227,10 +304,15 @@ export interface SubscriptionPackageStat {
   description: string | null;
   price: string | number;
   total_purchased: number;
+  total_renewals: number;
+  total_payments: number;
+  revenue: string | number;
 }
 
 export interface SubscriptionStatsResponse {
   totalRevenue: string | number;
+  totalPayments: number;
+  totalRenewals: number;
   packageStats: SubscriptionPackageStat[];
 }
 
