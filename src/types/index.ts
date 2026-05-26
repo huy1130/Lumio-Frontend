@@ -208,10 +208,15 @@ export interface SubscriptionPackageStat {
   description: string | null;
   price: string | number;
   total_purchased: number;
+  total_renewals: number;
+  total_payments: number;
+  revenue: string | number;
 }
 
 export interface SubscriptionStatsResponse {
   totalRevenue: string | number;
+  totalPayments: number;
+  totalRenewals: number;
   packageStats: SubscriptionPackageStat[];
 }
 

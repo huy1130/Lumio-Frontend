@@ -12,6 +12,16 @@ import {
   ShoppingBag,
   TrendingUp,
 } from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Header } from "@/components/layout/header";
 import { StatsCard } from "@/components/shared/stats-card";
 import { Badge } from "@/components/ui/badge";
@@ -88,10 +98,11 @@ export function AdminDashboard() {
     loadStats();
   }, [loadStats]);
 
+
   const sortedPackages = useMemo(() => {
     if (!stats?.packageStats.length) return [];
     return [...stats.packageStats].sort(
-      (a, b) => b.total_purchased - a.total_purchased,
+      (a, b) => toNumber(b.revenue) - toNumber(a.revenue),
     );
   }, [stats]);
 
@@ -100,8 +111,9 @@ export function AdminDashboard() {
     [sortedPackages],
   );
 
-  const topPackage = sortedPackages[0] ?? null;
   const revenue = stats ? toNumber(stats.totalRevenue) : 0;
+  const totalPayments = stats?.totalPayments ?? 0;
+  const totalRenewals = stats?.totalRenewals ?? 0;
 
   return (
     <div className="flex flex-col bg-gray-50/60 dark:bg-gray-950">
@@ -119,7 +131,7 @@ export function AdminDashboard() {
                 Thống kê Subscription
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Doanh thu PayOS (PAID) · lượt mua theo tenant
+                Doanh thu PayOS (PAID) · mua mới + gia hạn
               </p>
             </div>
           </div>
@@ -170,27 +182,124 @@ export function AdminDashboard() {
                 iconClassName="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/80 dark:text-emerald-300"
               />
               <StatsCard
-                title="Lượt mua gói"
-                value={totalPurchases}
+                title="Tổng lượt thanh toán"
+                value={totalPayments}
+                changeLabel="mua mới + gia hạn"
                 icon={<ShoppingBag className="h-4 w-4" />}
                 iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-900/80 dark:text-blue-300"
               />
               <StatsCard
-                title="Số gói"
-                value={stats.packageStats.length}
+                title="Mua mới"
+                value={totalPurchases}
                 icon={<Package className="h-4 w-4" />}
                 iconClassName="bg-orange-100 text-orange-600 dark:bg-orange-900/80 dark:text-orange-300"
               />
               <StatsCard
-                title="Bán chạy nhất"
-                value={
-                  topPackage
-                    ? formatPackageCode(topPackage.package_code)
-                    : "—"
-                }
+                title="Gia hạn"
+                value={totalRenewals}
                 icon={<TrendingUp className="h-4 w-4" />}
                 iconClassName="bg-violet-100 text-violet-600 dark:bg-violet-900/80 dark:text-violet-300"
               />
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Card className="border-gray-200/80 shadow-sm dark:border-gray-800">
+                <CardHeader className="border-b border-gray-100 bg-white pb-4 dark:border-gray-800 dark:bg-gray-900">
+                  <CardTitle className="text-base">Doanh thu theo gói</CardTitle>
+                  <CardDescription className="mt-0.5">Biểu đồ cột thể hiện doanh thu (VNĐ)</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 pt-6">
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={sortedPackages} margin={{ top: 10, right: 10, left: 20, bottom: 25 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                        <XAxis
+                          dataKey="package_code"
+                          tickFormatter={(val) => formatPackageCode(val)}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 12, fill: "#6b7280" }}
+                          dy={10}
+                        />
+                        <YAxis
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 12, fill: "#6b7280" }}
+                          tickFormatter={(val) => {
+                            if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
+                            if (val >= 1000) return `${(val / 1000).toFixed(0)}k`;
+                            return val;
+                          }}
+                        />
+                        <Tooltip
+                          cursor={{ fill: "rgba(243, 244, 246, 0.4)" }}
+                          formatter={(value: number) => [`${formatCurrency(value)}`, "Doanh thu"]}
+                          labelFormatter={(label) => formatPackageCode(label as string)}
+                          contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                        />
+                        <Bar
+                          dataKey="revenue"
+                          name="Doanh thu"
+                          fill="#10b981"
+                          radius={[4, 4, 0, 0]}
+                          maxBarSize={50}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-200/80 shadow-sm dark:border-gray-800">
+                <CardHeader className="border-b border-gray-100 bg-white pb-4 dark:border-gray-800 dark:bg-gray-900">
+                  <CardTitle className="text-base">Lượt mua theo gói</CardTitle>
+                  <CardDescription className="mt-0.5">So sánh mua mới và gia hạn</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 pt-6">
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={sortedPackages} margin={{ top: 10, right: 10, left: 0, bottom: 25 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                        <XAxis
+                          dataKey="package_code"
+                          tickFormatter={(val) => formatPackageCode(val)}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 12, fill: "#6b7280" }}
+                          dy={10}
+                        />
+                        <YAxis
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 12, fill: "#6b7280" }}
+                          allowDecimals={false}
+                        />
+                        <Tooltip
+                          cursor={{ fill: "rgba(243, 244, 246, 0.4)" }}
+                          formatter={(value: number, name: string) => [value, name]}
+                          labelFormatter={(label) => formatPackageCode(label as string)}
+                          contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                        />
+                        <Legend wrapperStyle={{ paddingTop: "15px" }} />
+                        <Bar
+                          dataKey="total_purchased"
+                          name="Mua mới"
+                          fill="#3b82f6"
+                          radius={[4, 4, 0, 0]}
+                          maxBarSize={40}
+                        />
+                        <Bar
+                          dataKey="total_renewals"
+                          name="Gia hạn"
+                          fill="#8b5cf6"
+                          radius={[4, 4, 0, 0]}
+                          maxBarSize={40}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             <Card className="overflow-hidden border-gray-200/80 shadow-sm dark:border-gray-800">
@@ -199,17 +308,27 @@ export function AdminDashboard() {
                   <div>
                     <CardTitle className="text-base">Chi tiết theo gói</CardTitle>
                     <CardDescription className="mt-0.5">
-                      Sắp xếp theo lượt mua · cao đến thấp
+                      Sắp xếp theo doanh thu · cao đến thấp
                     </CardDescription>
                   </div>
-                  {totalPurchases > 0 ? (
-                    <Badge
-                      variant="secondary"
-                      className="bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
-                    >
-                      {totalPurchases} lượt mua
-                    </Badge>
-                  ) : null}
+                  <div className="flex gap-2">
+                    {totalPayments > 0 ? (
+                      <Badge
+                        variant="secondary"
+                        className="bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                      >
+                        {totalPayments} lượt thanh toán
+                      </Badge>
+                    ) : null}
+                    {totalRenewals > 0 ? (
+                      <Badge
+                        variant="secondary"
+                        className="bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300"
+                      >
+                        {totalRenewals} gia hạn
+                      </Badge>
+                    ) : null}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
@@ -232,7 +351,13 @@ export function AdminDashboard() {
                           Giá
                         </TableHead>
                         <TableHead className="text-right font-semibold">
-                          Lượt mua
+                          Mua mới
+                        </TableHead>
+                        <TableHead className="text-right font-semibold">
+                          Gia hạn
+                        </TableHead>
+                        <TableHead className="text-right font-semibold">
+                          Doanh thu
                         </TableHead>
                       </TableRow>
                     </TableHeader>
@@ -243,14 +368,14 @@ export function AdminDashboard() {
                           className={cn(
                             "transition-colors",
                             index === 0 &&
-                              pkg.total_purchased > 0 &&
-                              "bg-indigo-50/40 dark:bg-indigo-950/20",
+                            toNumber(pkg.revenue) > 0 &&
+                            "bg-emerald-50/40 dark:bg-emerald-950/20",
                           )}
                         >
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              {index === 0 && pkg.total_purchased > 0 ? (
-                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-indigo-600 text-[10px] font-bold text-white">
+                              {index === 0 && toNumber(pkg.revenue) > 0 ? (
+                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-emerald-600 text-[10px] font-bold text-white">
                                   1
                                 </span>
                               ) : null}
@@ -275,12 +400,33 @@ export function AdminDashboard() {
                               className={cn(
                                 "inline-flex min-w-[2rem] justify-center rounded-md px-2 py-0.5 text-sm font-semibold tabular-nums",
                                 pkg.total_purchased > 0
-                                  ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300"
+                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300"
                                   : "text-muted-foreground",
                               )}
                             >
                               {pkg.total_purchased}
                             </span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <span
+                              className={cn(
+                                "inline-flex min-w-[2rem] justify-center rounded-md px-2 py-0.5 text-sm font-semibold tabular-nums",
+                                pkg.total_renewals > 0
+                                  ? "bg-violet-100 text-violet-700 dark:bg-violet-900/60 dark:text-violet-300"
+                                  : "text-muted-foreground",
+                              )}
+                            >
+                              {pkg.total_renewals}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums font-semibold">
+                            {toNumber(pkg.revenue) > 0 ? (
+                              <span className="text-emerald-700 dark:text-emerald-400">
+                                {formatCurrency(toNumber(pkg.revenue))}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">0 đ</span>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
