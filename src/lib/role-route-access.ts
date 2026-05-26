@@ -42,6 +42,7 @@ export const SHOP_OWNER_ALLOWED_PATH_PREFIXES = [
   "/subscription/cancel",
   "/orders",
   "/products",
+  "/product-categories",
   "/inventory",
   "/customers",
   "/merchandises",

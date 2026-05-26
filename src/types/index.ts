@@ -83,6 +83,25 @@ export interface CreateFeaturePayload {
 
 export type UpdateFeaturePayload = Partial<CreateFeaturePayload>;
 
+// ── Product Category ────────────────────────────────────────────────────────
+export interface ApiCategory {
+  id: number;
+  par_category_id: number | null;
+  tenant_id: number;
+  category_name: string;
+  is_active: boolean;
+  parent?: ApiCategory | null;
+  children?: ApiCategory[];
+}
+
+export interface CreateCategoryPayload {
+  category_name: string;
+  par_category_id?: number | null;
+  is_active?: boolean;
+}
+
+export type UpdateCategoryPayload = Partial<CreateCategoryPayload>;
+
 // ── Product ───────────────────────────────────────────────────────────────────
 export interface Product {
   id: string;
