@@ -5,7 +5,7 @@ import {
   LayoutDashboard, ShoppingCart, Package, Warehouse, CreditCard,
   Settings, Tag, BarChart3, Store, Users, UserCog, Building2,
   BrainCircuit, TrendingUp, ClipboardList, FileDown, DollarSign,
-  Gift, ShoppingBag, UserCircle, Shield, Sparkles,
+  Gift, ShoppingBag, UserCircle, Shield, Sparkles, FlaskConical,
 } from "lucide-react";
 
 export interface NavItem {
@@ -70,7 +70,8 @@ const shopOwnerNav: NavSection[] = [
       { title: "Khách hàng", href: "/customers", icon: Users },
       { title: "Products", href: "/products", icon: Package },
       { title: "Danh mục", href: "/product-categories", icon: Tag },
-      { title: "Inventory", href: "/inventory", icon: Warehouse },
+      { title: "Nguyên liệu", href: "/ingredients", icon: FlaskConical },
+      { title: "Tồn kho", href: "/inventory", icon: Warehouse },
       { title: "Merchandises", href: "/merchandises", icon: Store },
       { title: "Merch Program", href: "/programs", icon: Gift },
     ],

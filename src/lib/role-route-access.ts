@@ -43,6 +43,7 @@ export const SHOP_OWNER_ALLOWED_PATH_PREFIXES = [
   "/orders",
   "/products",
   "/product-categories",
+  "/ingredients",
   "/inventory",
   "/customers",
   "/merchandises",

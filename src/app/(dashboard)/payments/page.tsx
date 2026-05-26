@@ -10,8 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatsCard } from "@/components/shared/stats-card";
 import { AccessGuard } from "@/components/shared/AccessGuard";
-import { mockPayments, mockOrders } from "@/lib/mock-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import type { Payment, Order } from "@/types";
 
 export default function PaymentsPage() {
   return (
@@ -37,16 +37,19 @@ const statusVariant: Record<string, "success" | "warning" | "destructive" | "sec
 function PaymentsContent() {
   const [search, setSearch] = useState("");
 
-  const filtered = mockPayments.filter(
+  // Data will be fetched from API — empty until connected
+  const payments: Payment[] = [];
+  const unpaidOrders: Order[] = [];
+
+  const filtered = payments.filter(
     (p) =>
       p.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
       p.processedBy.toLowerCase().includes(search.toLowerCase())
   );
 
-  const completed        = mockPayments.filter((p) => p.status === "completed");
-  const pending          = mockPayments.filter((p) => p.status === "pending");
-  const totalProcessed   = completed.reduce((s, p) => s + p.amount, 0);
-  const unpaidOrders     = mockOrders.filter((o) => o.paymentStatus === "unpaid");
+  const completed      = payments.filter((p) => p.status === "completed");
+  const pending        = payments.filter((p) => p.status === "pending");
+  const totalProcessed = completed.reduce((s, p) => s + p.amount, 0);
 
   return (
     <div>
@@ -56,7 +59,7 @@ function PaymentsContent() {
         <div className="grid gap-4 sm:grid-cols-3">
           <StatsCard title="Processed Today"    value={formatCurrency(totalProcessed)} icon={<CheckCircle className="h-4 w-4" />} iconClassName="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" />
           <StatsCard title="Pending"            value={pending.length}                 icon={<Clock className="h-4 w-4" />}       iconClassName="bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300" />
-          <StatsCard title="Total Transactions" value={mockPayments.length}            icon={<CreditCard className="h-4 w-4" />}  iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" />
+          <StatsCard title="Total Transactions" value={payments.length}                icon={<CreditCard className="h-4 w-4" />}  iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" />
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -67,7 +70,7 @@ function PaymentsContent() {
             </CardHeader>
             <CardContent className="space-y-3">
               {unpaidOrders.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-4 text-center">All orders are paid ✓</p>
+                <p className="text-sm text-muted-foreground py-4 text-center">No unpaid orders.</p>
               ) : (
                 unpaidOrders.map((order) => (
                   <div key={order.id} className="rounded-lg border p-3 space-y-2">
@@ -121,32 +124,40 @@ function PaymentsContent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filtered.map((payment) => (
-                      <TableRow key={payment.id}>
-                        <TableCell className="font-mono font-semibold">{payment.orderNumber}</TableCell>
-                        <TableCell className="font-semibold">{formatCurrency(payment.amount)}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1.5 capitalize">
-                            {methodIcon[payment.method]}
-                            {payment.method}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={statusVariant[payment.status]} className="capitalize">{payment.status}</Badge>
-                        </TableCell>
-                        <TableCell className="font-mono text-xs text-muted-foreground">{payment.transactionRef ?? "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{payment.processedBy}</TableCell>
-                        <TableCell className="text-muted-foreground text-sm">{formatDate(payment.processedAt)}</TableCell>
-                        <TableCell className="text-right">
-                          {payment.status === "completed" && (
-                            <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive">Refund</Button>
-                          )}
-                          {payment.status === "pending" && (
-                            <Button size="sm" variant="ghost" className="h-7 text-xs text-green-600">Confirm</Button>
-                          )}
+                    {filtered.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={8} className="py-16 text-center text-sm text-muted-foreground">
+                          No payment records yet. Transactions will appear here once data is connected.
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      filtered.map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell className="font-mono font-semibold">{payment.orderNumber}</TableCell>
+                          <TableCell className="font-semibold">{formatCurrency(payment.amount)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5 capitalize">
+                              {methodIcon[payment.method]}
+                              {payment.method}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={statusVariant[payment.status]} className="capitalize">{payment.status}</Badge>
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground">{payment.transactionRef ?? "—"}</TableCell>
+                          <TableCell className="text-muted-foreground">{payment.processedBy}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{formatDate(payment.processedAt)}</TableCell>
+                          <TableCell className="text-right">
+                            {payment.status === "completed" && (
+                              <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive">Refund</Button>
+                            )}
+                            {payment.status === "pending" && (
+                              <Button size="sm" variant="ghost" className="h-7 text-xs text-green-600">Confirm</Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
