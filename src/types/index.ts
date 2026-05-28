@@ -140,20 +140,36 @@ export interface UpsertIngredientProductPayload {
 }
 
 // ── Product ───────────────────────────────────────────────────────────────────
-export interface Product {
-  id: string;
-  name: string;
+export interface ApiProduct {
+  id: number;
+  tenant_id: number;
+  category_id: number;
+  product_name: string;
   sku: string;
-  category: string;
-  price: number;
-  cost: number;
-  stock: number;
-  minStock: number;
-  unit: string;
-  imageUrl?: string;
-  status: "active" | "inactive";
-  createdAt: string;
+  basic_price: number | string;
+  unit_price: number | string;
+  barcode: string | null;
+  description: string | null;
+  measure_unit: string | null;
+  is_active: boolean;
+  created_at: string;
+  update_at: string;
+  category?: { id: number; category_name: string };
 }
+
+export interface CreateProductPayload {
+  category_id: number;
+  product_name: string;
+  sku: string;
+  basic_price: number;
+  unit_price: number;
+  barcode?: string;
+  description?: string;
+  measure_unit?: string;
+  is_active?: boolean;
+}
+
+export type UpdateProductPayload = Partial<CreateProductPayload>;
 
 // ── Merchandise ───────────────────────────────────────────────────────────────
 export interface Merchandise {
