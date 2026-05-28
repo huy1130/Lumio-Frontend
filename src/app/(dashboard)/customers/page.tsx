@@ -516,8 +516,8 @@ export default function CustomersPage() {
                 <div>
                   <CardTitle>Danh sách khách hàng</CardTitle>
                   <CardDescription>
-                    {filteredCustomers.length} / {customers.length} khách hàng
-                    đang hiển thị
+                    {filteredCustomers.length} / {tenantScopedCustomers.length}{" "}
+                    khách hàng đang hiển thị
                   </CardDescription>
                 </div>
                 <div className="relative w-full max-w-sm">
