@@ -61,42 +61,50 @@ const adminNav: NavSection[] = [
 const shopOwnerNav: NavSection[] = [
   {
     title: "Overview",
-    items: [{ title: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
+    items: [{ title: "Báo cáo", href: "/dashboard", icon: LayoutDashboard }],
+  },
+  {
+    title: "Orders",
+    items: [{ title: "Tạo đơn hàng", href: "/orders", icon: ShoppingCart }],
   },
   {
     title: "Store",
     items: [
       { title: "Cửa hàng", href: "/shop", icon: Store },
-      { title: "Khách hàng", href: "/customers", icon: Users },
       { title: "Products", href: "/products", icon: Package },
       { title: "Danh mục", href: "/product-categories", icon: Tag },
       { title: "Nguyên liệu", href: "/ingredients", icon: FlaskConical },
       { title: "Tồn kho", href: "/inventory", icon: Warehouse },
-      { title: "Merchandises", href: "/merchandises", icon: Store },
-      { title: "Merch Program", href: "/programs", icon: Gift },
+
     ],
   },
   {
-    title: "Orders",
-    items: [{ title: "Orders", href: "/orders", icon: ShoppingCart }],
+    title: "Khuyến mãi",
+    items: [{ title: "Quà Tặng", href: "/merchandises", icon: Store },
+    { title: "Chương Trình Khách Hàng", href: "/programs", icon: Gift },
+    { title: "Khách hàng", href: "/customers", icon: Users },
+
+    ],
+
   },
+
 
   {
     title: "System",
-    items: [{ title: "Settings", href: "/settings", icon: Settings }],
+    items: [{ title: "Cài đặt", href: "/settings", icon: Settings }],
   },
 ];
 
 // ── Inventory staff (slug inventory_staff, backend STAFF / INVENTORY_STAFF) ───
 const staffNav: NavSection[] = [
   {
-    title: "Overview",
-    items: [{ title: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
+    title: "Tổng quan",
+    items: [{ title: "Báo cáo", href: "/dashboard", icon: LayoutDashboard }],
   },
   {
     title: "Operations",
     items: [
-      { title: "Create Orders", href: "/orders", icon: ClipboardList },
+      { title: "Tạo đơn hàng", href: "/orders", icon: ClipboardList },
     ],
   },
   {
@@ -118,13 +126,13 @@ const staffNav: NavSection[] = [
 // ── Cashier ───────────────────────────────────────────────────────────────────
 const cashierNav: NavSection[] = [
   {
-    title: "Overview",
-    items: [{ title: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
+    title: "Tổng quan",
+    items: [{ title: "Báo cáo", href: "/dashboard", icon: LayoutDashboard }],
   },
   {
     title: "Operations",
     items: [
-      { title: "Payments", href: "/payments", icon: CreditCard },
+      { title: "Thanh toán", href: "/payments", icon: CreditCard },
       { title: "Checkout", href: "/checkout", icon: ShoppingBag },
       { title: "Khách hàng", href: "/customers", icon: Users },
       { title: "Danh mục", href: "/product-categories", icon: Tag },

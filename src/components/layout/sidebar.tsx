@@ -158,7 +158,7 @@ export function Sidebar() {
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-5">
+        <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {navigation.map((section) => (
             <div key={section.title}>
               {!isCollapsed && (

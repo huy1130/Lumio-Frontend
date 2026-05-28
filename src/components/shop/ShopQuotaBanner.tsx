@@ -29,7 +29,7 @@ export function ShopQuotaBanner({ quota, loading }: ShopQuotaBannerProps) {
           ? `Bạn có thể tạo thêm ${quota.max_shops! - quota.current_count} cửa hàng.`
           : quota.max_shops != null
             ? "Đã đạt giới hạn cửa hàng của gói. Nâng cấp gói để tạo thêm."
-            : "Gói hiện tại không hỗ trợ tạo cửa hàng hoặc chưa có gói active."}
+            : "Gói hiện tại không hỗ trợ tạo cửa hàng ."}
       </p>
     </div>
   );
