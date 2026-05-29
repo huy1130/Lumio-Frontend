@@ -107,7 +107,7 @@ export default function PricingPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`${API_URL}/subscriptions`, {
+        const res = await fetch(`/api/public/subscriptions`, {
           headers: { Accept: "application/json" },
         });
         if (res.ok) {
