@@ -19,7 +19,7 @@ import { PlaceholderPage } from "@/components/shared/PlaceholderPage";
 import { AccessGuard } from "@/components/shared/AccessGuard";
 import { useAuth } from "@/context/AuthContext";
 import { formatCurrency, formatDate, cn } from "@/lib/utils";
-import type { Product, Order, ApiProduct } from "@/types";
+import type { Order, ApiProduct } from "@/types";
 import { productService } from "@/lib/services/productService";
 import { orderService, type ApiOrder } from "@/lib/services/orderService";
 
@@ -50,19 +50,19 @@ const paymentVariant: Record<string, "success" | "warning" | "destructive" | "se
 function AdminOrdersView() {
   const orders: Order[] = [];
 
-  const total     = orders.reduce((s, o) => s + o.total, 0);
+  const total = orders.reduce((s, o) => s + o.total, 0);
   const completed = orders.filter((o) => o.status === "completed").length;
-  const pending   = orders.filter((o) => o.status === "pending").length;
+  const pending = orders.filter((o) => o.status === "pending").length;
 
   return (
     <div>
       <Header />
       <div className="p-6 space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatsCard title="Total Orders"  value={orders.length} icon={<ShoppingCart className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" />
-          <StatsCard title="Total Revenue" value={formatCurrency(total)} icon={<DollarSign className="h-4 w-4" />}  iconClassName="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" />
-          <StatsCard title="Completed"     value={completed} icon={<CheckCircle className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-300" />
-          <StatsCard title="Pending"       value={pending}   icon={<Clock className="h-4 w-4" />}       iconClassName="bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300" />
+          <StatsCard title="Total Orders" value={orders.length} icon={<ShoppingCart className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" />
+          <StatsCard title="Total Revenue" value={formatCurrency(total)} icon={<DollarSign className="h-4 w-4" />} iconClassName="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" />
+          <StatsCard title="Completed" value={completed} icon={<CheckCircle className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-300" />
+          <StatsCard title="Pending" value={pending} icon={<Clock className="h-4 w-4" />} iconClassName="bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300" />
         </div>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -120,25 +120,7 @@ function AdminOrdersView() {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SHOP OWNER VIEW  —  placeholder (full UI to be built)
-// ─────────────────────────────────────────────────────────────────────────────
-function ShopOwnerOrdersView() {
-  return (
-    <PlaceholderPage
-      title="Orders"
-      description="Monitor and manage all store orders"
-      role="shop_owner"
-      breadcrumbs={[{ label: "Shop Owner" }, { label: "Orders" }]}
-      stats={[
-        { title: "Total Orders", value: "—", change: 0, changeLabel: "today", icon: <ShoppingCart className="h-4 w-4" />, iconClassName: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" },
-        { title: "Completed",    value: "—", change: 0, changeLabel: "today", icon: <CheckCircle className="h-4 w-4" />, iconClassName: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" },
-        { title: "Pending",      value: "—", change: 0, changeLabel: "today", icon: <Clock className="h-4 w-4" />,       iconClassName: "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300" },
-      ]}
-      tableTitle="Order List"
-    />
-  );
-}
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STAFF VIEW  —  POS cart interface (products loaded from API later)
@@ -155,9 +137,9 @@ function StaffOrdersView() {
   const { user } = useAuth();
   const shopId = user?.shop_id;
 
-  const [search, setSearch]               = useState("");
+  const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [cart, setCart]                   = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [showRecentOrders, setShowRecentOrders] = useState(false);
 
   const [products, setProducts] = useState<ApiProduct[]>([]);
@@ -193,7 +175,7 @@ function StaffOrdersView() {
 
   const visibleProducts = useMemo(() =>
     posProducts.filter((p) => {
-      const catOk  = activeCategory === "All" || p.category === activeCategory;
+      const catOk = activeCategory === "All" || p.category === activeCategory;
       const textOk = !search || p.name.toLowerCase().includes(search.toLowerCase());
       return catOk && textOk;
     }), [posProducts, search, activeCategory]);
@@ -205,15 +187,15 @@ function StaffOrdersView() {
       return [...prev, { product, qty: 1 }];
     });
 
-  const updateQty  = (id: string, delta: number) =>
+  const updateQty = (id: string, delta: number) =>
     setCart((prev) => prev.map((c) => c.product.id === id ? { ...c, qty: c.qty + delta } : c).filter((c) => c.qty > 0));
   const removeItem = (id: string) => setCart((prev) => prev.filter((c) => c.product.id !== id));
-  const clearCart  = () => setCart([]);
+  const clearCart = () => setCart([]);
 
   const subtotal = cart.reduce((s, c) => s + c.product.price * c.qty, 0);
   const discount = 0; // Or calculate discount if applicable
-  const tax      = subtotal * 0.08;
-  const total    = subtotal - discount + tax;
+  const tax = subtotal * 0.08;
+  const total = subtotal - discount + tax;
   const totalQty = cart.reduce((s, c) => s + c.qty, 0);
 
   const handleCheckout = async () => {
@@ -231,8 +213,9 @@ function StaffOrdersView() {
       toast.success("Tạo đơn hàng thành công!");
       setRecentOrders(prev => [newOrder, ...prev]);
       clearCart();
-    } catch (err: any) {
-      toast.error(err.message || "Không thể tạo đơn hàng");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Không thể tạo đơn hàng";
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -401,11 +384,11 @@ function StaffOrdersView() {
               <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total</span>
               <span className="text-xl font-extrabold text-orange-500">{formatCurrency(total)}</span>
             </div>
-            <button 
+            <button
               disabled={isSubmitting}
-              onClick={handleCheckout} 
+              onClick={handleCheckout}
               className="w-full flex items-center justify-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:opacity-50 text-white font-semibold py-3 text-sm transition-colors shadow-sm shadow-orange-200 dark:shadow-orange-900/30">
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />} 
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
               {isSubmitting ? "Đang xử lý..." : "Thanh toán"}
             </button>
             <button onClick={clearCart} className="w-full text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors py-1">
