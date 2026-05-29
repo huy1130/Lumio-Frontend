@@ -68,7 +68,7 @@ function Stepper({ current }: { current: number }) {
   return (
     <div className="flex items-center gap-0 mb-8">
       {STEPS.map((label, i) => {
-        const done   = i < current;
+        const done = i < current;
         const active = i === current;
         return (
           <div key={i} className="flex items-center flex-1 last:flex-none">
@@ -79,8 +79,8 @@ function Stepper({ current }: { current: number }) {
                   done
                     ? "bg-indigo-600 text-white"
                     : active
-                    ? "bg-indigo-600 text-white ring-4 ring-indigo-100 dark:ring-indigo-900"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-400"
+                      ? "bg-indigo-600 text-white ring-4 ring-indigo-100 dark:ring-indigo-900"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-400"
                 )}
               >
                 {done ? <Check className="h-4 w-4" /> : i + 1}
@@ -112,18 +112,20 @@ function Stepper({ current }: { current: number }) {
 const fadeSlide = {
   initial: { opacity: 0, x: 20 },
   animate: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" as const } },
-  exit:    { opacity: 0, x: -20, transition: { duration: 0.2 } },
+  exit: { opacity: 0, x: -20, transition: { duration: 0.2 } },
 };
 
-// ─── Page ──────────────────────────────────────────────────────────────────────
-export default function OnboardingPage() {
+// ─── Page Content ──────────────────────────────────────────────────────────────
+import { Suspense } from "react";
+
+function OnboardingContent() {
   const router = useRouter();
   const params = useSearchParams();
 
   const planId = params.get("plan") ?? "";
 
   // ── Fetch plan từ backend (public GET /subscriptions, giống trang pricing) ──
-  const [plan, setPlan]           = useState<Plan | null>(null);
+  const [plan, setPlan] = useState<Plan | null>(null);
   const [planLoading, setPlanLoading] = useState(true);
   const [planError, setPlanError] = useState(false);
 
@@ -147,12 +149,12 @@ export default function OnboardingPage() {
         if (cancelled) return;
         if (found) {
           setPlan({
-            id:           found.id,
-            name:         formatCode(found.package_code),
-            price:        parseFloat(found.price),
+            id: found.id,
+            name: formatCode(found.package_code),
+            price: parseFloat(found.price),
             billingCycle: found.billing_cycle,
-            packageCode:  found.package_code,
-            features:     parseFeatures(found.description),
+            packageCode: found.package_code,
+            features: parseFeatures(found.description),
           });
           setPlanError(false);
         } else {
@@ -174,18 +176,18 @@ export default function OnboardingPage() {
   }, [planId]);
 
   // ── Form state ─────────────────────────────────────────────────────────────
-  const [step, setStep]     = useState(0);
+  const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError]   = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Các trường gửi lên POST /api/checkout/initiate (proxy → Nest subscriptions/purchase/initiate)
   const [tenantName, setTenantName] = useState("");
-  const [username,   setUsername]   = useState("");
-  const [email,      setEmail]      = useState("");
-  const [password,   setPassword]   = useState("");
-  const [confirmPw,  setConfirmPw]  = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
 
-  const [showPw,      setShowPw]      = useState(false);
+  const [showPw, setShowPw] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   // ── Validation ─────────────────────────────────────────────────────────────
@@ -218,7 +220,7 @@ export default function OnboardingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           subscription_id: plan.id,
-          tenant_name:     tenantName,
+          tenant_name: tenantName,
           username,
           email,
           password,
@@ -658,5 +660,13 @@ export default function OnboardingPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Đang tải...</div>}>
+      <OnboardingContent />
+    </Suspense>
   );
 }

@@ -115,8 +115,8 @@ export default function DashboardPage() {
     return <AdminDashboard />;
   }
 
-  if (role === "shop_owner") {
-    return <ShopOwnerDashboard />;
+  if (role === "shop_owner" || role === "cashier") {
+    return <ShopOwnerDashboard role={role} />;
   }
 
   if (role in SHELL_CONFIGS) {

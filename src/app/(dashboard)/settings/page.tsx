@@ -36,14 +36,12 @@ export default function SettingsPage() {
               <CardHeader>
                 <CardTitle>Chưa có cài đặt</CardTitle>
                 <CardDescription>
-                  Hiện chưa có mục cài đặt nào được kết nối API cho vai trò
-                  này.
+                  Hiện chưa có mục cài đặt nào được
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Các phần như thông tin cửa hàng, người dùng, bảo mật sẽ được
-                  bổ sung khi backend sẵn sàng.
+                  Các phần như thông tin cửa hàng được bảo mật
                 </p>
               </CardContent>
             </Card>

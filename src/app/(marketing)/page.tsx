@@ -18,14 +18,14 @@ import type { ApiSubscription } from "@/types";
 // ─── Animation variants ───────────────────────────────────────────────────────
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } },
 };
 const stagger = { show: { transition: { staggerChildren: 0.1 } } };
 
 // ─── Hero data ─────────────────────────────────────────────────────────────────
 const HERO_STATS = [
-  { value: "300.000+", label: "Doanh nghiệp đang sử dụng",  icon: Users      },
-  { value: "10.000+",  label: "Người dùng mới mỗi tháng",   icon: TrendingUp },
+  { value: "300.000+", label: "Doanh nghiệp đang sử dụng", icon: Users },
+  { value: "10.000+", label: "Người dùng mới mỗi tháng", icon: TrendingUp },
 ];
 
 const HERO_CARDS = [
@@ -61,12 +61,12 @@ const HERO_CARDS = [
 
 // ─── Features section data ─────────────────────────────────────────────────────
 const FEATURES = [
-  { icon: Zap,         title: "POS thời gian thực",      desc: "Xử lý giao dịch cực nhanh, đồng bộ tức thì trên mọi thiết bị và chi nhánh."        },
-  { icon: BarChart3,   title: "Phân tích nâng cao",       desc: "Góc nhìn sâu về doanh thu, xu hướng tồn kho và hiệu suất nhân viên trong một màn hình." },
-  { icon: Shield,      title: "Phân quyền theo vai trò",  desc: "Quyền truy cập chi tiết cho Quản lý, Admin, Nhân viên và Thu ngân — không chồng chéo."  },
-  { icon: Layers,      title: "Quản lý tồn kho",          desc: "Cảnh báo tái nhập tự động, theo dõi đa chi nhánh và lịch sử kiểm kê đầy đủ."           },
-  { icon: TrendingUp,  title: "Thông tin từ AI",           desc: "Phân tích dự đoán và gợi ý thông minh giúp tăng doanh thu mỗi ngày."                   },
-  { icon: ShoppingCart,title: "Đơn hàng đa kênh",         desc: "Xử lý đặt bàn, mang đi, giao hàng và đơn trực tuyến từ một dashboard duy nhất."         },
+  { icon: Zap, title: "POS thời gian thực", desc: "Xử lý giao dịch cực nhanh, đồng bộ tức thì trên mọi thiết bị và chi nhánh." },
+  { icon: BarChart3, title: "Phân tích nâng cao", desc: "Góc nhìn sâu về doanh thu, xu hướng tồn kho và hiệu suất nhân viên trong một màn hình." },
+  { icon: Shield, title: "Phân quyền theo vai trò", desc: "Quyền truy cập chi tiết cho Quản lý, Admin, Nhân viên và Thu ngân — không chồng chéo." },
+  { icon: Layers, title: "Quản lý tồn kho", desc: "Cảnh báo tái nhập tự động, theo dõi đa chi nhánh và lịch sử kiểm kê đầy đủ." },
+  { icon: TrendingUp, title: "Thông tin từ AI", desc: "Phân tích dự đoán và gợi ý thông minh giúp tăng doanh thu mỗi ngày." },
+  { icon: ShoppingCart, title: "Đơn hàng đa kênh", desc: "Xử lý đặt bàn, mang đi, giao hàng và đơn trực tuyến từ một dashboard duy nhất." },
 ];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ function formatPackageCode(code: string): string {
 }
 
 export default function LandingPage() {
-  const [plans, setPlans]     = useState<ApiSubscription[]>([]);
+  const [plans, setPlans] = useState<ApiSubscription[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
 
   useEffect(() => {
@@ -90,8 +90,8 @@ export default function LandingPage() {
         const data: ApiSubscription[] = Array.isArray(raw)
           ? raw
           : raw &&
-              typeof raw === "object" &&
-              Array.isArray((raw as { data?: ApiSubscription[] }).data)
+            typeof raw === "object" &&
+            Array.isArray((raw as { data?: ApiSubscription[] }).data)
             ? (raw as { data: ApiSubscription[] }).data
             : [];
         setPlans(data.filter((s) => s.is_active !== false));
@@ -279,10 +279,10 @@ export default function LandingPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: "Orders Today",    value: "284",    sub: "+5.1% vs yesterday", bg: "bg-blue-50   border-blue-100   dark:bg-blue-900/30   dark:border-blue-800",   val: "text-blue-700   dark:text-blue-400"   },
-                  { label: "Gross Revenue",   value: "$4,280", sub: "+12% this week",      bg: "bg-green-50  border-green-100  dark:bg-green-900/30  dark:border-green-800",  val: "text-green-700  dark:text-green-400"  },
-                  { label: "Active Products", value: "142",    sub: "8 low stock alerts",  bg: "bg-amber-50  border-amber-100  dark:bg-amber-900/30  dark:border-amber-800",  val: "text-amber-700  dark:text-amber-400"  },
-                  { label: "Team Members",    value: "12",     sub: "3 roles assigned",    bg: "bg-purple-50 border-purple-100 dark:bg-purple-900/30 dark:border-purple-800", val: "text-purple-700 dark:text-purple-400" },
+                  { label: "Orders Today", value: "284", sub: "+5.1% vs yesterday", bg: "bg-blue-50   border-blue-100   dark:bg-blue-900/30   dark:border-blue-800", val: "text-blue-700   dark:text-blue-400" },
+                  { label: "Gross Revenue", value: "$4,280", sub: "+12% this week", bg: "bg-green-50  border-green-100  dark:bg-green-900/30  dark:border-green-800", val: "text-green-700  dark:text-green-400" },
+                  { label: "Active Products", value: "142", sub: "8 low stock alerts", bg: "bg-amber-50  border-amber-100  dark:bg-amber-900/30  dark:border-amber-800", val: "text-amber-700  dark:text-amber-400" },
+                  { label: "Team Members", value: "12", sub: "3 roles assigned", bg: "bg-purple-50 border-purple-100 dark:bg-purple-900/30 dark:border-purple-800", val: "text-purple-700 dark:text-purple-400" },
                 ].map((c) => (
                   <div key={c.label} className={cn("rounded-xl border p-4", c.bg)}>
                     <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-1">{c.label}</p>
@@ -327,7 +327,7 @@ export default function LandingPage() {
             >
               {plans.map((plan, i) => {
                 const isPopular = i === Math.floor(plans.length / 2) && plans.length > 1;
-                const features  = parseFeatures(plan.description);
+                const features = parseFeatures(plan.description);
                 return (
                   <motion.div
                     key={plan.id}
@@ -412,7 +412,7 @@ export default function LandingPage() {
                 Hàng nghìn doanh nghiệp F&amp;B đang dùng Lumio để vận hành thông minh hơn mỗi ngày.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/register">
+                <Link href="/pricing">
                   <Button size="lg" className="h-12 gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-8 font-semibold shadow-lg">
                     Dùng thử miễn phí <ArrowRight className="h-4 w-4" />
                   </Button>

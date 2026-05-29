@@ -5,7 +5,7 @@ import {
   LayoutDashboard, ShoppingCart, Package, Warehouse, CreditCard,
   Settings, Tag, BarChart3, Store, Users, UserCog, Building2,
   BrainCircuit, TrendingUp, ClipboardList, FileDown, DollarSign,
-  Gift, ShoppingBag, UserCircle, Shield, Sparkles, FlaskConical,
+  Gift, ShoppingBag, UserCircle, Shield, Sparkles, FlaskConical, Clock,
 } from "lucide-react";
 
 export interface NavItem {
@@ -71,11 +71,11 @@ const shopOwnerNav: NavSection[] = [
     title: "Store",
     items: [
       { title: "Cửa hàng", href: "/shop", icon: Store },
-      { title: "Products", href: "/products", icon: Package },
+      { title: "Sản phẩm", href: "/products", icon: Package },
       { title: "Danh mục", href: "/product-categories", icon: Tag },
       { title: "Nguyên liệu", href: "/ingredients", icon: FlaskConical },
       { title: "Tồn kho", href: "/inventory", icon: Warehouse },
-
+      { title: "Ca làm việc", href: "/shifts", icon: Clock },
     ],
   },
   {
@@ -91,7 +91,10 @@ const shopOwnerNav: NavSection[] = [
 
   {
     title: "System",
-    items: [{ title: "Cài đặt", href: "/settings", icon: Settings }],
+    items: [
+      { title: "Nhân viên", href: "/cashier", icon: Users },
+      { title: "Cài đặt", href: "/settings", icon: Settings }
+    ],
   },
 ];
 
@@ -126,14 +129,18 @@ const staffNav: NavSection[] = [
 // ── Cashier ───────────────────────────────────────────────────────────────────
 const cashierNav: NavSection[] = [
   {
+    title: "Bán hàng",
+    items: [
+      { title: "Tạo đơn (POS)", href: "/orders", icon: ShoppingCart },
+    ],
+  },
+  {
     title: "Tổng quan",
     items: [{ title: "Báo cáo", href: "/dashboard", icon: LayoutDashboard }],
   },
   {
-    title: "Operations",
+    title: "Tra cứu",
     items: [
-      { title: "Thanh toán", href: "/payments", icon: CreditCard },
-      { title: "Checkout", href: "/checkout", icon: ShoppingBag },
       { title: "Khách hàng", href: "/customers", icon: Users },
       { title: "Danh mục", href: "/product-categories", icon: Tag },
     ],
@@ -146,7 +153,6 @@ const cashierNav: NavSection[] = [
     title: "System",
     items: [
       { title: "My Profile", href: "/profile", icon: UserCircle },
-      { title: "Settings", href: "/settings", icon: Settings },
     ],
   },
 ];

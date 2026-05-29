@@ -33,7 +33,9 @@ function passwordStrength(pw: string): {
   return { score, ...levels[score] };
 }
 
-export default function ResetPasswordPage() {
+import { Suspense } from "react";
+
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
@@ -330,5 +332,13 @@ export default function ResetPasswordPage() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Đang tải...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

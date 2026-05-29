@@ -60,7 +60,7 @@ import { toast } from "sonner";
 
 export default function ProductsPage() {
   return (
-    <AccessGuard roles={["admin", "shop_owner"]}>
+    <AccessGuard roles={["admin", "shop_owner", "cashier"]}>
       <ProductsContent />
     </AccessGuard>
   );
