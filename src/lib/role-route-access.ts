@@ -53,6 +53,8 @@ export const SHOP_OWNER_ALLOWED_PATH_PREFIXES = [
   "/audit-logs",
   "/export",
   "/ai/charts",
+  "/cashier",
+  "/shifts",
 ] as const;
 
 export function isPathAllowedForAdmin(pathname: string): boolean {

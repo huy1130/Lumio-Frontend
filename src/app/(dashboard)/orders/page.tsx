@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Eye, Download, ShoppingCart, DollarSign, Clock, CheckCircle,
-  Search, Filter, Plus, Minus, Trash2, Settings,
+  Search, Filter, Plus, Minus, Trash2, Settings, Loader2,
   ChevronDown, ChevronUp,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,11 +19,13 @@ import { PlaceholderPage } from "@/components/shared/PlaceholderPage";
 import { AccessGuard } from "@/components/shared/AccessGuard";
 import { useAuth } from "@/context/AuthContext";
 import { formatCurrency, formatDate, cn } from "@/lib/utils";
-import type { Product, Order } from "@/types";
+import type { Order, ApiProduct } from "@/types";
+import { productService } from "@/lib/services/productService";
+import { orderService, type ApiOrder } from "@/lib/services/orderService";
 
 export default function OrdersPage() {
   return (
-    <AccessGuard roles={["admin", "shop_owner", "inventory_staff"]}>
+    <AccessGuard roles={["admin", "shop_owner", "inventory_staff", "cashier"]}>
       <OrdersContent />
     </AccessGuard>
   );
@@ -30,8 +33,7 @@ export default function OrdersPage() {
 
 function OrdersContent() {
   const { role } = useAuth();
-  if (role === "inventory_staff") return <StaffOrdersView />;
-  if (role === "shop_owner") return <ShopOwnerOrdersView />;
+  if (role === "inventory_staff" || role === "cashier" || role === "shop_owner") return <StaffOrdersView />;
   return <AdminOrdersView />;
 }
 
@@ -48,19 +50,19 @@ const paymentVariant: Record<string, "success" | "warning" | "destructive" | "se
 function AdminOrdersView() {
   const orders: Order[] = [];
 
-  const total     = orders.reduce((s, o) => s + o.total, 0);
+  const total = orders.reduce((s, o) => s + o.total, 0);
   const completed = orders.filter((o) => o.status === "completed").length;
-  const pending   = orders.filter((o) => o.status === "pending").length;
+  const pending = orders.filter((o) => o.status === "pending").length;
 
   return (
     <div>
       <Header />
       <div className="p-6 space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatsCard title="Total Orders"  value={orders.length} icon={<ShoppingCart className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" />
-          <StatsCard title="Total Revenue" value={formatCurrency(total)} icon={<DollarSign className="h-4 w-4" />}  iconClassName="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" />
-          <StatsCard title="Completed"     value={completed} icon={<CheckCircle className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-300" />
-          <StatsCard title="Pending"       value={pending}   icon={<Clock className="h-4 w-4" />}       iconClassName="bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300" />
+          <StatsCard title="Total Orders" value={orders.length} icon={<ShoppingCart className="h-4 w-4" />} iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" />
+          <StatsCard title="Total Revenue" value={formatCurrency(total)} icon={<DollarSign className="h-4 w-4" />} iconClassName="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" />
+          <StatsCard title="Completed" value={completed} icon={<CheckCircle className="h-4 w-4" />} iconClassName="bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-300" />
+          <StatsCard title="Pending" value={pending} icon={<Clock className="h-4 w-4" />} iconClassName="bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300" />
         </div>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -118,30 +120,12 @@ function AdminOrdersView() {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SHOP OWNER VIEW  —  placeholder (full UI to be built)
-// ─────────────────────────────────────────────────────────────────────────────
-function ShopOwnerOrdersView() {
-  return (
-    <PlaceholderPage
-      title="Orders"
-      description="Monitor and manage all store orders"
-      role="shop_owner"
-      breadcrumbs={[{ label: "Shop Owner" }, { label: "Orders" }]}
-      stats={[
-        { title: "Total Orders", value: "—", change: 0, changeLabel: "today", icon: <ShoppingCart className="h-4 w-4" />, iconClassName: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" },
-        { title: "Completed",    value: "—", change: 0, changeLabel: "today", icon: <CheckCircle className="h-4 w-4" />, iconClassName: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" },
-        { title: "Pending",      value: "—", change: 0, changeLabel: "today", icon: <Clock className="h-4 w-4" />,       iconClassName: "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300" },
-      ]}
-      tableTitle="Order List"
-    />
-  );
-}
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STAFF VIEW  —  POS cart interface (products loaded from API later)
 // ─────────────────────────────────────────────────────────────────────────────
-interface POSProduct extends Product { emoji: string; description: string; emojiBg: string; }
+interface POSProduct { id: string; name: string; price: number; category: string; unit: string; emoji: string; description: string; emojiBg: string; }
 
 interface CartItem { product: POSProduct; qty: number }
 
@@ -150,20 +134,48 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "se
 };
 
 function StaffOrdersView() {
-  const [search, setSearch]               = useState("");
+  const { user } = useAuth();
+  const shopId = user?.shop_id;
+
+  const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [cart, setCart]                   = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [showRecentOrders, setShowRecentOrders] = useState(false);
 
-  // Products will be loaded from API — empty until connected
-  const posProducts: POSProduct[] = [];
-  const recentOrders: Order[]     = [];
+  const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [recentOrders, setRecentOrders] = useState<ApiOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!shopId) return;
+    Promise.all([
+      productService.getAll(),
+      orderService.getAll(shopId).catch(() => [])
+    ]).then(([prodRes, ordRes]) => {
+      setProducts(prodRes.filter((p) => p.is_active !== false));
+      setRecentOrders(ordRes);
+    }).finally(() => setLoading(false));
+  }, [shopId]);
+
+  const posProducts: POSProduct[] = useMemo(() => {
+    return products.map(p => ({
+      id: String(p.id),
+      name: p.product_name,
+      price: Number(p.unit_price) || 0,
+      category: p.category?.category_name || "Uncategorized",
+      unit: p.measure_unit || "Item",
+      emoji: "📦",
+      description: p.description || "",
+      emojiBg: "bg-gray-100"
+    }));
+  }, [products]);
 
   const categories = useMemo(() => ["All", ...Array.from(new Set(posProducts.map((p) => p.category)))], [posProducts]);
 
   const visibleProducts = useMemo(() =>
     posProducts.filter((p) => {
-      const catOk  = activeCategory === "All" || p.category === activeCategory;
+      const catOk = activeCategory === "All" || p.category === activeCategory;
       const textOk = !search || p.name.toLowerCase().includes(search.toLowerCase());
       return catOk && textOk;
     }), [posProducts, search, activeCategory]);
@@ -175,16 +187,39 @@ function StaffOrdersView() {
       return [...prev, { product, qty: 1 }];
     });
 
-  const updateQty  = (id: string, delta: number) =>
+  const updateQty = (id: string, delta: number) =>
     setCart((prev) => prev.map((c) => c.product.id === id ? { ...c, qty: c.qty + delta } : c).filter((c) => c.qty > 0));
   const removeItem = (id: string) => setCart((prev) => prev.filter((c) => c.product.id !== id));
-  const clearCart  = () => setCart([]);
+  const clearCart = () => setCart([]);
 
   const subtotal = cart.reduce((s, c) => s + c.product.price * c.qty, 0);
-  const discount = subtotal * 0.05;
-  const tax      = subtotal * 0.08;
-  const total    = subtotal - discount + tax;
+  const discount = 0; // Or calculate discount if applicable
+  const tax = subtotal * 0.08;
+  const total = subtotal - discount + tax;
   const totalQty = cart.reduce((s, c) => s + c.qty, 0);
+
+  const handleCheckout = async () => {
+    if (!shopId || cart.length === 0) return;
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        shift_id: 1, // Defaulting to 1 for MVP as it's required by backend. In real world, fetch active shift.
+        items: cart.map(c => ({
+          product_id: Number(c.product.id),
+          quantity: c.qty
+        }))
+      };
+      const newOrder = await orderService.create(shopId, payload);
+      toast.success("Tạo đơn hàng thành công!");
+      setRecentOrders(prev => [newOrder, ...prev]);
+      clearCart();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Không thể tạo đơn hàng";
+      toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex h-full min-h-0 bg-gray-50 dark:bg-gray-950">
@@ -232,7 +267,12 @@ function StaffOrdersView() {
             </p>
           </div>
 
-          {visibleProducts.length > 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <Loader2 className="h-10 w-10 text-orange-500 animate-spin mb-4" />
+              <p className="text-base font-semibold text-gray-700 dark:text-gray-300">Đang tải sản phẩm...</p>
+            </div>
+          ) : visibleProducts.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {visibleProducts.map((product) => (
                 <POSProductCard key={product.id} product={product}
@@ -243,9 +283,9 @@ function StaffOrdersView() {
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="text-5xl mb-4">📦</div>
-              <p className="text-base font-semibold text-gray-700 dark:text-gray-300">No products available</p>
+              <p className="text-base font-semibold text-gray-700 dark:text-gray-300">Không tìm thấy sản phẩm nào</p>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                Products will appear here once the API is connected.
+                Hãy thêm sản phẩm mới vào danh mục của bạn.
               </p>
             </div>
           )}
@@ -279,11 +319,11 @@ function StaffOrdersView() {
                     ) : (
                       recentOrders.map((order) => (
                         <TableRow key={order.id}>
-                          <TableCell className="font-mono font-semibold text-sm">{order.orderNumber}</TableCell>
-                          <TableCell>{order.customerName}</TableCell>
-                          <TableCell className="font-semibold">{formatCurrency(order.total)}</TableCell>
-                          <TableCell><Badge variant={STATUS_VARIANT[order.status]} className="capitalize">{order.status}</Badge></TableCell>
-                          <TableCell className="text-gray-500 dark:text-gray-400 text-sm">{formatDate(order.createdAt)}</TableCell>
+                          <TableCell className="font-mono font-semibold text-sm">#{order.id}</TableCell>
+                          <TableCell>{order.customer?.full_name || "Walk-in"}</TableCell>
+                          <TableCell className="font-semibold">{formatCurrency(Number(order.grand_total))}</TableCell>
+                          <TableCell><Badge variant={STATUS_VARIANT[order.order_status?.toLowerCase()] || "secondary"} className="capitalize">{order.order_status}</Badge></TableCell>
+                          <TableCell className="text-gray-500 dark:text-gray-400 text-sm">{formatDate(order.created_at)}</TableCell>
                         </TableRow>
                       ))
                     )}
@@ -344,8 +384,12 @@ function StaffOrdersView() {
               <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total</span>
               <span className="text-xl font-extrabold text-orange-500">{formatCurrency(total)}</span>
             </div>
-            <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-semibold py-3 text-sm transition-colors shadow-sm shadow-orange-200 dark:shadow-orange-900/30">
-              <CheckCircle className="h-4 w-4" /> Continue to Payment
+            <button
+              disabled={isSubmitting}
+              onClick={handleCheckout}
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:opacity-50 text-white font-semibold py-3 text-sm transition-colors shadow-sm shadow-orange-200 dark:shadow-orange-900/30">
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+              {isSubmitting ? "Đang xử lý..." : "Thanh toán"}
             </button>
             <button onClick={clearCart} className="w-full text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors py-1">
               Clear order

@@ -108,7 +108,7 @@ function ColumnChartPlaceholder({ title, description }: { title: string; descrip
   );
 }
 
-export function ShopOwnerDashboard() {
+export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
   return (
     <div>
       <Header />
@@ -116,8 +116,8 @@ export function ShopOwnerDashboard() {
         <PageHeader
           title="Bảng điều khiển"
           description="Tổng quan doanh thu và hiệu suất bán hàng của cửa hàng."
-          role="shop_owner"
-          breadcrumbs={[{ label: "Shop Owner" }, { label: "Dashboard" }]}
+          role={role as any}
+          breadcrumbs={[{ label: role === "cashier" ? "Cashier" : "Shop Owner" }, { label: "Dashboard" }]}
         />
 
         <div className="grid gap-6 lg:grid-cols-2">

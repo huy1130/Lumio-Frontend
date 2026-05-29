@@ -67,23 +67,23 @@ export function Navbar() {
           ) : null}
           {!isManagementUser &&
             NAV_LINKS.map(({ label, href }) => {
-            const isActive =
-              pathname === href || pathname.startsWith(href + "/");
-            return (
-              <Link
-                key={label}
-                href={href}
-                className={cn(
-                  "relative px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200 dark:shadow-indigo-900/40"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/70 dark:hover:bg-white/8",
-                )}
-              >
-                {label}
-              </Link>
-            );
-          })}
+              const isActive =
+                pathname === href || pathname.startsWith(href + "/");
+              return (
+                <Link
+                  key={label}
+                  href={href}
+                  className={cn(
+                    "relative px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-200",
+                    isActive
+                      ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200 dark:shadow-indigo-900/40"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/70 dark:hover:bg-white/8",
+                  )}
+                >
+                  {label}
+                </Link>
+              );
+            })}
         </div>
 
         {/* Right: actions */}
@@ -92,20 +92,20 @@ export function Navbar() {
 
           {/* Login — filled when active */}
           {!isManagementUser ? (
-          <Link href="/login" className="hidden md:block">
-            <Button
-              variant={pathname === "/login" ? "default" : "outline"}
-              size="sm"
-              className={cn(
-                "transition-all duration-200",
-                pathname === "/login"
-                  ? "bg-indigo-600 hover:bg-indigo-500 text-white border-transparent shadow-sm"
-                  : "border-gray-400/60 dark:border-gray-500/60 bg-white/20 dark:bg-white/10 text-gray-800 dark:text-gray-200 hover:bg-white/40 dark:hover:bg-white/20 backdrop-blur-sm",
-              )}
-            >
-              Đăng nhập
-            </Button>
-          </Link>
+            <Link href="/login" className="hidden md:block">
+              <Button
+                variant={pathname === "/login" ? "default" : "outline"}
+                size="sm"
+                className={cn(
+                  "transition-all duration-200",
+                  pathname === "/login"
+                    ? "bg-indigo-600 hover:bg-indigo-500 text-white border-transparent shadow-sm"
+                    : "border-gray-400/60 dark:border-gray-500/60 bg-white/20 dark:bg-white/10 text-gray-800 dark:text-gray-200 hover:bg-white/40 dark:hover:bg-white/20 backdrop-blur-sm",
+                )}
+              >
+                Đăng nhập
+              </Button>
+            </Link>
           ) : (
             <Link href="/settings" className="hidden md:block">
               <Button size="sm" variant="outline">
@@ -143,27 +143,27 @@ export function Navbar() {
           ) : null}
           {!isManagementUser &&
             NAV_LINKS.map(({ label, href }) => {
-            const isActive =
-              pathname === href || pathname.startsWith(href + "/");
-            return (
-              <Link
-                key={label}
-                href={href}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-medium transition-all",
-                  isActive
-                    ? "bg-indigo-600 text-white"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white",
-                )}
-              >
-                {isActive && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-white shrink-0" />
-                )}
-                {label}
-              </Link>
-            );
-          })}
+              const isActive =
+                pathname === href || pathname.startsWith(href + "/");
+              return (
+                <Link
+                  key={label}
+                  href={href}
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-medium transition-all",
+                    isActive
+                      ? "bg-indigo-600 text-white"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white",
+                  )}
+                >
+                  {isActive && (
+                    <span className="h-1.5 w-1.5 rounded-full bg-white shrink-0" />
+                  )}
+                  {label}
+                </Link>
+              );
+            })}
 
           {!isManagementUser ? (
             <div className="pt-2 pb-1 flex gap-2">
@@ -178,7 +178,7 @@ export function Navbar() {
                   className={cn(
                     "w-full transition-all",
                     pathname === "/login" &&
-                      "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400",
+                    "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400",
                   )}
                 >
                   Đăng nhập
