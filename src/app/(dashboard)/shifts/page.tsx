@@ -111,6 +111,7 @@ function ShiftsTab({ shifts, templates, shopId, onReload, loading }: any) {
   const [formData, setFormData] = useState({
     template_id: "",
     shift_date: new Date().toISOString().split('T')[0],
+    cashiers_input: "", // ID thu ngân cách nhau bằng dấu phẩy
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,11 +120,17 @@ function ShiftsTab({ shifts, templates, shopId, onReload, loading }: any) {
     
     setIsSubmitting(true);
     try {
+      // Parse mảng ID từ chuỗi nhập vào
+      const cashiersArray = formData.cashiers_input
+        .split(',')
+        .map(id => parseInt(id.trim()))
+        .filter(id => !isNaN(id));
+
       await shiftService.createShift({
         shop_id: shopId,
         template_id: Number(formData.template_id),
         shift_date: formData.shift_date,
-        cashiers: [], // Trọng MVP chưa map nhân viên
+        cashiers: cashiersArray,
         shift_status: "OPEN"
       });
       toast.success("Tạo ca làm việc thành công!");
@@ -175,6 +182,15 @@ function ShiftsTab({ shifts, templates, shopId, onReload, loading }: any) {
                   <p className="text-xs text-red-500 mt-1">Chưa có mẫu ca nào. Vui lòng sang tab Cấu hình mẫu ca để tạo trước.</p>
                 )}
               </div>
+              <div className="space-y-2">
+                <Label>ID Thu ngân (Cách nhau bằng dấu phẩy)</Label>
+                <Input 
+                  placeholder="VD: 1, 2, 5" 
+                  value={formData.cashiers_input} 
+                  onChange={e => setFormData({...formData, cashiers_input: e.target.value})} 
+                />
+                <p className="text-xs text-gray-500">Nhập ID của các thu ngân sẽ làm trong ca này.</p>
+              </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Hủy</Button>
                 <Button type="submit" disabled={isSubmitting || templates.length === 0} className="bg-orange-500 hover:bg-orange-600 text-white">
@@ -196,13 +212,14 @@ function ShiftsTab({ shifts, templates, shopId, onReload, loading }: any) {
                 <TableHead>Mẫu ca</TableHead>
                 <TableHead>Ngày</TableHead>
                 <TableHead>Giờ</TableHead>
+                <TableHead>Thu ngân</TableHead>
                 <TableHead>Trạng thái</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {shifts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-gray-500">Chưa có ca làm việc nào.</TableCell>
+                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">Chưa có ca làm việc nào.</TableCell>
                 </TableRow>
               ) : (
                 shifts.map((s: any) => (
@@ -211,6 +228,19 @@ function ShiftsTab({ shifts, templates, shopId, onReload, loading }: any) {
                     <TableCell>{s.template?.name || "N/A"}</TableCell>
                     <TableCell>{formatDate(s.shift_date).split(',')[0]}</TableCell>
                     <TableCell>{s.template?.start_time} - {s.template?.end_time}</TableCell>
+                    <TableCell>
+                      {s.cashiers && s.cashiers.length > 0 ? (
+                        <div className="flex flex-col gap-1">
+                          {s.cashiers.map((c: any) => (
+                            <span key={c.id} className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded w-fit">
+                              {c.full_name || `ID: ${c.id}`}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic">Chưa gán</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={s.shift_status === "OPEN" ? "success" : "secondary"}>
                         {s.shift_status}
