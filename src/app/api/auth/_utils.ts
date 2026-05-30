@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { applyRoleCookie, resolveRoleFromAuthPayload } from "@/lib/auth-cookies";
 
-const BACKEND_URL =
-  process.env.API_BACKEND_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:3000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
 function normalizeMessage(body: unknown): string | undefined {
   const message = (body as { message?: string | string[] } | undefined)?.message;

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const BACKEND = process.env.API_BACKEND_URL ?? "http://localhost:3000";
+const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 const SERVICE_TOKEN = process.env.SERVICE_TOKEN;
 
 type RouteContext = { params: { orderCode: string } };
