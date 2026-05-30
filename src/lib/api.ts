@@ -1,7 +1,7 @@
 import { AUTH_TOKEN_KEY } from "@/lib/api-client";
 
 // CORS đã được bật ở backend → browser gọi thẳng, không cần proxy
-/** Trùng cổng mặc định của Nest (`PORT ?? 3000`) và BFF `API_BACKEND_URL`. */
+/** Trùng cổng mặc định của Nest (`PORT ?? 3000`) và BFF `NEXT_PUBLIC_API_URL`. */
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
 /** Cùng key với AuthContext / axios api-client — trước đây dùng lumio_admin_token nên CRUD không gửi JWT. */

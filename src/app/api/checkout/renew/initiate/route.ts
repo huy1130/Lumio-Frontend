@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.API_BACKEND_URL ?? "http://localhost:3000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
 function normalizeNestMessage(body: unknown): string | undefined {
   const msg = (body as { message?: string | string[] })?.message;

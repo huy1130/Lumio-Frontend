@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.API_BACKEND_URL ?? "http://localhost:3000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 const SERVICE_TOKEN = process.env.SERVICE_TOKEN;
 
 /** NestJS thường trả `message` là string hoặc mảng (class-validator). */

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const BACKEND       = process.env.API_BACKEND_URL ?? "http://localhost:3000";
+const BACKEND       = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 const SERVICE_TOKEN = process.env.SERVICE_TOKEN;
 
 /** Đảm bảo luôn trả về mảng (tránh crash filter ở client nếu backend bọc payload). */
