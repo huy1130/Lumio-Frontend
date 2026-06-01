@@ -57,6 +57,7 @@ import { productService } from "@/lib/services/productService";
 import { categoryService } from "@/lib/services/categoryService";
 import { ingredientService } from "@/lib/services/ingredientService";
 import { toast } from "sonner";
+import { CategoriesView } from "./categories-view";
 
 export default function ProductsPage() {
   return (
@@ -67,7 +68,42 @@ export default function ProductsPage() {
 }
 
 function ProductsContent() {
-  return <AdminProductsView />;
+  const [activeTab, setActiveTab] = useState<"products" | "categories">("products");
+
+  return (
+    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-950">
+      <Header />
+      <div className="px-6 pt-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+        <div className="flex gap-6">
+          <button
+            onClick={() => setActiveTab("products")}
+            className={cn(
+              "pb-3 text-sm font-medium border-b-2 transition-colors",
+              activeTab === "products"
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            )}
+          >
+            Sản phẩm
+          </button>
+          <button
+            onClick={() => setActiveTab("categories")}
+            className={cn(
+              "pb-3 text-sm font-medium border-b-2 transition-colors",
+              activeTab === "categories"
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            )}
+          >
+            Danh mục
+          </button>
+        </div>
+      </div>
+      <div className="flex-1 min-h-0 bg-white dark:bg-gray-900">
+        {activeTab === "products" ? <AdminProductsView /> : <CategoriesView />}
+      </div>
+    </div>
+  );
 }
 
 // ─── Category config ──────────────────────────────────────────────────────────
@@ -417,7 +453,6 @@ function AdminProductsView() {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header />
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[180px]">
