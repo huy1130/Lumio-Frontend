@@ -72,7 +72,6 @@ const shopOwnerNav: NavSection[] = [
     items: [
       { title: "Cửa hàng", href: "/shop", icon: Store },
       { title: "Sản phẩm", href: "/products", icon: Package },
-      { title: "Danh mục", href: "/product-categories", icon: Tag },
       { title: "Nguyên liệu", href: "/ingredients", icon: FlaskConical },
       { title: "Tồn kho", href: "/inventory", icon: Warehouse },
       { title: "Ca làm việc", href: "/shifts", icon: Clock },
@@ -142,7 +141,6 @@ const cashierNav: NavSection[] = [
     title: "Tra cứu",
     items: [
       { title: "Khách hàng", href: "/customers", icon: Users },
-      { title: "Danh mục", href: "/product-categories", icon: Tag },
     ],
   },
   {

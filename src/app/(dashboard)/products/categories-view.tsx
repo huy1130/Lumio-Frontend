@@ -7,9 +7,8 @@ import {
   Pencil,
   Plus,
   Trash2,
+  Eye,
 } from "lucide-react";
-import { Header } from "@/components/layout/header";
-import { AccessGuard } from "@/components/shared/AccessGuard";
 import { DataTable, type Column } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -33,8 +32,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { categoryService } from "@/lib/services/categoryService";
-import { cn } from "@/lib/utils";
-import type { ApiCategory } from "@/types";
+import { productService } from "@/lib/services/productService";
+import { cn, formatCurrency } from "@/lib/utils";
+import type { ApiCategory, ApiProduct } from "@/types";
 import { toast } from "sonner";
 
 type CategoryFormState = {
@@ -59,19 +59,12 @@ const EMPTY_FORM: CategoryFormState = {
   is_active: true,
 };
 
-export default function ProductCategoriesPage() {
-  return (
-    <AccessGuard roles={["shop_owner", "cashier"]}>
-      <ProductCategoriesContent />
-    </AccessGuard>
-  );
-}
-
-function ProductCategoriesContent() {
+export function CategoriesView() {
   const { role } = useAuth();
   const canManage = role === "shop_owner";
 
   const [categories, setCategories] = useState<ApiCategory[]>([]);
+  const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,17 +80,24 @@ function ProductCategoriesContent() {
   const [deleteTarget, setDeleteTarget] = useState<ApiCategory | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  async function fetchCategories() {
+  // Xem chi tiết danh mục
+  const [viewingCategory, setViewingCategory] = useState<ApiCategory | null>(null);
+
+  async function fetchData() {
     setLoading(true);
     setError(null);
     try {
-      const data = await categoryService.getAll();
-      setCategories(data);
+      const [cats, prods] = await Promise.all([
+        categoryService.getAll(),
+        productService.getAll(),
+      ]);
+      setCategories(cats);
+      setProducts(prods);
     } catch (err: unknown) {
       setError(
         err instanceof Error
           ? err.message
-          : "Không tải được danh sách danh mục",
+          : "Không tải được dữ liệu",
       );
     } finally {
       setLoading(false);
@@ -105,7 +105,7 @@ function ProductCategoriesContent() {
   }
 
   useEffect(() => {
-    void fetchCategories();
+    void fetchData();
   }, []);
 
   function openCreate() {
@@ -172,7 +172,7 @@ function ProductCategoriesContent() {
 
       setFormOpen(false);
       setEditingCategory(null);
-      await fetchCategories();
+      await fetchData();
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Lưu danh mục thất bại";
@@ -191,7 +191,7 @@ function ProductCategoriesContent() {
       await categoryService.delete(deleteTarget.id);
       toast.success("Đã xóa danh mục");
       setDeleteTarget(null);
-      await fetchCategories();
+      await fetchData();
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Xóa danh mục thất bại";
@@ -209,10 +209,8 @@ function ProductCategoriesContent() {
     if (!keyword) return rows;
 
     return rows.filter((row) => {
-      const parentMatch = row.parent_name.toLowerCase().includes(keyword);
       return (
         row.category_name.toLowerCase().includes(keyword) ||
-        parentMatch ||
         (row.is_active ? "active" : "inactive").includes(keyword)
       );
     });
@@ -222,37 +220,24 @@ function ProductCategoriesContent() {
     const base: Column<CategoryRow>[] = [
       {
         key: "category_name",
-        label: "Danh mục",
+        label: "Tên danh mục",
         render: (row) => (
-          <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                "inline-flex h-2.5 w-2.5 rounded-full",
-                row.depth === 0 ? "bg-sky-500" : "bg-amber-500",
-              )}
-            ></span>
-            <div className="min-w-0">
-              <div
-                className="font-medium text-gray-900 dark:text-gray-100"
-              >
-                {row.category_name}
-              </div>
-            </div>
+          <div className="font-medium text-gray-900 dark:text-gray-100">
+            {row.category_name}
           </div>
         ),
       },
       {
-        key: "parent_name",
-        label: "Danh mục cha",
-      },
-      {
-        key: "child_count",
-        label: "Danh mục con",
-        render: (row) => (
-          <span className="text-sm text-gray-600 dark:text-gray-300">
-            {row.child_count}
-          </span>
-        ),
+        key: "product_count",
+        label: "Sản phẩm",
+        render: (row) => {
+          const count = products.filter(p => p.category_id === row.id).length;
+          return (
+            <Badge variant="outline" className="text-gray-600 dark:text-gray-300 font-medium">
+              {count} sản phẩm
+            </Badge>
+          );
+        },
       },
       {
         key: "is_active",
@@ -274,6 +259,20 @@ function ProductCategoriesContent() {
             <Button
               variant="ghost"
               size="sm"
+              title="Xem sản phẩm"
+              className="h-8 w-8 p-0"
+              onClick={() =>
+                setViewingCategory(
+                  categoryMap.get(row.id) ?? (null as unknown as ApiCategory),
+                )
+              }
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              title="Sửa"
               className="h-8 w-8 p-0"
               onClick={() =>
                 openEdit(
@@ -286,6 +285,7 @@ function ProductCategoriesContent() {
             <Button
               variant="ghost"
               size="sm"
+              title="Xóa"
               className="h-8 w-8 p-0 text-destructive hover:text-destructive"
               onClick={() =>
                 setDeleteTarget(
@@ -301,11 +301,10 @@ function ProductCategoriesContent() {
     }
 
     return base;
-  }, [canManage, categoryMap]);
+  }, [canManage, categoryMap, products]);
 
   return (
-    <div>
-      <Header />
+    <div className="flex-1 overflow-y-auto h-full bg-gray-50/50 dark:bg-gray-950/50">
       <div className="p-6 space-y-6">
         <PageHeader
           title="Danh mục"
@@ -352,7 +351,7 @@ function ProductCategoriesContent() {
               size="sm"
               variant="ghost"
               className="ml-auto h-auto px-2 py-0 text-xs"
-              onClick={() => void fetchCategories()}
+              onClick={() => void fetchData()}
             >
               Thử lại
             </Button>
@@ -403,8 +402,8 @@ function ProductCategoriesContent() {
             </DialogTitle>
             <DialogDescription>
               {editingCategory
-                ? "Cập nhật tên danh mục, quan hệ cha và trạng thái hoạt động."
-                : "Tạo danh mục mới và có thể đặt dưới một danh mục cha."}
+                ? "Cập nhật tên và trạng thái của danh mục."
+                : "Tạo một danh mục mới cho các sản phẩm."}
             </DialogDescription>
           </DialogHeader>
 
@@ -430,30 +429,6 @@ function ProductCategoriesContent() {
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="par_category_id">Danh mục cha</Label>
-              <select
-                id="par_category_id"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                value={form.par_category_id}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    par_category_id: e.target.value,
-                  }))
-                }
-              >
-                <option value="">Không có danh mục cha</option>
-                {getParentOptions(categories, editingCategory?.id).map(
-                  (category) => (
-                    <option key={category.id} value={category.id}>
-                      {"— ".repeat(category.depth)}
-                      {category.category_name}
-                    </option>
-                  ),
-                )}
-              </select>
-            </div>
 
             <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-800">
               <input
@@ -521,6 +496,59 @@ function ProductCategoriesContent() {
             >
               {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Xóa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={viewingCategory != null}
+        onOpenChange={(open) => !open && setViewingCategory(null)}
+      >
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Sản phẩm thuộc "{viewingCategory?.category_name}"</DialogTitle>
+            <DialogDescription>
+              Danh sách các sản phẩm đang nằm trong danh mục này. Để thay đổi danh mục cho sản phẩm, vui lòng sang tab Sản phẩm để chỉnh sửa.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="max-h-[60vh] overflow-y-auto pr-2">
+            {products.filter((p) => p.category_id === viewingCategory?.id).length === 0 ? (
+              <div className="py-8 text-center text-sm text-gray-500 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
+                Chưa có sản phẩm nào thuộc danh mục này.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {products
+                  .filter((p) => p.category_id === viewingCategory?.id)
+                  .map((product) => (
+                    <div
+                      key={product.id}
+                      className="flex items-center justify-between gap-4 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 font-bold text-sm">
+                          {product.product_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {product.product_name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {formatCurrency(Number(product.unit_price))}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewingCategory(null)}>
+              Đóng
             </Button>
           </DialogFooter>
         </DialogContent>
