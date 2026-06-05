@@ -8,7 +8,7 @@ import { Mail, Loader2, ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Navbar } from "@/components/layout/Navbar";
+import { AuthNavbar } from "@/components/layout/AuthNavbar";
 import { Footer } from "@/components/layout/Footer";
 import { forgotPassword } from "@/lib/auth-service";
 
@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <Navbar />
+      <AuthNavbar />
 
       <main className="flex-1 px-4 pb-10 pt-20 sm:px-6 sm:pb-12 sm:pt-24">
         <motion.div
