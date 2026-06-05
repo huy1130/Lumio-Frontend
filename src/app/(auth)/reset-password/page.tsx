@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthNavbar } from "@/components/layout/AuthNavbar";
-import { Footer } from "@/components/layout/Footer";
 import { cn } from "@/lib/utils";
 import { resetPassword } from "@/lib/auth-service";
 
@@ -77,8 +76,8 @@ function ResetPasswordContent() {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <AuthNavbar />
-      
-      <main className="flex-1 px-4 pb-10 pt-20 sm:px-6 sm:pb-12 sm:pt-24">
+
+      <main className="flex flex-1 items-center justify-center px-4 py-6 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -94,6 +93,18 @@ function ResetPasswordContent() {
                 priority
                 className="object-cover"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-slate-900/20 to-transparent" />
+              <div className="absolute left-6 right-6 top-6 text-white md:left-8 md:right-8 md:top-8">
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <p className="text-[42px] font-bold leading-tight">
+                    Xin chào
+                  </p>
+                </motion.div>
+              </div>
             </section>
 
             <section className="flex items-center px-5 py-7 sm:px-7 md:px-8">
@@ -254,9 +265,9 @@ function ResetPasswordContent() {
                               className={cn(
                                 "h-11 rounded-xl border-slate-200 bg-slate-50 pr-10 text-slate-800 placeholder:text-slate-400 focus-visible:ring-indigo-200",
                                 confirm.length > 0 &&
-                                  (matching
-                                    ? "border-green-300"
-                                    : "border-red-300"),
+                                (matching
+                                  ? "border-green-300"
+                                  : "border-red-300"),
                               )}
                             />
                             <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -330,7 +341,6 @@ function ResetPasswordContent() {
           </div>
         </motion.div>
       </main>
-      <Footer />
     </div>
   );
 }
