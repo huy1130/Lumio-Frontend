@@ -233,7 +233,7 @@ export function AdminDashboard() {
                         />
                         <Tooltip
                           cursor={{ fill: "rgba(243, 244, 246, 0.4)" }}
-                          formatter={(value: number) => [`${formatCurrency(value)}`, "Doanh thu"]}
+                          formatter={(value: any) => [`${formatCurrency(Number(value))}`, "Doanh thu"]}
                           labelFormatter={(label) => formatPackageCode(label as string)}
                           contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
                         />
@@ -276,7 +276,7 @@ export function AdminDashboard() {
                         />
                         <Tooltip
                           cursor={{ fill: "rgba(243, 244, 246, 0.4)" }}
-                          formatter={(value: number, name: string) => [value, name]}
+                          formatter={(value: any, name: any) => [value, name]}
                           labelFormatter={(label) => formatPackageCode(label as string)}
                           contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
                         />

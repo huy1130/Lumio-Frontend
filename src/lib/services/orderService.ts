@@ -22,7 +22,7 @@ export interface ApiOrder {
   created_at: string;
   update_at: string;
   order_items: ApiOrderItem[];
-  customer?: { id: number; full_name: string };
+  customer?: { id: number; full_name: string; phone?: string };
 }
 
 export interface CreateOrderPayload {
@@ -36,7 +36,7 @@ export interface CreateOrderPayload {
 }
 
 export type UpdateOrderPayload = {
-  status?: string;
+  order_status?: string;
   notes?: string;
 };
 
@@ -55,5 +55,9 @@ export const orderService = {
 
   update: (shopId: number, id: number, payload: UpdateOrderPayload) => {
     return api.patch<ApiOrder>(`/shops/${shopId}/orders/${id}`, payload);
+  },
+
+  checkout: (shopId: number, id: number) => {
+    return api.post<ApiOrder>(`/shops/${shopId}/orders/${id}/checkout`, {});
   },
 };

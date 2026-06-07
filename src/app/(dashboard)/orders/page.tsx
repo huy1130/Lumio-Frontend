@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import {
   Eye, Download, ShoppingCart, DollarSign, Clock, CheckCircle,
   Search, Filter, Plus, Minus, Trash2, Settings, Loader2,
-  ChevronDown, ChevronUp,
+  ChevronDown, ChevronUp, X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/layout/header";
@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatsCard } from "@/components/shared/stats-card";
 import { PlaceholderPage } from "@/components/shared/PlaceholderPage";
@@ -22,6 +23,7 @@ import { formatCurrency, formatDate, cn } from "@/lib/utils";
 import type { Order, ApiProduct } from "@/types";
 import { productService } from "@/lib/services/productService";
 import { orderService, type ApiOrder } from "@/lib/services/orderService";
+import { customerService, type ApiCustomer } from "@/lib/services/customerService";
 
 export default function OrdersPage() {
   return (
@@ -140,9 +142,13 @@ function StaffOrdersView() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [showRecentOrders, setShowRecentOrders] = useState(false);
+  const [activeTab, setActiveTab] = useState<"menu" | "history">("menu");
+  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<ApiOrder | null>(null);
+  const [cancelOrderId, setCancelOrderId] = useState<number | null>(null);
 
   const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [customers, setCustomers] = useState<ApiCustomer[]>([]);
   const [recentOrders, setRecentOrders] = useState<ApiOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -151,10 +157,12 @@ function StaffOrdersView() {
     if (!shopId) return;
     Promise.all([
       productService.getAll(),
-      orderService.getAll(shopId).catch(() => [])
-    ]).then(([prodRes, ordRes]) => {
+      orderService.getAll(shopId).catch(() => []),
+      customerService.getAll().catch(() => [])
+    ]).then(([prodRes, ordRes, custRes]) => {
       setProducts(prodRes.filter((p) => p.is_active !== false));
       setRecentOrders(ordRes);
+      setCustomers(custRes);
     }).finally(() => setLoading(false));
   }, [shopId]);
 
@@ -204,18 +212,49 @@ function StaffOrdersView() {
     try {
       const payload = {
         shift_id: 1, // Defaulting to 1 for MVP as it's required by backend. In real world, fetch active shift.
+        customer_id: selectedCustomerId || undefined,
         items: cart.map(c => ({
           product_id: Number(c.product.id),
           quantity: c.qty
         }))
       };
+
+      // Khách hàng thanh toán xong -> Tạo đơn hàng (Trạng thái: PENDING để pha chế)
       const newOrder = await orderService.create(shopId, payload);
-      toast.success("Tạo đơn hàng thành công!");
+      toast.success("Tạo đơn hàng thành công (Đang chờ xử lý)!");
       setRecentOrders(prev => [newOrder, ...prev]);
       clearCart();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Không thể tạo đơn hàng";
       toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCheckoutExisting = async (orderId: number) => {
+    if (!shopId) return;
+    try {
+      const res = await orderService.checkout(shopId, orderId);
+      const updatedOrder = res; // already unwrapped by api client
+      toast.success("Đã hoàn thành đơn hàng!");
+      setRecentOrders(prev => prev.map(o => o.id === orderId ? updatedOrder : o));
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi hoàn thành đơn hàng");
+    }
+  };
+
+  const handleCancelExisting = async (orderId: number) => {
+    if (!shopId) return;
+    setIsSubmitting(true);
+    try {
+      const res = await orderService.update(shopId, orderId, { order_status: "CANCELLED" });
+      const updatedOrder = res; // already unwrapped by api client
+      toast.success("Đã huỷ đơn hàng!");
+      setRecentOrders(prev => prev.map(o => o.id === orderId ? updatedOrder : o));
+      setCancelOrderId(null);
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi huỷ đơn hàng");
     } finally {
       setIsSubmitting(false);
     }
@@ -229,174 +268,295 @@ function StaffOrdersView() {
         <div className="shrink-0 px-6 pt-6 pb-4 bg-gray-50 dark:bg-gray-950">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Welcome 👋</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Discover whatever you need easily</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Bán hàng (POS)</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Tạo đơn hàng mới hoặc quản lý lịch sử</p>
             </div>
-            <div className="flex items-center gap-2 w-full sm:w-80">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                <Input placeholder="Search product..." className="pl-9 rounded-xl bg-white dark:bg-gray-800"
-                  value={search} onChange={(e) => setSearch(e.target.value)} />
-              </div>
-              <button className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <Filter className="h-4 w-4" />
+
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+              <button
+                onClick={() => { setActiveTab("menu"); setSelectedOrder(null); }}
+                className={cn("px-4 py-2 text-sm font-semibold rounded-lg transition-all", activeTab === "menu" ? "bg-white dark:bg-gray-900 text-orange-500 shadow-sm" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300")}
+              >
+                Tạo đơn hàng
+              </button>
+              <button
+                onClick={() => setActiveTab("history")}
+                className={cn("px-4 py-2 text-sm font-semibold rounded-lg transition-all", activeTab === "history" ? "bg-white dark:bg-gray-900 text-orange-500 shadow-sm" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300")}
+              >
+                Lịch sử đơn
               </button>
             </div>
           </div>
-          <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-            {categories.map((cat) => {
-              const isActive = activeCategory === cat;
-              return (
-                <button key={cat} onClick={() => setActiveCategory(cat)}
-                  className={cn("flex shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-all",
-                    isActive
-                      ? "bg-orange-500 text-white shadow-sm shadow-orange-200 dark:shadow-orange-900/40"
-                      : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-orange-300 hover:text-orange-600")}>
-                  <span>{cat}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              {activeCategory === "All" ? "All Products" : activeCategory}
-              <span className="ml-2 text-gray-400 dark:text-gray-500 font-normal">({visibleProducts.length})</span>
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <Loader2 className="h-10 w-10 text-orange-500 animate-spin mb-4" />
-              <p className="text-base font-semibold text-gray-700 dark:text-gray-300">Đang tải sản phẩm...</p>
-            </div>
-          ) : visibleProducts.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {visibleProducts.map((product) => (
-                <POSProductCard key={product.id} product={product}
-                  inCart={cart.find((c) => c.product.id === product.id)?.qty ?? 0}
-                  onAdd={() => addToCart(product)} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="text-5xl mb-4">📦</div>
-              <p className="text-base font-semibold text-gray-700 dark:text-gray-300">Không tìm thấy sản phẩm nào</p>
-              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                Hãy thêm sản phẩm mới vào danh mục của bạn.
-              </p>
+          {activeTab === "menu" && (
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+              {categories.map((cat) => {
+                const isActive = activeCategory === cat;
+                return (
+                  <button key={cat} onClick={() => setActiveCategory(cat)}
+                    className={cn("flex shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-all",
+                      isActive
+                        ? "bg-orange-500 text-white shadow-sm shadow-orange-200 dark:shadow-orange-900/40"
+                        : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-orange-300 hover:text-orange-600")}>
+                    <span>{cat}</span>
+                  </button>
+                );
+              })}
             </div>
           )}
+        </div>
 
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
-            <button className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-              onClick={() => setShowRecentOrders((v) => !v)}>
-              <span className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-orange-500" />
-                Recent Orders
-                <Badge variant="secondary" className="text-xs">{recentOrders.length}</Badge>
-              </span>
-              {showRecentOrders ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
-            </button>
-            {showRecentOrders && (
-              <div className="border-t border-gray-100 dark:border-gray-800">
-                <Table>
-                  <TableHeader>
+        <div className="flex-1 overflow-y-auto px-6 pb-6 pt-6 space-y-6">
+          {activeTab === "menu" ? (
+            <>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  {activeCategory === "All" ? "Tất cả sản phẩm" : activeCategory}
+                  <span className="ml-2 text-gray-400 dark:text-gray-500 font-normal">({visibleProducts.length})</span>
+                </p>
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                  <Input placeholder="Tìm món..." className="pl-9 h-9 text-sm bg-white dark:bg-gray-800"
+                    value={search} onChange={(e) => setSearch(e.target.value)} />
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <Loader2 className="h-10 w-10 text-orange-500 animate-spin mb-4" />
+                  <p className="text-base font-semibold text-gray-700 dark:text-gray-300">Đang tải sản phẩm...</p>
+                </div>
+              ) : visibleProducts.length > 0 ? (
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {visibleProducts.map((product) => (
+                    <POSProductCard key={product.id} product={product}
+                      inCart={cart.find((c) => c.product.id === product.id)?.qty ?? 0}
+                      onAdd={() => addToCart(product)} />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="text-5xl mb-4">📦</div>
+                  <p className="text-base font-semibold text-gray-700 dark:text-gray-300">Không tìm thấy sản phẩm nào</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                    Hãy thử thay đổi từ khoá tìm kiếm.
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
+              <div className="border-b border-gray-100 dark:border-gray-800 px-5 py-4">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Đơn hàng gần đây ({recentOrders.length})</h3>
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Mã đơn</TableHead><TableHead>Khách hàng</TableHead>
+                    <TableHead>Tổng tiền</TableHead><TableHead>Trạng thái</TableHead><TableHead>Thời gian</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentOrders.length === 0 ? (
                     <TableRow>
-                      <TableHead>Order #</TableHead><TableHead>Customer</TableHead>
-                      <TableHead>Total</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead>
+                      <TableCell colSpan={6} className="py-12 text-center text-sm text-muted-foreground">
+                        Chưa có đơn hàng nào.
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentOrders.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
-                          No recent orders.
+                  ) : (
+                    recentOrders.map((order) => (
+                      <TableRow
+                        key={order.id}
+                        className={cn(
+                          "cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50",
+                          selectedOrder?.id === order.id ? "bg-orange-50 dark:bg-orange-900/20 border-l-2 border-l-orange-500" : ""
+                        )}
+                        onClick={() => setSelectedOrder(order)}
+                      >
+                        <TableCell className="font-mono font-semibold text-sm">#{order.id}</TableCell>
+                        <TableCell>{order.customer?.full_name || "Khách lẻ"}</TableCell>
+                        <TableCell className="font-semibold text-orange-600">{formatCurrency(Number(order.grand_total))}</TableCell>
+                        <TableCell><Badge variant={STATUS_VARIANT[order.order_status?.toLowerCase()] || "secondary"} className="capitalize">{order.order_status}</Badge></TableCell>
+                        <TableCell className="text-gray-500 dark:text-gray-400 text-sm">{formatDate(order.created_at)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                            {order.order_status === "PENDING" && (
+                              <>
+                                <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 h-7 px-2" onClick={() => setCancelOrderId(order.id)}>
+                                  Huỷ
+                                </Button>
+                                <Button size="sm" variant="outline" className="text-orange-600 border-orange-200 hover:bg-orange-50 h-7 px-2" onClick={() => handleCheckoutExisting(order.id)}>
+                                  <CheckCircle className="h-3 w-3 mr-1" /> Hoàn thành
+                                </Button>
+                              </>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      recentOrders.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell className="font-mono font-semibold text-sm">#{order.id}</TableCell>
-                          <TableCell>{order.customer?.full_name || "Walk-in"}</TableCell>
-                          <TableCell className="font-semibold">{formatCurrency(Number(order.grand_total))}</TableCell>
-                          <TableCell><Badge variant={STATUS_VARIANT[order.order_status?.toLowerCase()] || "secondary"} className="capitalize">{order.order_status}</Badge></TableCell>
-                          <TableCell className="text-gray-500 dark:text-gray-400 text-sm">{formatDate(order.created_at)}</TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* RIGHT — cart panel or order details */}
+      <div className="w-80 xl:w-96 shrink-0 flex flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
+        {selectedOrder ? (
+          <div className="flex flex-col h-full">
+            <div className="shrink-0 flex items-center justify-between px-5 pt-6 pb-4 border-b border-gray-100 dark:border-gray-800">
+              <div>
+                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Chi tiết đơn #{selectedOrder.id}</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{formatDate(selectedOrder.created_at)}</p>
+              </div>
+              <button onClick={() => setSelectedOrder(null)} className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Khách hàng</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  {selectedOrder.customer?.full_name || "Khách lẻ (Walk-in)"}
+                  {selectedOrder.customer?.phone && <span className="block text-xs font-normal text-gray-500 mt-0.5">{selectedOrder.customer.phone}</span>}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Trạng thái</p>
+                <Badge variant={STATUS_VARIANT[selectedOrder.order_status?.toLowerCase() || ""] || "secondary"} className="capitalize">
+                  {selectedOrder.order_status}
+                </Badge>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">Sản phẩm ({selectedOrder.order_items?.length || 0})</h4>
+                <div className="space-y-4">
+                  {selectedOrder.order_items?.map((item: any) => (
+                    <div key={item.id} className="flex justify-between items-center">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.product?.product_name || `Sản phẩm #${item.product_id}`}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{item.quantity} x {formatCurrency(Number(item.unit_price))}</p>
+                      </div>
+                      <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{formatCurrency(item.quantity * Number(item.unit_price))}</p>
+                    </div>
+                  ))}
+                  {(!selectedOrder.order_items || selectedOrder.order_items.length === 0) && (
+                    <p className="text-sm text-gray-500 text-center py-4">Không có sản phẩm nào</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 px-5 pt-4 pb-6 space-y-3">
+              <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
+                <span>Tạm tính:</span>
+                <span>{formatCurrency(Number(selectedOrder.subtotal_amount))}</span>
+              </div>
+              <div className="flex justify-between items-center font-bold text-lg mt-1">
+                <span className="text-gray-900 dark:text-gray-100">Tổng cộng:</span>
+                <span className="text-orange-500">{formatCurrency(Number(selectedOrder.grand_total))}</span>
+              </div>
+              <Button onClick={() => setSelectedOrder(null)} className="w-full mt-4 bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 h-12 rounded-xl font-semibold">
+                Quay lại tạo đơn mới
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col h-full">
+            <div className="shrink-0 flex items-center justify-between px-5 pt-6 pb-4">
+              <div>
+                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Current Order</h2>
+                {totalQty > 0 && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{totalQty} item{totalQty !== 1 ? "s" : ""}</p>}
+              </div>
+              <button className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <Settings className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="shrink-0 px-5 py-3 border-b border-gray-100 dark:border-gray-800">
+              <CustomerSearch
+                customers={customers}
+                selectedId={selectedCustomerId}
+                onChange={setSelectedCustomerId}
+                onCustomerCreated={(newCust) => setCustomers(prev => [...prev, newCust])}
+              />
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 mt-3 space-y-3">
+              {cart.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full py-16 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 mb-4">
+                    <ShoppingCart className="h-8 w-8 text-orange-400" />
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">No items yet</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Click a product card to add it</p>
+                </div>
+              ) : (
+                cart.map(({ product, qty }) => (
+                  <POSCartRow key={product.id} product={product} qty={qty}
+                    onIncrease={() => updateQty(product.id, +1)}
+                    onDecrease={() => updateQty(product.id, -1)}
+                    onRemove={() => removeItem(product.id)} />
+                ))
+              )}
+            </div>
+
+            {cart.length > 0 && (
+              <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 px-5 pt-4 pb-6 space-y-3">
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                    <span>Subtotal</span><span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between text-red-500">
+                    <span>Discount (5%)</span><span className="font-medium">-{formatCurrency(discount)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                    <span>Sales tax (8%)</span><span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(tax)}</span>
+                  </div>
+                </div>
+                <Separator />
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total</span>
+                  <span className="text-xl font-extrabold text-orange-500">{formatCurrency(total)}</span>
+                </div>
+                <button
+                  disabled={isSubmitting}
+                  onClick={handleCheckout}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:opacity-50 text-white font-semibold py-3 text-sm transition-colors shadow-sm shadow-orange-200 dark:shadow-orange-900/30">
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+                  {isSubmitting ? "Đang xử lý..." : "Thanh toán"}
+                </button>
+                <button onClick={clearCart} className="w-full text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors py-1">
+                  Clear order
+                </button>
               </div>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* RIGHT — cart panel */}
-      <div className="w-80 xl:w-96 shrink-0 flex flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
-        <div className="shrink-0 flex items-center justify-between px-5 pt-6 pb-4">
-          <div>
-            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Current Order</h2>
-            {totalQty > 0 && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{totalQty} item{totalQty !== 1 ? "s" : ""}</p>}
-          </div>
-          <button className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-            <Settings className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-5 space-y-3">
-          {cart.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full py-16 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 mb-4">
-                <ShoppingCart className="h-8 w-8 text-orange-400" />
-              </div>
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">No items yet</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Click a product card to add it</p>
-            </div>
-          ) : (
-            cart.map(({ product, qty }) => (
-              <POSCartRow key={product.id} product={product} qty={qty}
-                onIncrease={() => updateQty(product.id, +1)}
-                onDecrease={() => updateQty(product.id, -1)}
-                onRemove={() => removeItem(product.id)} />
-            ))
-          )}
-        </div>
-
-        {cart.length > 0 && (
-          <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 px-5 pt-4 pb-6 space-y-3">
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                <span>Subtotal</span><span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-red-500">
-                <span>Discount (5%)</span><span className="font-medium">-{formatCurrency(discount)}</span>
-              </div>
-              <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                <span>Sales tax (8%)</span><span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(tax)}</span>
-              </div>
-            </div>
-            <Separator />
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total</span>
-              <span className="text-xl font-extrabold text-orange-500">{formatCurrency(total)}</span>
-            </div>
-            <button
-              disabled={isSubmitting}
-              onClick={handleCheckout}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:opacity-50 text-white font-semibold py-3 text-sm transition-colors shadow-sm shadow-orange-200 dark:shadow-orange-900/30">
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-              {isSubmitting ? "Đang xử lý..." : "Thanh toán"}
-            </button>
-            <button onClick={clearCart} className="w-full text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors py-1">
-              Clear order
-            </button>
-          </div>
         )}
       </div>
+
+
+      <Dialog open={!!cancelOrderId} onOpenChange={(open) => !open && setCancelOrderId(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 flex items-center gap-2">
+              <Trash2 className="h-5 w-5" /> Xác nhận huỷ đơn
+            </DialogTitle>
+            <DialogDescription className="py-4 text-sm text-gray-600 dark:text-gray-300">
+              Bạn có chắc chắn muốn huỷ đơn hàng <span className="font-bold">#{cancelOrderId}</span> này không? Hành động này không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2 flex sm:justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setCancelOrderId(null)} disabled={isSubmitting}>
+              Quay lại
+            </Button>
+            <Button type="button" variant="destructive" onClick={() => cancelOrderId && handleCancelExisting(cancelOrderId)} disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null} Xác nhận huỷ
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -447,6 +607,118 @@ function POSCartRow({ product, qty, onIncrease, onDecrease, onRemove }: { produc
       <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 ml-1">
         <Trash2 className="h-3.5 w-3.5" />
       </button>
+    </div>
+  );
+}
+
+function CustomerSearch({
+  customers,
+  selectedId,
+  onChange,
+  onCustomerCreated
+}: {
+  customers: ApiCustomer[];
+  selectedId: number | null;
+  onChange: (id: number | null) => void;
+  onCustomerCreated: (c: ApiCustomer) => void;
+}) {
+  const [search, setSearch] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const selectedCustomer = customers.find(c => c.id === selectedId);
+
+  const filtered = customers.filter(c =>
+    c.phone.includes(search) || c.full_name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleCreate = async () => {
+    if (!search || !newName) return;
+    setIsCreating(true);
+    try {
+      const newCust = await customerService.create({ phone: search, full_name: newName });
+      onCustomerCreated(newCust);
+      onChange(newCust.id);
+      setSearch("");
+      setNewName("");
+      setShowDropdown(false);
+      toast.success("Đã tạo khách hàng mới!");
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi tạo khách hàng");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  return (
+    <div className="relative">
+      {selectedCustomer ? (
+        <div className="flex items-center justify-between bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-900 p-2 rounded-lg">
+          <div>
+            <p className="text-sm font-semibold text-orange-900 dark:text-orange-100">{selectedCustomer.full_name}</p>
+            <p className="text-xs text-orange-700 dark:text-orange-400">{selectedCustomer.phone}</p>
+          </div>
+          <button onClick={() => onChange(null)} className="flex h-6 w-6 items-center justify-center rounded-full text-orange-500 hover:bg-orange-200 dark:hover:bg-orange-800 transition-colors">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      ) : (
+        <div className="relative">
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Nhập SĐT khách hàng..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setShowDropdown(true); }}
+              onFocus={() => setShowDropdown(true)}
+              className="w-full text-sm pl-9 bg-gray-50 dark:bg-gray-800 rounded-lg"
+            />
+          </div>
+
+          {showDropdown && search && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-xl rounded-xl z-50 max-h-64 overflow-y-auto overflow-x-hidden">
+              {filtered.length > 0 ? (
+                <div className="p-1">
+                  {filtered.map(c => (
+                    <div
+                      key={c.id}
+                      className="p-2 hover:bg-orange-50 dark:hover:bg-gray-800 cursor-pointer rounded-lg transition-colors"
+                      onClick={() => { onChange(c.id); setSearch(""); setShowDropdown(false); }}
+                    >
+                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{c.full_name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{c.phone}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">Không tìm thấy khách. Tạo mới:</p>
+                  <Input
+                    placeholder="Nhập Tên khách hàng..."
+                    value={newName}
+                    onChange={e => setNewName(e.target.value)}
+                    className="h-9 text-sm mb-2 bg-white dark:bg-gray-900"
+                  />
+                  <Button
+                    size="sm"
+                    className="w-full h-9 bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+                    onClick={handleCreate}
+                    disabled={isCreating || !newName}
+                  >
+                    {isCreating ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />} Thêm mới & Chọn
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Backdrop for closing dropdown */}
+          {showDropdown && search && (
+            <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+          )}
+        </div>
+      )}
     </div>
   );
 }
