@@ -1,5 +1,4 @@
 import type {
-  Product,
   InventoryItem,
   Order,
   Payment,
@@ -9,7 +8,7 @@ import type {
 
 export const mockUsers: User[] = [];
 
-export const mockProducts: Product[] = [];
+export const mockProducts: any[] = [];
 
 export const mockMerchandises: Merchandise[] = [];
 
