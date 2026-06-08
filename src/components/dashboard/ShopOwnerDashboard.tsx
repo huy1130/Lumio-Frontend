@@ -308,6 +308,39 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
     return data;
   }, [orders, dateRange]);
 
+  // Compute Monthly Revenue (last 6 months)
+  const monthlyRevenue = useMemo(() => {
+    const map = new Map<string, number>();
+
+    orders.forEach(o => {
+      if (!o.created_at) return;
+      const d = new Date(o.created_at);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const key = `${yyyy}-${mm}`;
+      const total = Number(o.grand_total) || 0;
+      map.set(key, (map.get(key) || 0) + total);
+    });
+
+    const data = [];
+    const today = new Date();
+    
+    // Generate the last 6 months including current month
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const key = `${yyyy}-${mm}`;
+      
+      data.push({
+        date: `Th ${mm}/${yyyy.toString().slice(2)}`,
+        revenue: map.get(key) || 0
+      });
+    }
+
+    return data;
+  }, [orders]);
+
   return (
     <div>
       <Header />
@@ -367,11 +400,10 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
                   </div>
                 }
               />
-              {/* You can change this to monthly later, for now we reuse daily or show empty */}
               <RealColumnChart
-                title="Doanh thu theo tháng (Demo)"
-                description="Biểu đồ cột — doanh thu từng tháng (chưa khả dụng)"
-                data={[]}
+                title="Doanh thu theo tháng"
+                description="Tổng doanh thu 6 tháng gần nhất"
+                data={monthlyRevenue}
               />
             </div>
           </>
