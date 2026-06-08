@@ -152,6 +152,7 @@ function StaffOrdersView() {
   const [recentOrders, setRecentOrders] = useState<ApiOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "TRANSFER">("CASH");
 
   useEffect(() => {
     if (!shopId) return;
@@ -213,6 +214,7 @@ function StaffOrdersView() {
       const payload = {
         shift_id: 1, // Defaulting to 1 for MVP as it's required by backend. In real world, fetch active shift.
         customer_id: selectedCustomerId || undefined,
+        notes: `Thanh toán: ${paymentMethod === "CASH" ? "Tiền mặt" : "Chuyển khoản"}`,
         items: cart.map(c => ({
           product_id: Number(c.product.id),
           quantity: c.qty
@@ -353,6 +355,7 @@ function StaffOrdersView() {
                   <TableRow>
                     <TableHead>Mã đơn</TableHead><TableHead>Khách hàng</TableHead>
                     <TableHead>Tổng tiền</TableHead><TableHead>Trạng thái</TableHead><TableHead>Thời gian</TableHead>
+                    <TableHead>Ghi chú / Thanh toán</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -378,6 +381,9 @@ function StaffOrdersView() {
                         <TableCell className="font-semibold text-orange-600">{formatCurrency(Number(order.grand_total))}</TableCell>
                         <TableCell><Badge variant={STATUS_VARIANT[order.order_status?.toLowerCase()] || "secondary"} className="capitalize">{order.order_status}</Badge></TableCell>
                         <TableCell className="text-gray-500 dark:text-gray-400 text-sm">{formatDate(order.created_at)}</TableCell>
+                        <TableCell>
+                          <p>{order.notes}</p>
+                        </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                             {order.order_status === "PENDING" && (
@@ -423,10 +429,20 @@ function StaffOrdersView() {
                   {selectedOrder.customer?.full_name || "Khách lẻ (Walk-in)"}
                   {selectedOrder.customer?.phone && <span className="block text-xs font-normal text-gray-500 mt-0.5">{selectedOrder.customer.phone}</span>}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Trạng thái</p>
-                <Badge variant={STATUS_VARIANT[selectedOrder.order_status?.toLowerCase() || ""] || "secondary"} className="capitalize">
-                  {selectedOrder.order_status}
-                </Badge>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Trạng thái</p>
+                    <Badge variant={STATUS_VARIANT[selectedOrder.order_status?.toLowerCase() || ""] || "secondary"} className="capitalize">
+                      {selectedOrder.order_status}
+                    </Badge>
+                  </div>
+                  {selectedOrder.notes && (
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Ghi chú / Thanh toán</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{selectedOrder.notes}</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -516,10 +532,26 @@ function StaffOrdersView() {
                   </div>
                 </div>
                 <Separator />
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-1">
                   <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total</span>
                   <span className="text-xl font-extrabold text-orange-500">{formatCurrency(total)}</span>
                 </div>
+
+                <div className="flex gap-2 pb-1">
+                  <button
+                    onClick={() => setPaymentMethod("CASH")}
+                    className={cn("flex-1 py-2 text-xs font-semibold rounded-lg border transition-colors", paymentMethod === "CASH" ? "bg-orange-50 border-orange-500 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400" : "bg-white border-gray-200 text-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700")}
+                  >
+                    Tiền mặt
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod("TRANSFER")}
+                    className={cn("flex-1 py-2 text-xs font-semibold rounded-lg border transition-colors", paymentMethod === "TRANSFER" ? "bg-orange-50 border-orange-500 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400" : "bg-white border-gray-200 text-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700")}
+                  >
+                    Chuyển khoản
+                  </button>
+                </div>
+
                 <button
                   disabled={isSubmitting}
                   onClick={handleCheckout}

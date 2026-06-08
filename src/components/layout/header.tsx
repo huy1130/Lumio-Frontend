@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { RoleSwitcher } from "@/components/layout/RoleSwitcher";
+import { ShopSwitcher } from "@/components/layout/ShopSwitcher";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 import { ROLE_LABELS, ROLE_COLORS } from "@/lib/roles";
@@ -79,6 +80,7 @@ export function Header() {
       </div>
 
       <RoleSwitcher />
+      <ShopSwitcher />
       <ThemeToggle />
 
       <Button

@@ -70,7 +70,6 @@ const shopOwnerNav: NavSection[] = [
   {
     title: "Store",
     items: [
-      { title: "Cửa hàng", href: "/shop", icon: Store },
       { title: "Sản phẩm", href: "/products", icon: Package },
       { title: "Nguyên liệu", href: "/ingredients", icon: FlaskConical },
       { title: "Tồn kho", href: "/inventory", icon: Warehouse },

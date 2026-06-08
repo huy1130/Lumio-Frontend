@@ -22,7 +22,7 @@ import { useAuth } from "@/context/AuthContext";
 import { orderService, type ApiOrder } from "@/lib/services/orderService";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
 const SKELETON_ROWS = 5;
 const SKELETON_BARS = [40, 65, 50, 80, 55, 70, 45];
@@ -154,12 +154,22 @@ function RealProductList({ title, description, data }: { title: string; descript
   );
 }
 
-function RealColumnChart({ title, description, data }: { title: string; description: string; data: any[] }) {
+function RealColumnChart({ title, description, data, headerRight }: { 
+  title: string; description: string; data: any[];
+  headerRight?: React.ReactNode;
+}) {
   return (
     <Card className="border-gray-200/80 shadow-sm dark:border-gray-800">
-      <CardHeader className="border-b border-gray-100 pb-4 dark:border-gray-800">
-        <CardTitle className="text-base">{title}</CardTitle>
-        <CardDescription className="mt-0.5">{description}</CardDescription>
+      <CardHeader className="border-b border-gray-100 pb-4 dark:border-gray-800 flex flex-row items-center justify-between space-y-0">
+        <div>
+          <CardTitle className="text-base">{title}</CardTitle>
+          <CardDescription className="mt-0.5">{description}</CardDescription>
+        </div>
+        {headerRight && (
+          <div className="flex shrink-0 items-center">
+            {headerRight}
+          </div>
+        )}
       </CardHeader>
       <CardContent className="p-6">
         <div className="h-[280px] w-full">
@@ -211,6 +221,21 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
   
   const [orders, setOrders] = useState<ApiOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const getLocalISO = (d: Date) => {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const defaultFrom = new Date();
+  defaultFrom.setDate(defaultFrom.getDate() - 6);
+  
+  const [dateRange, setDateRange] = useState({
+    from: getLocalISO(defaultFrom),
+    to: getLocalISO(new Date())
+  });
 
   useEffect(() => {
     if (!shopId) return;
@@ -247,21 +272,73 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
     return { top: sortedDesc.slice(0, 5), bottom: sortedAsc.slice(0, 5) };
   }, [orders]);
 
-  // Compute Daily Revenue
-  const dailyRevenue = useMemo(() => {
+  // Compute Daily Revenue (custom date range)
+  const dateRangedRevenue = useMemo(() => {
     const map = new Map<string, number>();
+
     orders.forEach(o => {
       if (!o.created_at) return;
-      // Convert to local date string (YYYY-MM-DD)
-      const date = new Date(o.created_at).toLocaleDateString("vi-VN", { day: '2-digit', month: '2-digit' });
+      const d = new Date(o.created_at);
+      const iso = getLocalISO(d);
       const total = Number(o.grand_total) || 0;
-      map.set(date, (map.get(date) || 0) + total);
+      map.set(iso, (map.get(iso) || 0) + total);
     });
+
+    const start = new Date(dateRange.from);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(dateRange.to);
+    end.setHours(23, 59, 59, 999);
+
+    // Limit maximum range to 60 days to prevent chart crowding / performance issues
+    const diffTime = end.getTime() - start.getTime();
+    let totalDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    if (totalDays > 60) totalDays = 60; 
+
+    const data = [];
+    for (let i = 0; i < totalDays; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      const iso = getLocalISO(d);
+      data.push({
+        date: d.toLocaleDateString("vi-VN", { day: '2-digit', month: '2-digit' }),
+        revenue: map.get(iso) || 0
+      });
+    }
+
+    return data;
+  }, [orders, dateRange]);
+
+  // Compute Monthly Revenue (last 6 months)
+  const monthlyRevenue = useMemo(() => {
+    const map = new Map<string, number>();
+
+    orders.forEach(o => {
+      if (!o.created_at) return;
+      const d = new Date(o.created_at);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const key = `${yyyy}-${mm}`;
+      const total = Number(o.grand_total) || 0;
+      map.set(key, (map.get(key) || 0) + total);
+    });
+
+    const data = [];
+    const today = new Date();
     
-    return Array.from(map.entries())
-      .map(([date, revenue]) => ({ date, revenue }));
-      // Notice: If you want to sort strictly by actual Date, you should parse it. 
-      // For MVP, if data is within a month, it should be fine.
+    // Generate the last 6 months including current month
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const key = `${yyyy}-${mm}`;
+      
+      data.push({
+        date: `Th ${mm}/${yyyy.toString().slice(2)}`,
+        revenue: map.get(key) || 0
+      });
+    }
+
+    return data;
   }, [orders]);
 
   return (
@@ -298,14 +375,35 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
             <div className="grid gap-6 lg:grid-cols-2 items-start">
               <RealColumnChart
                 title="Doanh thu theo ngày"
-                description="Tổng doanh thu cộng dồn theo từng ngày (đơn vị VNĐ)"
-                data={dailyRevenue}
+                description="Tổng doanh thu từng ngày trong khoảng thời gian chọn"
+                data={dateRangedRevenue}
+                headerRight={
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col">
+                      <label className="text-[10px] text-gray-500 uppercase font-semibold mb-0.5">Từ ngày</label>
+                      <input 
+                        type="date" 
+                        value={dateRange.from} 
+                        onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                        className="text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:border-orange-500 transition-colors" 
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-[10px] text-gray-500 uppercase font-semibold mb-0.5">Đến ngày</label>
+                      <input 
+                        type="date" 
+                        value={dateRange.to} 
+                        onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                        className="text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:border-orange-500 transition-colors" 
+                      />
+                    </div>
+                  </div>
+                }
               />
-              {/* You can change this to monthly later, for now we reuse daily or show empty */}
               <RealColumnChart
-                title="Doanh thu theo tháng (Demo)"
-                description="Biểu đồ cột — doanh thu từng tháng (chưa khả dụng)"
-                data={[]}
+                title="Doanh thu theo tháng"
+                description="Tổng doanh thu 6 tháng gần nhất"
+                data={monthlyRevenue}
               />
             </div>
           </>
