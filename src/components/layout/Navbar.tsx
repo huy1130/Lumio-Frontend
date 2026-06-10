@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -26,11 +26,24 @@ export function Navbar() {
   const homeHref = isManagementUser ? "/dashboard" : "/";
 
   const isHome = pathname === "/";
+  const [scrolled, setScrolled] = useState(false);
 
-  // navbar có background khi không ở trang chủ (các marketing sub-pages có bg màu)
-  const navBg = isHome
-    ? "border-transparent bg-transparent"
-    : "border-b border-gray-200/60 dark:border-gray-800/60 bg-white/90 dark:bg-gray-950/90 backdrop-blur-xl";
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    // Khởi tạo giá trị ban đầu
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // navbar có background khi không ở trang chủ, hoặc khi cuộn xuống
+  const navBg = (!isHome || scrolled)
+    ? "border-b border-gray-200/80 dark:border-gray-800/80 bg-white/90 dark:bg-gray-950/90 backdrop-blur-xl shadow-sm"
+    : "border-transparent bg-transparent";
 
   return (
     <nav
