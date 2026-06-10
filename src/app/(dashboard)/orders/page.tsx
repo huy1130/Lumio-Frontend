@@ -135,6 +135,8 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "se
   completed: "success", processing: "warning", pending: "secondary", cancelled: "destructive",
 };
 
+const QUICK_CASH_AMOUNTS = [10000, 20000, 50000, 100000, 200000, 500000];
+
 function StaffOrdersView() {
   const { user } = useAuth();
   const shopId = user?.shop_id;
@@ -153,6 +155,8 @@ function StaffOrdersView() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"CASH" | "TRANSFER">("CASH");
+  const [cashReceived, setCashReceived] = useState<string>("");
+  const [showTransferConfirm, setShowTransferConfirm] = useState(false);
 
   useEffect(() => {
     if (!shopId) return;
@@ -207,7 +211,7 @@ function StaffOrdersView() {
   const total = subtotal - discount + tax;
   const totalQty = cart.reduce((s, c) => s + c.qty, 0);
 
-  const handleCheckout = async () => {
+  const processCheckout = async () => {
     if (!shopId || cart.length === 0) return;
     setIsSubmitting(true);
     try {
@@ -226,11 +230,21 @@ function StaffOrdersView() {
       toast.success("Tạo đơn hàng thành công (Đang chờ xử lý)!");
       setRecentOrders(prev => [newOrder, ...prev]);
       clearCart();
+      setCashReceived("");
+      setShowTransferConfirm(false);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Không thể tạo đơn hàng";
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCheckoutClick = () => {
+    if (paymentMethod === "TRANSFER") {
+      setShowTransferConfirm(true);
+    } else {
+      processCheckout();
     }
   };
 
@@ -552,9 +566,86 @@ function StaffOrdersView() {
                   </button>
                 </div>
 
+                {paymentMethod === "CASH" && (
+                  <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300 py-2">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tiền khách đưa</p>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 text-xs text-orange-600 hover:text-orange-700 dark:text-orange-400 p-0" 
+                          onClick={() => setCashReceived(total.toString())}
+                        >
+                          Khách đưa đủ
+                        </Button>
+                      </div>
+                      <Input 
+                        placeholder="0" 
+                        type="number" 
+                        value={cashReceived}
+                        onChange={(e) => setCashReceived(e.target.value)}
+                        className="text-lg font-medium h-10 border-gray-200 dark:border-gray-700"
+                      />
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-1.5">
+                      {QUICK_CASH_AMOUNTS.map((amt) => (
+                        <Button 
+                          key={amt} 
+                          variant="outline" 
+                          size="sm"
+                          className="flex-1 min-w-[30%] text-xs border-gray-200 dark:border-gray-700 hover:border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all"
+                          onClick={() => {
+                            const current = parseFloat(cashReceived) || 0;
+                            setCashReceived((current + amt).toString());
+                          }}
+                        >
+                          +{formatCurrency(amt).replace(/\.00$/, '').replace(/,00$/, '')}
+                        </Button>
+                      ))}
+                      <Button 
+                         variant="secondary" 
+                         size="sm"
+                         className="flex-1 min-w-[30%] text-xs"
+                         onClick={() => setCashReceived("")}
+                      >
+                        Xóa
+                      </Button>
+                    </div>
+
+                    {(() => {
+                       const received = parseFloat(cashReceived) || 0;
+                       if (received === 0 && cashReceived === "") return null;
+                       
+                       const change = received - total;
+                       const isSufficient = change >= 0;
+                       
+                       return (
+                         <div className={`p-3 rounded-lg border flex justify-between items-center transition-colors duration-300 ${
+                           isSufficient 
+                             ? "bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-800/50" 
+                             : "bg-red-50/50 border-red-200 dark:bg-red-900/10 dark:border-red-800/50"
+                         }`}>
+                           <span className={`text-sm font-medium ${
+                             isSufficient ? "text-green-700 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                           }`}>
+                             {isSufficient ? "Tiền thối lại" : "Khách đưa thiếu"}
+                           </span>
+                           <span className={`text-lg font-bold tracking-tight ${
+                             isSufficient ? "text-green-700 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                           }`}>
+                             {isSufficient ? formatCurrency(change) : formatCurrency(Math.abs(change))}
+                           </span>
+                         </div>
+                       );
+                    })()}
+                  </div>
+                )}
+
                 <button
-                  disabled={isSubmitting}
-                  onClick={handleCheckout}
+                  disabled={isSubmitting || (paymentMethod === "CASH" && (parseFloat(cashReceived) || 0) < total)}
+                  onClick={handleCheckoutClick}
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:opacity-50 text-white font-semibold py-3 text-sm transition-colors shadow-sm shadow-orange-200 dark:shadow-orange-900/30">
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
                   {isSubmitting ? "Đang xử lý..." : "Thanh toán"}
@@ -568,6 +659,30 @@ function StaffOrdersView() {
         )}
       </div>
 
+
+      <Dialog open={showTransferConfirm} onOpenChange={(open) => !open && setShowTransferConfirm(false)}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="flex items-center justify-center bg-orange-100 text-orange-600 w-8 h-8 rounded-full dark:bg-orange-900/30 dark:text-orange-400">
+                <DollarSign className="h-5 w-5" />
+              </span>
+              Xác nhận chuyển khoản
+            </DialogTitle>
+            <DialogDescription className="py-4 text-sm text-gray-600 dark:text-gray-300">
+              Vui lòng kiểm tra ứng dụng ngân hàng để đảm bảo đã nhận được số tiền <span className="font-bold text-orange-600 dark:text-orange-400 text-lg">{formatCurrency(total)}</span> từ khách hàng.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2 flex sm:justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setShowTransferConfirm(false)} disabled={isSubmitting}>
+              Huỷ
+            </Button>
+            <Button type="button" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={processCheckout} disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />} Tiếp tục & Hoàn thành
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!cancelOrderId} onOpenChange={(open) => !open && setCancelOrderId(null)}>
         <DialogContent className="sm:max-w-[425px]">
