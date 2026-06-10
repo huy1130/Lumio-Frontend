@@ -114,23 +114,23 @@ function SettingsPageContent({ role }: { role: string }) {
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-950">
       <Header />
-      <div className="px-6 pt-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 mb-1">Cài đặt</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <div className="px-6 pt-8 pb-0 bg-white dark:bg-gray-900 shrink-0">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 mb-1">Cài đặt</h1>
+        <p className="text-[13.5px] text-gray-500 dark:text-gray-400 mb-8">
           {isShopOwner
             ? "Quản lý gói đăng ký và hệ thống chi nhánh của bạn."
             : "Các tùy chọn cài đặt theo vai trò."}
         </p>
 
         {isShopOwner && (
-          <div className="flex gap-6">
+          <div className="flex gap-2 pb-4">
             <button
               onClick={() => setActiveTab("subscription")}
               className={cn(
-                "pb-3 text-sm font-medium border-b-2 transition-colors",
+                "px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200",
                 activeTab === "subscription"
-                  ? "border-indigo-600 text-indigo-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
+                  ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
+                  : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100"
               )}
             >
               Gói đăng ký
@@ -138,10 +138,10 @@ function SettingsPageContent({ role }: { role: string }) {
             <button
               onClick={() => setActiveTab("shops")}
               className={cn(
-                "pb-3 text-sm font-medium border-b-2 transition-colors",
+                "px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200",
                 activeTab === "shops"
-                  ? "border-indigo-600 text-indigo-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
+                  ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
+                  : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100"
               )}
             >
               Hệ thống chi nhánh
@@ -169,16 +169,16 @@ function SettingsPageContent({ role }: { role: string }) {
                 ) : null}
 
                 {requiresSetup ? (
-                  <Card>
-                    <CardHeader>
-                      <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+                  <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden">
+                    <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5">
+                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 text-indigo-600 dark:from-indigo-900/40 dark:to-blue-900/40 dark:text-indigo-300 shadow-sm">
                         <Store className="h-6 w-6" />
                       </div>
-                      <CardTitle>Thiết lập cửa hàng</CardTitle>
-                      <CardDescription>
+                      <CardTitle className="text-xl">Thiết lập cửa hàng</CardTitle>
+                      <CardDescription className="text-[13px]">
                         Chưa có cửa hàng. Tạo cửa hàng đầu tiên theo gói đăng ký của bạn.
                         {pending?.shop_name ? (
-                          <span className="mt-1 block text-indigo-600 dark:text-indigo-400">
+                          <span className="mt-1 block text-indigo-600 dark:text-indigo-400 font-medium">
                             Gợi ý từ đăng ký: {pending.shop_name}
                           </span>
                         ) : null}
@@ -205,49 +205,49 @@ function SettingsPageContent({ role }: { role: string }) {
                       </Button>
                     ) : null}
 
-                    <Card className="mb-6">
-                      <CardHeader>
-                        <CardTitle>Danh sách Cửa hàng</CardTitle>
-                        <CardDescription>
+                    <Card className="mb-6 border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden">
+                      <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5">
+                        <CardTitle className="text-lg font-bold">Danh sách Cửa hàng</CardTitle>
+                        <CardDescription className="text-[13px]">
                           {shops.length} cửa hàng
                           {quota?.max_shops != null ? ` / tối đa ${quota.max_shops} theo gói` : ""}
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-2">
+                      <CardContent className="p-6 space-y-3">
                         {shops.map((shop) => {
                           const isManaging = shop.id === (activeId ?? primaryShop?.id);
                           return (
                             <div
                               key={shop.id}
                               className={cn(
-                                "flex flex-col gap-2 rounded-xl border px-4 py-3 sm:flex-row sm:items-center sm:justify-between",
+                                "flex flex-col gap-3 rounded-2xl border px-5 py-4 transition-all duration-200 sm:flex-row sm:items-center sm:justify-between group hover:shadow-md",
                                 isManaging
-                                  ? "border-indigo-300 bg-indigo-50/50 dark:border-indigo-800"
-                                  : "border-gray-200 dark:border-gray-800",
+                                  ? "border-indigo-200 bg-gradient-to-r from-indigo-50/50 to-white dark:from-indigo-900/20 dark:to-gray-900 dark:border-indigo-800/50"
+                                  : "border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700",
                               )}
                             >
                               <div>
-                                <p className="font-semibold text-gray-900 dark:text-white">
+                                <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                   {shop.shop_name}
                                   {isManaging ? (
-                                    <span className="ml-2 text-xs font-medium text-indigo-600">
+                                    <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-bold uppercase tracking-wider dark:bg-indigo-900/50 dark:text-indigo-300">
                                       Đang quản lý
                                     </span>
                                   ) : null}
                                 </p>
                                 {shop.address ? (
-                                  <p className="text-xs text-gray-500">{shop.address}</p>
+                                  <p className="text-xs text-gray-500 mt-1.5">{shop.address}</p>
                                 ) : null}
                               </div>
                               {!isManaging ? (
                                 <Button
                                   type="button"
                                   size="sm"
-                                  variant="secondary"
-                                  className="shrink-0 rounded-lg"
+                                  variant="outline"
+                                  className="shrink-0 rounded-xl bg-white hover:bg-gray-50 shadow-sm font-semibold transition-all group-hover:border-indigo-200 group-hover:text-indigo-600"
                                   onClick={() => handleUseShop(shop)}
                                 >
-                                  Quản lý
+                                  Chuyển sang
                                 </Button>
                               ) : null}
                             </div>
@@ -264,10 +264,10 @@ function SettingsPageContent({ role }: { role: string }) {
                     ) : null}
 
                     {canAddMore ? (
-                      <Card className="mt-6">
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-base">Thêm cửa hàng</CardTitle>
-                          <CardDescription>
+                      <Card className="mt-6 border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden">
+                        <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5 bg-white/50 dark:bg-gray-900/50">
+                          <CardTitle className="text-base font-bold">Thêm cửa hàng</CardTitle>
+                          <CardDescription className="text-[13px]">
                             Gói cho phép tạo thêm cửa hàng. Mỗi cửa hàng quản lý doanh thu và nhân sự riêng.
                           </CardDescription>
                         </CardHeader>
@@ -275,10 +275,10 @@ function SettingsPageContent({ role }: { role: string }) {
                           {!showAddForm ? (
                             <Button
                               type="button"
-                              className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-700"
+                              className="w-full rounded-2xl h-12 shadow-sm bg-orange-500 hover:bg-orange-600 text-white font-bold transition-all active:scale-[0.98]"
                               onClick={() => setShowAddForm(true)}
                             >
-                              <Plus className="mr-2 h-4 w-4" />
+                              <Plus className="mr-2 h-5 w-5" />
                               Tạo cửa hàng mới
                             </Button>
                           ) : (
@@ -297,10 +297,10 @@ function SettingsPageContent({ role }: { role: string }) {
             )}
           </>
         ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>Chưa có cài đặt</CardTitle>
-              <CardDescription>
+          <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden">
+            <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5">
+              <CardTitle className="text-lg font-bold">Chưa có cài đặt</CardTitle>
+              <CardDescription className="text-[13px]">
                 Hiện chưa có mục cài đặt nào được cấp cho tài khoản của bạn.
               </CardDescription>
             </CardHeader>

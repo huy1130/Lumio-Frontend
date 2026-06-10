@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Loader2, AlertCircle } from "lucide-react";
+import { Plus, Pencil, Loader2, AlertCircle, Package, CheckCircle2, XCircle } from "lucide-react";
 import { Header } from "@/components/layout/header";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { StatsCard } from "@/components/shared/stats-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -211,90 +213,95 @@ function SubscriptionsContent() {
   return (
     <div>
       <Header />
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-8 animate-in fade-in duration-500">
+        <PageHeader
+          title="Gói Dịch Vụ (Subscriptions)"
+          description="Quản lý và thiết lập các gói dịch vụ dành cho cửa hàng."
+          breadcrumbs={[{ label: "Admin" }, { label: "Gói Dịch Vụ" }]}
+        />
+
         {/* Error banner */}
         {error && (
-          <div className="flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <div className="flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive shadow-sm">
             <AlertCircle className="h-4 w-4 shrink-0" />
             {error}
             <Button
               size="sm"
               variant="ghost"
-              className="ml-auto h-auto px-2 py-0 text-xs"
+              className="ml-auto h-auto px-2 py-0 text-xs font-semibold hover:bg-destructive/20"
               onClick={fetchSubscriptions}
             >
-              Retry
+              Thử lại
             </Button>
           </div>
         )}
 
         {/* Summary cards */}
         {!loading && !error && (
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardDescription>Total Plans</CardDescription>
-                <CardTitle className="text-3xl">
-                  {subscriptions.length}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardDescription>Active Plans</CardDescription>
-                <CardTitle className="text-3xl text-green-600">
-                  {subscriptions.filter((s) => s.is_active).length}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardDescription>Inactive Plans</CardDescription>
-                <CardTitle className="text-3xl text-muted-foreground">
-                  {subscriptions.filter((s) => !s.is_active).length}
-                </CardTitle>
-              </CardHeader>
-            </Card>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <StatsCard
+              title="Tổng số Gói"
+              value={subscriptions.length}
+              icon={<Package className="h-5 w-5" />}
+              iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300"
+            />
+            <StatsCard
+              title="Đang cung cấp"
+              value={subscriptions.filter((s) => s.is_active).length}
+              icon={<CheckCircle2 className="h-5 w-5" />}
+              iconClassName="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300"
+            />
+            <StatsCard
+              title="Tạm ngưng"
+              value={subscriptions.filter((s) => !s.is_active).length}
+              icon={<XCircle className="h-5 w-5" />}
+              iconClassName="bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-300"
+            />
           </div>
         )}
 
         {/* Table */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+        <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden dark:bg-gray-900/50">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-gray-100/50 pb-5 bg-white/50 dark:border-gray-800/50 dark:bg-gray-900/50">
             <div>
-              <CardTitle>Subscription Plans</CardTitle>
-              <CardDescription>
-                {loading ? "Loading…" : `${subscriptions.length} plans`}
+              <CardTitle className="text-lg font-bold">Danh sách Gói Dịch vụ</CardTitle>
+              <CardDescription className="text-[13px] mt-1">
+                {loading ? "Đang tải dữ liệu..." : `Hiển thị ${subscriptions.length} gói`}
               </CardDescription>
             </div>
             {isRealAdmin && (
-              <Button className="gap-2" onClick={openCreate} disabled={loading}>
-                <Plus className="h-4 w-4" /> New Plan
+              <Button 
+                className="gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-10 px-5 font-semibold shadow-sm transition-all active:scale-95" 
+                onClick={openCreate} 
+                disabled={loading}
+              >
+                <Plus className="h-4 w-4" /> Tạo Gói Mới
               </Button>
             )}
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {loading ? (
               <div className="flex items-center justify-center py-16 text-muted-foreground">
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Loading subscriptions…
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Package Code</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Billing Cycle</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                    {isRealAdmin && (
-                      <TableHead className="text-right">Actions</TableHead>
-                    )}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 dark:bg-gray-900/50">
+                      <TableHead className="font-semibold text-gray-600 px-6 py-4">Mã gói</TableHead>
+                      <TableHead className="font-semibold text-gray-600">Mô tả</TableHead>
+                      <TableHead className="font-semibold text-gray-600">Giá (VNĐ)</TableHead>
+                      <TableHead className="font-semibold text-gray-600">Chu kỳ</TableHead>
+                      <TableHead className="font-semibold text-gray-600">Trạng thái</TableHead>
+                      <TableHead className="font-semibold text-gray-600">Ngày tạo</TableHead>
+                      {isRealAdmin && (
+                        <TableHead className="text-right font-semibold text-gray-600 px-6">Thao tác</TableHead>
+                      )}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                   {subscriptions.length === 0 ? (
                     <TableRow>
                       <TableCell
@@ -308,38 +315,43 @@ function SubscriptionsContent() {
                     </TableRow>
                   ) : (
                     subscriptions.map((sub) => (
-                      <TableRow key={sub.id}>
-                        <TableCell className="font-medium">
-                          {sub.package_code}
+                      <TableRow key={sub.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/50">
+                        <TableCell className="font-semibold px-6 py-4">
+                          <span className="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md text-xs dark:bg-indigo-900/30 dark:text-indigo-300">
+                            {sub.package_code}
+                          </span>
                         </TableCell>
-                        <TableCell className="text-muted-foreground max-w-xs truncate">
+                        <TableCell className="text-muted-foreground text-[13.5px] max-w-xs truncate">
                           {sub.description ?? "—"}
                         </TableCell>
-                        <TableCell>{formatPrice(sub.price)}</TableCell>
-                        <TableCell className="capitalize">
-                          {sub.billing_cycle}
+                        <TableCell className="font-medium text-emerald-600 dark:text-emerald-400">
+                          {formatPrice(sub.price)}
+                        </TableCell>
+                        <TableCell className="text-[13.5px]">
+                          {sub.billing_cycle === 'MONTHLY' ? 'Hàng tháng' : sub.billing_cycle === 'YEARLY' ? 'Hàng năm' : sub.billing_cycle}
                         </TableCell>
                         <TableCell>
                           <Badge
                             variant={sub.is_active ? "success" : "secondary"}
+                            className="font-medium"
                           >
-                            {sub.is_active ? "Active" : "Inactive"}
+                            {sub.is_active ? "Hoạt động" : "Tạm ngưng"}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
+                        <TableCell className="text-muted-foreground text-[13.5px]">
                           {new Date(sub.created_at).toLocaleDateString("vi-VN")}
                         </TableCell>
                         {isRealAdmin && (
-                          <TableCell className="text-right">
+                          <TableCell className="text-right px-6">
                             <div className="flex justify-end items-center gap-2">
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-                                title="Edit"
+                                className="h-8 w-8 rounded-full p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                title="Sửa"
                                 onClick={() => openEdit(sub)}
                               >
-                                <Pencil className="h-3.5 w-3.5" />
+                                <Pencil className="h-4 w-4" />
                               </Button>
 
                               {/* Toggle active pill button */}
@@ -383,12 +395,11 @@ function SubscriptionsContent() {
                   )}
                 </TableBody>
               </Table>
+            </div>
             )}
           </CardContent>
         </Card>
       </div>
-
-      {/* Create / Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

@@ -122,62 +122,34 @@ export function Sidebar() {
                 height={32}
                 className="h-8 w-8 object-contain"
               />
-              <span className="text-lg font-bold tracking-tight text-indigo-600 dark:text-indigo-400">
+              <span className="text-xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400">
                 Lumio
               </span>
             </div>
           )}
         </div>
 
-        {/* Role badge */}
-        {!isCollapsed && (
-          <div className="border-b border-gray-200 dark:border-gray-700 px-4 py-3">
-            <p className="truncate text-xs text-gray-500 dark:text-gray-400">
-              {displayName}
-            </p>
-            <span className={roleBadgeClass}>{ROLE_LABELS[role]}</span>
-            {shopLabel && (
-              <p className="mt-1.5 truncate text-xs font-medium text-indigo-600 dark:text-indigo-400">
-                {shopLabel}
-              </p>
-            )}
-            {role === "shop_owner" && tenantShopCount >= 2 && (
-              <Link
-                href="/select-shop"
-                className="mt-1 block truncate text-[10px] text-indigo-500 hover:underline"
-              >
-                Đổi cửa hàng
-              </Link>
-            )}
-            {role === "shop_owner" && user && shouldShowShopSetup(user, tenantShopCount) && !shopLabel && (
-              <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
-                Chưa có cửa hàng
-              </p>
-            )}
-          </div>
-        )}
-
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {navigation.map((section) => (
             <div key={section.title}>
               {!isCollapsed && (
-                <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                <p className="mb-2 px-2 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                   {section.title}
                 </p>
               )}
-              <ul className="space-y-0.5">
+              <ul className="space-y-1">
                 {section.items.map((item) => {
                   const isActive =
                     pathname === item.href ||
                     (item.href !== "/" && pathname.startsWith(item.href + "/"));
                   const Icon = item.icon;
                   const linkClass = cn(
-                    "group flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all",
+                    "group flex items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] font-medium transition-all",
                     isCollapsed && "justify-center",
                     isActive
                       ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+                      : "text-gray-500 hover:bg-gray-100/80 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100",
                   );
                   const iconClass = cn(
                     "h-4 w-4 shrink-0 transition-colors",
@@ -223,41 +195,39 @@ export function Sidebar() {
         {/* User card */}
         <div
           className={cn(
-            "shrink-0 border-t border-gray-200 dark:border-gray-700 p-3",
-            isCollapsed ? "flex justify-center" : "space-y-2",
+            "shrink-0 border-t border-gray-200 dark:border-gray-700 p-4",
+            isCollapsed && "flex justify-center",
           )}
         >
           {isCollapsed ? (
             <button
               onClick={handleLogout}
               title="Log out"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-5 w-5" />
             </button>
           ) : (
-            <>
-              <div className="flex items-center gap-3 px-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className={avatarClass}>{initials}</div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-semibold text-gray-900 dark:text-gray-100">
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-bold text-gray-900 dark:text-gray-100">
                     {displayName}
                   </p>
-                  <p className="truncate text-[10px] text-gray-400 dark:text-gray-500">
-                    {email}
+                  <p className="truncate text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">
+                    {ROLE_LABELS[role]}
                   </p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={handleLogout}
-                className="h-8 w-full justify-start gap-2 text-xs text-gray-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                title="Đăng xuất"
+                className="shrink-0 rounded-full p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
               >
-                <LogOut className="h-3.5 w-3.5" />
-                Log out
-              </Button>
-            </>
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
           )}
         </div>
       </div>

@@ -121,26 +121,25 @@ export function AdminDashboard() {
 
       <div className="w-full space-y-6 p-6">
         {/* Page header */}
-        <div className="flex flex-col gap-4 rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50/90 to-white px-5 py-4 dark:border-indigo-900/50 dark:from-indigo-950/40 dark:to-gray-900 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
-              <BarChart3 className="h-5 w-5" />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-in fade-in duration-500">
+          <div>
+            <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 mb-1.5">
+              <span>Admin</span>
+              <span className="text-gray-300 dark:text-gray-600">/</span>
+              <span className="text-gray-900 dark:text-gray-200">Dashboard</span>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Thống kê Subscription
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Doanh thu PayOS (PAID) · mua mới + gia hạn
-              </p>
-            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+              Thống kê Doanh thu
+            </h1>
+            <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
+              Doanh thu từ các giao dịch thanh toán PayOS thành công (mua mới + gia hạn).
+            </p>
           </div>
-          <div className="flex gap-2 sm:shrink-0">
+          <div className="flex gap-2 sm:shrink-0 animate-in fade-in duration-500">
             <Button
               type="button"
               variant="outline"
-              size="sm"
-              className="rounded-lg border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
+              className="rounded-xl h-10 px-4 bg-white hover:bg-gray-50 shadow-sm border-gray-200 font-semibold"
               onClick={loadStats}
               disabled={loading}
             >
@@ -153,8 +152,7 @@ export function AdminDashboard() {
             </Button>
             <Button
               asChild
-              size="sm"
-              className="rounded-lg bg-indigo-600 hover:bg-indigo-700"
+              className="rounded-xl h-10 px-5 shadow-sm bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-all active:scale-95"
             >
               <Link href="/subscriptions">Quản lý gói</Link>
             </Button>
@@ -203,10 +201,10 @@ export function AdminDashboard() {
             </div>
 
             <div className="grid gap-4 lg:grid-cols-2">
-              <Card className="border-gray-200/80 shadow-sm dark:border-gray-800">
-                <CardHeader className="border-b border-gray-100 bg-white pb-4 dark:border-gray-800 dark:bg-gray-900">
-                  <CardTitle className="text-base">Doanh thu theo gói</CardTitle>
-                  <CardDescription className="mt-0.5">Biểu đồ cột thể hiện doanh thu (VNĐ)</CardDescription>
+              <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden dark:bg-gray-900/50">
+                <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5 bg-white/50 dark:bg-gray-900/50">
+                  <CardTitle className="text-base font-bold">Doanh thu theo gói</CardTitle>
+                  <CardDescription className="text-[13px] mt-1">Biểu đồ cột thể hiện doanh thu (VNĐ)</CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 pt-6">
                   <div className="h-[300px] w-full">
@@ -250,10 +248,10 @@ export function AdminDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="border-gray-200/80 shadow-sm dark:border-gray-800">
-                <CardHeader className="border-b border-gray-100 bg-white pb-4 dark:border-gray-800 dark:bg-gray-900">
-                  <CardTitle className="text-base">Lượt mua theo gói</CardTitle>
-                  <CardDescription className="mt-0.5">So sánh mua mới và gia hạn</CardDescription>
+              <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden dark:bg-gray-900/50">
+                <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5 bg-white/50 dark:bg-gray-900/50">
+                  <CardTitle className="text-base font-bold">Lượt mua theo gói</CardTitle>
+                  <CardDescription className="text-[13px] mt-1">So sánh mua mới và gia hạn</CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 pt-6">
                   <div className="h-[300px] w-full">
@@ -302,12 +300,12 @@ export function AdminDashboard() {
               </Card>
             </div>
 
-            <Card className="overflow-hidden border-gray-200/80 shadow-sm dark:border-gray-800">
-              <CardHeader className="border-b border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900">
-                <div className="flex flex-wrap items-center justify-between gap-2">
+            <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden dark:bg-gray-900/50">
+              <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5 bg-white/50 dark:bg-gray-900/50">
+                <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <CardTitle className="text-base">Chi tiết theo gói</CardTitle>
-                    <CardDescription className="mt-0.5">
+                    <CardTitle className="text-lg font-bold">Chi tiết theo gói</CardTitle>
+                    <CardDescription className="text-[13px] mt-1">
                       Sắp xếp theo doanh thu · cao đến thấp
                     </CardDescription>
                   </div>
@@ -344,32 +342,32 @@ export function AdminDashboard() {
                 ) : (
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-gray-50/80 hover:bg-gray-50/80 dark:bg-gray-900/50">
-                        <TableHead className="font-semibold">Gói</TableHead>
-                        <TableHead className="font-semibold">Mô tả</TableHead>
-                        <TableHead className="text-right font-semibold">
+                      <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 dark:bg-gray-900/50">
+                        <TableHead className="font-semibold text-gray-600">Gói</TableHead>
+                        <TableHead className="font-semibold text-gray-600">Mô tả</TableHead>
+                        <TableHead className="text-right font-semibold text-gray-600">
                           Giá
                         </TableHead>
-                        <TableHead className="text-right font-semibold">
+                        <TableHead className="text-right font-semibold text-gray-600">
                           Mua mới
                         </TableHead>
-                        <TableHead className="text-right font-semibold">
+                        <TableHead className="text-right font-semibold text-gray-600">
                           Gia hạn
                         </TableHead>
-                        <TableHead className="text-right font-semibold">
+                        <TableHead className="text-right font-semibold text-gray-600">
                           Doanh thu
                         </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {sortedPackages.map((pkg, index) => (
-                        <TableRow
+                          <TableRow
                           key={pkg.id}
                           className={cn(
-                            "transition-colors",
+                            "transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/50",
                             index === 0 &&
                             toNumber(pkg.revenue) > 0 &&
-                            "bg-emerald-50/40 dark:bg-emerald-950/20",
+                            "bg-emerald-50/20 hover:bg-emerald-50/40 dark:bg-emerald-950/10",
                           )}
                         >
                           <TableCell>
