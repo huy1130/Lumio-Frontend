@@ -118,21 +118,26 @@ function ShopOwnerCashierView() {
   return (
     <div>
       <Header />
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-8 animate-in fade-in duration-500">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
+            <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 mb-1.5">
+              <span>Quản lý Cửa hàng</span>
+              <span className="text-gray-300 dark:text-gray-600">/</span>
+              <span className="text-gray-900 dark:text-gray-200">Nhân sự</span>
+            </div>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-              Nhân viên / Thu ngân
+              Danh sách Thu ngân
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Quản lý tài khoản thu ngân cho chi nhánh của bạn.
+            <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
+              Quản lý tài khoản đăng nhập vào hệ thống bán hàng (POS) của chi nhánh.
             </p>
           </div>
 
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white gap-2">
-                <Plus className="h-4 w-4" /> Thêm thu ngân
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white gap-2 shadow-sm rounded-xl px-5 h-10 font-semibold transition-all active:scale-95">
+                <Plus className="h-4 w-4" /> Thêm nhân viên
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -208,68 +213,73 @@ function ShopOwnerCashierView() {
           </Dialog>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Danh sách nhân viên</CardTitle>
-            <CardDescription>
-              Quản lý các tài khoản thu ngân và nhân viên trong chi nhánh.
+        <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden dark:bg-gray-900/50">
+          <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5 bg-white/50 dark:bg-gray-900/50">
+            <CardTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">Danh sách nhân viên</CardTitle>
+            <CardDescription className="text-[13px]">
+              Hiển thị tất cả nhân viên thu ngân đang thuộc quyền quản lý của bạn.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {isLoadingStaff ? (
-              <div className="py-16 flex justify-center items-center">
+              <div className="py-20 flex flex-col justify-center items-center gap-4">
                 <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+                <span className="text-sm font-medium text-gray-500">Đang tải danh sách...</span>
               </div>
             ) : staffList.length === 0 ? (
-              <div className="py-16 flex flex-col items-center justify-center text-center">
-                <Users className="h-12 w-12 text-gray-300 mb-4" />
-                <p className="text-gray-500 mb-2">Chưa có nhân viên nào</p>
-                <p className="text-sm text-gray-400">Hãy thêm nhân viên đầu tiên bằng nút "Thêm thu ngân" phía trên.</p>
+              <div className="py-20 flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                  <Users className="h-8 w-8 text-gray-400" />
+                </div>
+                <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Chưa có nhân viên nào</p>
+                <p className="text-sm text-gray-500 max-w-sm">Hãy thêm nhân viên đầu tiên bằng nút "Thêm nhân viên" phía trên để họ có thể đăng nhập POS.</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Nhân viên</TableHead>
-                    <TableHead>Tên đăng nhập</TableHead>
-                    <TableHead>Vai trò</TableHead>
-                    <TableHead>Trạng thái</TableHead>
-                    <TableHead>Ngày tạo</TableHead>
+                  <TableRow className="bg-gray-50/50 dark:bg-gray-800/30 hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                    <TableHead className="font-semibold text-gray-600 dark:text-gray-400 pl-6 h-12">Nhân viên</TableHead>
+                    <TableHead className="font-semibold text-gray-600 dark:text-gray-400 h-12">Tên đăng nhập</TableHead>
+                    <TableHead className="font-semibold text-gray-600 dark:text-gray-400 h-12">Vai trò</TableHead>
+                    <TableHead className="font-semibold text-gray-600 dark:text-gray-400 h-12">Trạng thái</TableHead>
+                    <TableHead className="font-semibold text-gray-600 dark:text-gray-400 pr-6 h-12 text-right">Ngày tham gia</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {staffList.map((staff) => (
-                    <TableRow key={staff.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-medium">
+                    <TableRow key={staff.id} className="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors border-b border-gray-50 dark:border-gray-800/50">
+                      <TableCell className="py-4 pl-6">
+                        <div className="flex items-center gap-4">
+                          <div className="h-10 w-10 rounded-2xl bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 font-bold text-sm transition-transform hover:scale-105">
                             {staff.full_name ? staff.full_name.charAt(0).toUpperCase() : staff.username.charAt(0).toUpperCase()}
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-gray-100">{staff.full_name || "Chưa cập nhật"}</p>
-                            <p className="text-sm text-gray-500">{staff.email}</p>
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">{staff.full_name || "Chưa cập nhật"}</span>
+                            <span className="text-xs font-medium text-gray-500 mt-0.5">{staff.email}</span>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="font-medium">{staff.username}</TableCell>
+                      <TableCell className="font-medium text-gray-700 dark:text-gray-300">@{staff.username}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                          {staff.role?.description || staff.role?.role_code}
+                        <Badge variant="outline" className="bg-blue-50/80 text-blue-700 border-blue-200/50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800 rounded-md px-2.5 py-0.5 font-bold text-[10px] uppercase tracking-widest">
+                          {(staff.role?.description || staff.role?.role_code || "").replace(/nhân viên cửa hàng/i, "Nhân viên")}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         {staff.is_active ? (
-                          <Badge className="bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
-                            Hoạt động
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]"></span>
+                            <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300">Hoạt động</span>
+                          </div>
                         ) : (
-                          <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                            Ngừng h.động
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                            <span className="text-[13px] font-semibold text-gray-500">Đã khóa</span>
+                          </div>
                         )}
                       </TableCell>
-                      <TableCell className="text-gray-500">
-                        {new Date(staff.created_at).toLocaleDateString("vi-VN")}
+                      <TableCell className="text-[13px] font-medium text-gray-500 pr-6 text-right">
+                        {new Date(staff.created_at).toLocaleDateString("vi-VN", { day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </TableCell>
                     </TableRow>
                   ))}

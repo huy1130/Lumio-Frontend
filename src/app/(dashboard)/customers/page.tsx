@@ -461,19 +461,20 @@ export default function CustomersPage() {
               <div className="flex flex-wrap gap-3">
                 <Button
                   onClick={openCreateDialog}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-orange-500 hover:bg-orange-600 text-white gap-2 shadow-sm rounded-xl px-5 h-10 font-semibold transition-all active:scale-95"
                 >
                   <Plus className="h-4 w-4" />
                   Thêm khách hàng
                 </Button>
                 <Button
                   onClick={() => loadCustomers(true)}
-                  className="bg-white text-slate-900 hover:bg-slate-100 border border-gray-200"
+                  variant="outline"
+                  className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 rounded-xl h-10 font-semibold shadow-sm transition-all active:scale-95"
                 >
                   {refreshing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : (
-                    <RefreshCw className="h-4 w-4" />
+                    <RefreshCw className="h-4 w-4 mr-2" />
                   )}
                   Làm mới
                 </Button>
@@ -487,54 +488,52 @@ export default function CustomersPage() {
               return (
                 <Card
                   key={stat.title}
-                  className={`border-slate-200/80 shadow-sm ${cardTone}`}
+                  className={`border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden relative group dark:bg-gray-900/50 ${cardTone}`}
                 >
-                  <CardContent className="flex items-start justify-between p-5">
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">
-                        {stat.title}
-                      </p>
-                      <p className="text-2xl font-semibold tracking-tight">
-                        {stat.value}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {stat.description}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl bg-slate-100 p-3 text-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                      <Icon className="h-5 w-5" />
-                    </div>
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
+                    <Icon className="w-24 h-24 text-blue-500" />
+                  </div>
+                  <CardContent className="p-6">
+                    <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      {stat.title}
+                    </p>
+                    <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                      {stat.value}
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
+                      {stat.description}
+                    </p>
                   </CardContent>
                 </Card>
               );
             })}
           </div>
 
-          <Card className="border-slate-200/80 shadow-sm">
-            <CardHeader className="space-y-4 border-b border-slate-200/70 bg-slate-50/70 dark:border-slate-700 dark:bg-slate-900/60">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden dark:bg-gray-900/50">
+            <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5 bg-white/50 dark:bg-gray-900/50">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <CardTitle>Danh sách khách hàng</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">Danh sách khách hàng</CardTitle>
+                  <CardDescription className="text-[13px] mt-1">
                     {filteredCustomers.length} / {tenantScopedCustomers.length}{" "}
                     khách hàng đang hiển thị
                   </CardDescription>
                 </div>
                 <div className="relative w-full max-w-sm">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <Input
                     value={search}
                     onChange={(event) => {
                       setSearch(event.target.value);
                       setCurrentPage(1);
                     }}
-                    placeholder="Tìm theo tên, số điện thoại, tenant..."
-                    className="pl-9"
+                    placeholder="Tìm theo tên, số điện thoại..."
+                    className="pl-9 rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
                   />
                 </div>
               </div>
               {error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-200">
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-200 mt-4">
                   {error}
                 </div>
               )}
@@ -562,22 +561,18 @@ export default function CustomersPage() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[960px] text-left">
-                    <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-[0.16em] text-muted-foreground dark:border-slate-700 dark:bg-slate-900/60">
+                  <table className="w-full min-w-[960px] text-left border-collapse">
+                    <thead className="bg-gray-50/50 dark:bg-gray-800/30">
                       <tr>
-                        <th className="px-6 py-4 font-semibold">Khách hàng</th>
-                        <th className="px-6 py-4 font-semibold">
-                          Số điện thoại
-                        </th>
+                        <th className="px-6 py-4 font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-widest text-[10px]">Khách hàng</th>
+                        <th className="px-6 py-4 font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-widest text-[10px]">Số điện thoại</th>
                         {!isTenantScoped ? (
-                          <th className="px-6 py-4 font-semibold">Tenant</th>
+                          <th className="px-6 py-4 font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-widest text-[10px]">Tenant</th>
                         ) : null}
-                        <th className="px-6 py-4 font-semibold">Rank</th>
-                        <th className="px-6 py-4 font-semibold">Tích điểm</th>
-                        <th className="px-6 py-4 font-semibold">Ngày tạo</th>
-                        <th className="px-6 py-4 text-right font-semibold">
-                          Thao tác
-                        </th>
+                        <th className="px-6 py-4 font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-widest text-[10px]">Rank</th>
+                        <th className="px-6 py-4 font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-widest text-[10px]">Tích điểm</th>
+                        <th className="px-6 py-4 font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-widest text-[10px]">Ngày tạo</th>
+                        <th className="px-6 py-4 text-right font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-widest text-[10px]">Thao tác</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -588,70 +583,63 @@ export default function CustomersPage() {
                         return (
                           <tr
                             key={customer.id}
-                            className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50/60 dark:border-slate-800 dark:hover:bg-slate-900/30"
+                            className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/80 dark:border-gray-800/50 dark:hover:bg-gray-800/50 transition-colors"
                           >
                             <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 text-sm font-semibold text-white shadow-sm">
+                              <div className="flex items-center gap-4">
+                                <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 text-indigo-700 dark:from-blue-900/40 dark:to-indigo-900/40 dark:text-indigo-400 flex items-center justify-center font-bold text-sm transition-transform hover:scale-105 shadow-sm">
                                   {getCustomerInitials(customer.full_name)}
                                 </div>
-                                <div>
-                                  <p className="font-medium text-slate-900 dark:text-slate-100">
-                                    {customer.full_name}
-                                  </p>
+                                <div className="flex flex-col">
+                                  <span className="font-semibold text-gray-900 dark:text-gray-100">{customer.full_name}</span>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
-                              <div className="inline-flex items-center gap-2">
-                                <Phone className="h-4 w-4 text-muted-foreground" />
+                            <td className="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">
+                              <div className="inline-flex items-center gap-1.5">
+                                <Phone className="h-3.5 w-3.5 text-gray-400" />
                                 {customer.phone}
                               </div>
                             </td>
                             {!isTenantScoped ? (
-                              <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
-                                {tenantById.get(customer.tenant_id)
-                                  ?.tenant_name ??
-                                  `Tenant #${customer.tenant_id}`}
+                              <td className="px-6 py-4 text-[13px] font-medium text-gray-600 dark:text-gray-400">
+                                {tenantById.get(customer.tenant_id)?.tenant_name ?? `Tenant #${customer.tenant_id}`}
                               </td>
                             ) : null}
                             <td className="px-6 py-4">
                               <Badge
                                 variant="outline"
-                                className="border-slate-200 bg-white/80 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                                className="bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 rounded-md px-2.5 py-0.5 font-bold text-[10px] uppercase tracking-widest"
                               >
                                 {customer.member_rank ?? loyaltyMeta.label}
                               </Badge>
                             </td>
-                            <td className="px-10 py-10">
-                              <Badge
-                                variant={loyaltyMeta.tone}
-                                className="gap-1.5"
-                              >
-                                <Star className="h-3.5 w-3.5" />
-                                {loyalty}
-                              </Badge>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-1.5">
+                                <Star className={`h-4 w-4 ${loyalty > 0 ? "text-orange-400 fill-orange-400" : "text-gray-300"}`} />
+                                <span className="font-semibold text-gray-900 dark:text-white">{loyalty}</span>
+                              </div>
                             </td>
-                            <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
+                            <td className="px-6 py-4 text-[13px] font-medium text-gray-500">
                               {formatDate(customer.created_at)}
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex justify-end gap-2">
                                 <Button
-                                  variant="outline"
+                                  variant="ghost"
                                   size="sm"
+                                  className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg"
                                   onClick={() => openEditDialog(customer)}
                                 >
                                   <Pencil className="h-4 w-4" />
-                                  Sửa
                                 </Button>
                                 <Button
-                                  variant="destructive"
+                                  variant="ghost"
                                   size="sm"
+                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
                                   onClick={() => setDeleteTarget(customer)}
                                 >
                                   <Trash2 className="h-4 w-4" />
-                                  Xoá
                                 </Button>
                               </div>
                             </td>

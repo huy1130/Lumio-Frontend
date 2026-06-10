@@ -135,6 +135,13 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "se
   completed: "success", processing: "warning", pending: "secondary", cancelled: "destructive",
 };
 
+const QUICK_CASH_AMOUNTS = [10000, 20000, 50000, 100000, 200000, 500000];
+
+const getLocalISODate = (d: Date) => {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
 function StaffOrdersView() {
   const { user } = useAuth();
   const shopId = user?.shop_id;
@@ -153,6 +160,9 @@ function StaffOrdersView() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"CASH" | "TRANSFER">("CASH");
+  const [cashReceived, setCashReceived] = useState<string>("");
+  const [showTransferConfirm, setShowTransferConfirm] = useState(false);
+  const [filterDateStr, setFilterDateStr] = useState<string>(getLocalISODate(new Date()));
 
   useEffect(() => {
     if (!shopId) return;
@@ -189,6 +199,14 @@ function StaffOrdersView() {
       return catOk && textOk;
     }), [posProducts, search, activeCategory]);
 
+  const filteredRecentOrders = useMemo(() => {
+    if (!filterDateStr) return recentOrders;
+    return recentOrders.filter(order => {
+      if (!order.created_at) return false;
+      return getLocalISODate(new Date(order.created_at)) === filterDateStr;
+    });
+  }, [recentOrders, filterDateStr]);
+
   const addToCart = (product: POSProduct) =>
     setCart((prev) => {
       const hit = prev.find((c) => c.product.id === product.id);
@@ -207,7 +225,7 @@ function StaffOrdersView() {
   const total = subtotal - discount + tax;
   const totalQty = cart.reduce((s, c) => s + c.qty, 0);
 
-  const handleCheckout = async () => {
+  const processCheckout = async () => {
     if (!shopId || cart.length === 0) return;
     setIsSubmitting(true);
     try {
@@ -226,11 +244,21 @@ function StaffOrdersView() {
       toast.success("Tạo đơn hàng thành công (Đang chờ xử lý)!");
       setRecentOrders(prev => [newOrder, ...prev]);
       clearCart();
+      setCashReceived("");
+      setShowTransferConfirm(false);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Không thể tạo đơn hàng";
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCheckoutClick = () => {
+    if (paymentMethod === "TRANSFER") {
+      setShowTransferConfirm(true);
+    } else {
+      processCheckout();
     }
   };
 
@@ -328,7 +356,7 @@ function StaffOrdersView() {
                   <p className="text-base font-semibold text-gray-700 dark:text-gray-300">Đang tải sản phẩm...</p>
                 </div>
               ) : visibleProducts.length > 0 ? (
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                   {visibleProducts.map((product) => (
                     <POSProductCard key={product.id} product={product}
                       inCart={cart.find((c) => c.product.id === product.id)?.qty ?? 0}
@@ -346,63 +374,85 @@ function StaffOrdersView() {
               )}
             </>
           ) : (
-            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
-              <div className="border-b border-gray-100 dark:border-gray-800 px-5 py-4">
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Đơn hàng gần đây ({recentOrders.length})</h3>
+            <div className="space-y-4 max-w-5xl mx-auto pb-10">
+              <div className="flex items-center justify-between px-2">
+                <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 tracking-tight">Đơn hàng <span className="text-gray-400 font-normal text-sm ml-1">({filteredRecentOrders.length})</span></h3>
+                <input 
+                  type="date"
+                  value={filterDateStr}
+                  onChange={(e) => setFilterDateStr(e.target.value)}
+                  className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors"
+                />
               </div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Mã đơn</TableHead><TableHead>Khách hàng</TableHead>
-                    <TableHead>Tổng tiền</TableHead><TableHead>Trạng thái</TableHead><TableHead>Thời gian</TableHead>
-                    <TableHead>Ghi chú / Thanh toán</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentOrders.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="py-12 text-center text-sm text-muted-foreground">
-                        Chưa có đơn hàng nào.
-                      </TableCell>
-                    </TableRow>
+              
+              <div className="grid grid-cols-1 gap-3">
+                  {filteredRecentOrders.length === 0 ? (
+                    <div className="py-12 text-center text-sm text-gray-500 bg-gray-50 dark:bg-gray-800/30 rounded-2xl border border-gray-100 dark:border-gray-800">
+                      Chưa có đơn hàng nào trong ngày này.
+                    </div>
                   ) : (
-                    recentOrders.map((order) => (
-                      <TableRow
+                    filteredRecentOrders.map((order) => (
+                      <div
                         key={order.id}
-                        className={cn(
-                          "cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50",
-                          selectedOrder?.id === order.id ? "bg-orange-50 dark:bg-orange-900/20 border-l-2 border-l-orange-500" : ""
-                        )}
                         onClick={() => setSelectedOrder(order)}
+                        className={cn(
+                          "group relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer bg-white dark:bg-gray-800/50",
+                          selectedOrder?.id === order.id 
+                            ? "border-orange-500 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-orange-900/20 ring-1 ring-orange-500/50" 
+                            : "border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-[0_4px_20px_rgb(0,0,0,0.04)]"
+                        )}
                       >
-                        <TableCell className="font-mono font-semibold text-sm">#{order.id}</TableCell>
-                        <TableCell>{order.customer?.full_name || "Khách lẻ"}</TableCell>
-                        <TableCell className="font-semibold text-orange-600">{formatCurrency(Number(order.grand_total))}</TableCell>
-                        <TableCell><Badge variant={STATUS_VARIANT[order.order_status?.toLowerCase()] || "secondary"} className="capitalize">{order.order_status}</Badge></TableCell>
-                        <TableCell className="text-gray-500 dark:text-gray-400 text-sm">{formatDate(order.created_at)}</TableCell>
-                        <TableCell>
-                          <p>{order.notes}</p>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                            {order.order_status === "PENDING" && (
-                              <>
-                                <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 h-7 px-2" onClick={() => setCancelOrderId(order.id)}>
-                                  Huỷ
-                                </Button>
-                                <Button size="sm" variant="outline" className="text-orange-600 border-orange-200 hover:bg-orange-50 h-7 px-2" onClick={() => handleCheckoutExisting(order.id)}>
-                                  <CheckCircle className="h-3 w-3 mr-1" /> Hoàn thành
-                                </Button>
-                              </>
-                            )}
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-5 flex-1">
+                            <div className={cn("flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center transition-colors", 
+                              order.order_status === "PENDING" ? "bg-orange-50/80 text-orange-600 dark:bg-orange-900/30" : 
+                              order.order_status === "COMPLETED" ? "bg-green-50/80 text-green-600 dark:bg-green-900/30" : "bg-gray-50 text-gray-500 dark:bg-gray-800"
+                            )}>
+                              {order.order_status === "PENDING" ? <Clock className="w-5 h-5" /> : 
+                               order.order_status === "COMPLETED" ? <CheckCircle className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                              <div className="flex items-center gap-2.5">
+                                <span className="font-bold text-gray-900 dark:text-gray-100 text-[15px]">#{order.id}</span>
+                                <Badge variant={STATUS_VARIANT[order.order_status?.toLowerCase()] || "secondary"} className="h-5 text-[10px] px-2 uppercase font-bold tracking-widest rounded-md">
+                                  {order.order_status}
+                                </Badge>
+                              </div>
+                              <span className="text-[13px] font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                <span>{order.customer?.full_name || "Khách lẻ"}</span>
+                                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                                <span>{formatDate(order.created_at)}</span>
+                              </span>
+                              {order.notes && (
+                                <span className="text-[13px] text-gray-400 dark:text-gray-500 line-clamp-1 italic">"{order.notes}"</span>
+                              )}
+                            </div>
                           </div>
-                        </TableCell>
-                      </TableRow>
+
+                          <div className="flex flex-col items-end gap-3 justify-center">
+                            <span className="text-[15px] font-semibold text-gray-800 dark:text-gray-200 tracking-tight">
+                              {formatCurrency(Number(order.grand_total))}
+                            </span>
+                            
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              {order.order_status === "PENDING" && (
+                                <>
+                                  <Button size="sm" variant="ghost" className="h-8 text-xs font-medium text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg px-3 transition-colors" onClick={() => setCancelOrderId(order.id)}>
+                                    Huỷ đơn
+                                  </Button>
+                                  <Button size="sm" className="h-8 text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white shadow-sm rounded-lg px-4 transition-colors" onClick={() => handleCheckoutExisting(order.id)}>
+                                    Hoàn thành
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     ))
                   )}
-                </TableBody>
-              </Table>
+              </div>
             </div>
           )}
         </div>
@@ -552,9 +602,86 @@ function StaffOrdersView() {
                   </button>
                 </div>
 
+                {paymentMethod === "CASH" && (
+                  <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300 py-2">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tiền khách đưa</p>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 text-xs text-orange-600 hover:text-orange-700 dark:text-orange-400 p-0" 
+                          onClick={() => setCashReceived(total.toString())}
+                        >
+                          Khách đưa đủ
+                        </Button>
+                      </div>
+                      <Input 
+                        placeholder="0" 
+                        type="number" 
+                        value={cashReceived}
+                        onChange={(e) => setCashReceived(e.target.value)}
+                        className="text-lg font-medium h-10 border-gray-200 dark:border-gray-700"
+                      />
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-1.5">
+                      {QUICK_CASH_AMOUNTS.map((amt) => (
+                        <Button 
+                          key={amt} 
+                          variant="outline" 
+                          size="sm"
+                          className="flex-1 min-w-[30%] text-xs border-gray-200 dark:border-gray-700 hover:border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all"
+                          onClick={() => {
+                            const current = parseFloat(cashReceived) || 0;
+                            setCashReceived((current + amt).toString());
+                          }}
+                        >
+                          +{formatCurrency(amt).replace(/\.00$/, '').replace(/,00$/, '')}
+                        </Button>
+                      ))}
+                      <Button 
+                         variant="secondary" 
+                         size="sm"
+                         className="flex-1 min-w-[30%] text-xs"
+                         onClick={() => setCashReceived("")}
+                      >
+                        Xóa
+                      </Button>
+                    </div>
+
+                    {(() => {
+                       const received = parseFloat(cashReceived) || 0;
+                       if (received === 0 && cashReceived === "") return null;
+                       
+                       const change = received - total;
+                       const isSufficient = change >= 0;
+                       
+                       return (
+                         <div className={`p-3 rounded-lg border flex justify-between items-center transition-colors duration-300 ${
+                           isSufficient 
+                             ? "bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-800/50" 
+                             : "bg-red-50/50 border-red-200 dark:bg-red-900/10 dark:border-red-800/50"
+                         }`}>
+                           <span className={`text-sm font-medium ${
+                             isSufficient ? "text-green-700 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                           }`}>
+                             {isSufficient ? "Tiền thối lại" : "Khách đưa thiếu"}
+                           </span>
+                           <span className={`text-lg font-bold tracking-tight ${
+                             isSufficient ? "text-green-700 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                           }`}>
+                             {isSufficient ? formatCurrency(change) : formatCurrency(Math.abs(change))}
+                           </span>
+                         </div>
+                       );
+                    })()}
+                  </div>
+                )}
+
                 <button
-                  disabled={isSubmitting}
-                  onClick={handleCheckout}
+                  disabled={isSubmitting || (paymentMethod === "CASH" && (parseFloat(cashReceived) || 0) < total)}
+                  onClick={handleCheckoutClick}
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:opacity-50 text-white font-semibold py-3 text-sm transition-colors shadow-sm shadow-orange-200 dark:shadow-orange-900/30">
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
                   {isSubmitting ? "Đang xử lý..." : "Thanh toán"}
@@ -568,6 +695,30 @@ function StaffOrdersView() {
         )}
       </div>
 
+
+      <Dialog open={showTransferConfirm} onOpenChange={(open) => !open && setShowTransferConfirm(false)}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="flex items-center justify-center bg-orange-100 text-orange-600 w-8 h-8 rounded-full dark:bg-orange-900/30 dark:text-orange-400">
+                <DollarSign className="h-5 w-5" />
+              </span>
+              Xác nhận chuyển khoản
+            </DialogTitle>
+            <DialogDescription className="py-4 text-sm text-gray-600 dark:text-gray-300">
+              Vui lòng kiểm tra ứng dụng ngân hàng để đảm bảo đã nhận được số tiền <span className="font-bold text-orange-600 dark:text-orange-400 text-lg">{formatCurrency(total)}</span> từ khách hàng.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2 flex sm:justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setShowTransferConfirm(false)} disabled={isSubmitting}>
+              Huỷ
+            </Button>
+            <Button type="button" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={processCheckout} disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />} Tiếp tục & Hoàn thành
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!cancelOrderId} onOpenChange={(open) => !open && setCancelOrderId(null)}>
         <DialogContent className="sm:max-w-[425px]">
@@ -595,25 +746,26 @@ function StaffOrdersView() {
 
 function POSProductCard({ product, inCart, onAdd }: { product: POSProduct; inCart: number; onAdd: () => void }) {
   return (
-    <div onClick={onAdd} className={cn("group relative flex flex-col rounded-2xl bg-white dark:bg-gray-800 border cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5",
-      inCart > 0 ? "border-orange-300 dark:border-orange-600 ring-1 ring-orange-200 dark:ring-orange-900" : "border-gray-200 dark:border-gray-700")}>
-      <div className={cn("relative flex items-center justify-center rounded-t-2xl h-32 text-5xl select-none bg-gray-100 dark:bg-gray-700")}>
-        📦
-        {inCart > 0 && (
-          <span className="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white">{inCart}</span>
-        )}
-        <button onClick={(e) => { e.stopPropagation(); onAdd(); }}
-          className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-gray-900 shadow-md text-orange-500 hover:bg-orange-500 hover:text-white transition-colors">
-          <ShoppingCart className="h-3.5 w-3.5" />
-        </button>
-      </div>
-      <div className="p-3 flex flex-col gap-1">
-        <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{product.category}</p>
-        <p className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-snug line-clamp-1">{product.name}</p>
-        <div className="flex items-baseline gap-1 mt-1">
-          <span className="text-sm font-extrabold text-orange-500">{formatCurrency(product.price)}</span>
-          <span className="text-[10px] text-gray-400 dark:text-gray-500">/ {product.unit}</span>
+    <div 
+      onClick={onAdd} 
+      className={cn(
+        "group relative flex flex-col items-center justify-center text-center p-4 rounded-2xl bg-white dark:bg-gray-800/50 border cursor-pointer transition-all duration-300 min-h-[120px]",
+        "hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:border-orange-300 dark:hover:border-orange-700",
+        inCart > 0 ? "border-orange-500 dark:border-orange-500 ring-1 ring-orange-500" : "border-gray-100 dark:border-gray-800"
+      )}
+    >
+      {inCart > 0 && (
+        <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-xs font-bold text-white shadow-sm animate-in zoom-in duration-200">
+          {inCart}
         </div>
+      )}
+      
+      <p className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-500 font-bold mb-1.5">{product.category}</p>
+      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug line-clamp-2 mb-2">{product.name}</p>
+      
+      <div className="flex items-baseline justify-center gap-1 mt-auto">
+        <span className="text-base font-bold text-orange-600 dark:text-orange-400">{formatCurrency(product.price)}</span>
+        <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">/{product.unit}</span>
       </div>
     </div>
   );
@@ -621,24 +773,27 @@ function POSProductCard({ product, inCart, onAdd }: { product: POSProduct; inCar
 
 function POSCartRow({ product, qty, onIncrease, onDecrease, onRemove }: { product: POSProduct; qty: number; onIncrease: () => void; onDecrease: () => void; onRemove: () => void }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl p-2.5 hover:bg-gray-50 dark:hover:bg-gray-800/60 group transition-colors">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xl select-none bg-gray-100 dark:bg-gray-700">📦</div>
+    <div className="flex items-start gap-3 rounded-xl p-3 bg-white dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800 hover:shadow-sm hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-200 group">
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">{product.name}</p>
-        <p className="text-xs font-bold text-orange-500 mt-0.5">{formatCurrency(product.price)}</p>
+        <div className="flex justify-between items-start">
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 leading-tight pr-4">{product.name}</p>
+          <button onClick={onRemove} className="text-gray-400 hover:text-red-500 transition-colors shrink-0 p-1 -mr-1 -mt-1 opacity-0 group-hover:opacity-100">
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-sm font-medium text-orange-600 dark:text-orange-400">{formatCurrency(product.price)}</p>
+          <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-900 rounded-md p-0.5 border border-gray-200 dark:border-gray-700">
+            <button onClick={onDecrease} className="flex h-6 w-6 items-center justify-center rounded text-gray-500 hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm transition-all">
+              <Minus className="h-3 w-3" />
+            </button>
+            <span className="w-6 text-center text-sm font-semibold text-gray-900 dark:text-gray-100 tabular-nums">{qty}</span>
+            <button onClick={onIncrease} className="flex h-6 w-6 items-center justify-center rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm border border-gray-200 dark:border-gray-700 hover:border-orange-500 hover:text-orange-600 transition-all">
+              <Plus className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
       </div>
-      <div className="flex items-center gap-1 shrink-0">
-        <button onClick={onDecrease} className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 hover:bg-orange-500 hover:text-white transition-colors">
-          <Minus className="h-3 w-3" />
-        </button>
-        <span className="w-5 text-center text-xs font-bold text-gray-800 dark:text-gray-200 tabular-nums">{qty}</span>
-        <button onClick={onIncrease} className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-colors">
-          <Plus className="h-3 w-3" />
-        </button>
-      </div>
-      <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 ml-1">
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
     </div>
   );
 }

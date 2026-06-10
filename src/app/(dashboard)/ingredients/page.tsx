@@ -8,6 +8,8 @@ import {
   Pencil,
   Plus,
   Trash2,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { AccessGuard } from "@/components/shared/AccessGuard";
@@ -212,16 +214,16 @@ function IngredientsContent() {
         key: "name",
         label: "Tên nguyên liệu",
         render: (row) => (
-          <div className="flex items-center gap-2">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-              <FlaskConical className="h-4 w-4" />
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-orange-600 dark:from-amber-900/40 dark:to-orange-900/40 dark:text-amber-300 shadow-sm">
+              <FlaskConical className="h-5 w-5" />
+            </div>
             <div>
-              <div className="font-medium text-gray-900 dark:text-gray-100">
+              <div className="font-semibold text-gray-900 dark:text-gray-100">
                 {row.name}
               </div>
               {row.description && (
-                <div className="text-xs text-muted-foreground line-clamp-1">
+                <div className="text-[13px] text-muted-foreground line-clamp-1 mt-0.5">
                   {row.description}
                 </div>
               )}
@@ -264,18 +266,18 @@ function IngredientsContent() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 rounded-full p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
               onClick={() => openEdit(row)}
             >
-              <Pencil className="h-3.5 w-3.5" />
+              <Pencil className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+              className="h-8 w-8 rounded-full p-0 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               onClick={() => setDeleteTarget(row)}
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         ),
@@ -287,44 +289,41 @@ function IngredientsContent() {
   return (
     <div>
       <Header />
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-8 animate-in fade-in duration-500">
         <PageHeader
           title="Nguyên liệu"
           description="Quản lý nguyên liệu dùng cho công thức sản phẩm và tồn kho."
           role={role}
           breadcrumbs={[{ label: "Shop Owner" }, { label: "Nguyên liệu" }]}
           actions={
-            <Button className="gap-2" onClick={openCreate}>
+            <Button 
+              className="bg-orange-500 hover:bg-orange-600 text-white gap-2 shadow-sm rounded-xl px-5 h-10 font-semibold transition-all active:scale-95" 
+              onClick={openCreate}
+            >
               <Plus className="h-4 w-4" /> Thêm nguyên liệu
             </Button>
           }
         />
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-gray-200 bg-transparent px-4 py-3 dark:border-gray-800">
-            <div className="text-xs uppercase tracking-wider text-gray-500">
-              Tổng nguyên liệu
-            </div>
-            <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {ingredients.length}
-            </div>
-          </div>
-          <div className="rounded-xl border border-gray-200 bg-transparent px-4 py-3 dark:border-gray-800">
-            <div className="text-xs uppercase tracking-wider text-gray-500">
-              Đang dùng
-            </div>
-            <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {activeCount}
-            </div>
-          </div>
-          <div className="rounded-xl border border-gray-200 bg-transparent px-4 py-3 dark:border-gray-800">
-            <div className="text-xs uppercase tracking-wider text-gray-500">
-              Ngừng dùng
-            </div>
-            <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {ingredients.length - activeCount}
-            </div>
-          </div>
+          <StatBox
+            title="Tổng nguyên liệu"
+            value={ingredients.length}
+            icon={<FlaskConical className="h-4 w-4" />}
+            tone="default"
+          />
+          <StatBox
+            title="Đang dùng"
+            value={activeCount}
+            icon={<CheckCircle2 className="h-4 w-4" />}
+            tone="green"
+          />
+          <StatBox
+            title="Ngừng dùng"
+            value={ingredients.length - activeCount}
+            icon={<XCircle className="h-4 w-4" />}
+            tone="red"
+          />
         </div>
 
         {error && (
@@ -342,37 +341,43 @@ function IngredientsContent() {
           </div>
         )}
 
-        <Card>
-          <CardHeader className="space-y-2">
-            <CardTitle>Danh sách nguyên liệu</CardTitle>
-            <CardDescription>
-              Nguyên liệu thuộc tenant của bạn. Dùng cho công thức sản phẩm và
-              quản lý kho sau này.
-            </CardDescription>
-            <div className="max-w-md pt-2">
-              <Input
-                placeholder="Tìm theo tên, đơn vị, mô tả hoặc trạng thái..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+        <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden dark:bg-gray-900/50">
+          <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5 bg-white/50 dark:bg-gray-900/50">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <CardTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">Danh sách nguyên liệu</CardTitle>
+                <CardDescription className="text-[13px] mt-1">
+                  Nguyên liệu thuộc tenant của bạn. Dùng cho công thức sản phẩm và quản lý kho sau này.
+                </CardDescription>
+              </div>
+              <div className="relative w-full max-w-sm">
+                <Input
+                  placeholder="Tìm theo tên, đơn vị, mô tả hoặc trạng thái..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-4 rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 h-10"
+                />
+              </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {loading ? (
-              <div className="flex items-center justify-center py-16 text-muted-foreground">
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Đang tải...
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+                <span className="text-sm font-medium text-gray-500">Đang tải...</span>
               </div>
             ) : (
-              <DataTable
-                columns={columns}
-                data={tableRows}
-                emptyMessage={
-                  search
-                    ? "Không tìm thấy nguyên liệu phù hợp."
-                    : "Chưa có nguyên liệu nào. Nhấn «Thêm nguyên liệu» để bắt đầu."
-                }
-              />
+              <div className="px-6 py-4 overflow-x-auto">
+                <DataTable
+                  columns={columns}
+                  data={tableRows}
+                  emptyMessage={
+                    search
+                      ? "Không tìm thấy nguyên liệu phù hợp."
+                      : "Chưa có nguyên liệu nào. Nhấn «Thêm nguyên liệu» để bắt đầu."
+                  }
+                />
+              </div>
             )}
           </CardContent>
         </Card>
@@ -511,5 +516,42 @@ function IngredientsContent() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function StatBox({
+  title,
+  value,
+  icon,
+  tone = "default",
+}: {
+  title: string;
+  value: number;
+  icon: React.ReactNode;
+  tone?: "default" | "green" | "amber" | "red";
+}) {
+  const toneClass =
+    tone === "green"
+      ? "text-green-500"
+      : tone === "amber"
+        ? "text-orange-500"
+        : tone === "red"
+          ? "text-red-500"
+          : "text-blue-500";
+
+  return (
+    <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden relative group dark:bg-gray-900/50">
+      <div className={`absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500 ${toneClass}`}>
+        <div className="[&>svg]:w-24 [&>svg]:h-24">{icon}</div>
+      </div>
+      <CardContent className="p-6">
+        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          {title}
+        </p>
+        <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+          {value}
+        </h3>
+      </CardContent>
+    </Card>
   );
 }

@@ -507,7 +507,7 @@ function ShopOwnerInventoryView() {
   return (
     <div>
       <Header />
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-8 animate-in fade-in duration-500">
         <PageHeader
           title="Tồn kho"
           description={
@@ -518,32 +518,29 @@ function ShopOwnerInventoryView() {
           role="shop_owner"
           breadcrumbs={[{ label: "Shop Owner" }, { label: "Tồn kho" }]}
           actions={
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               <Button
                 variant="outline"
-                size="sm"
-                className="gap-2"
+                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 rounded-xl h-10 font-semibold shadow-sm transition-all active:scale-95"
                 onClick={() => void loadInventoryData()}
                 disabled={loading || shopId == null}
               >
                 <RefreshCw
-                  className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                  className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
                 />
                 Làm mới
               </Button>
               <Button
                 variant="outline"
-                size="sm"
-                className="gap-2"
+                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 rounded-xl h-10 font-semibold shadow-sm transition-all active:scale-95"
                 onClick={() => setConfigureOpen(true)}
                 disabled={shopId == null}
               >
-                <Settings2 className="h-4 w-4" />
+                <Settings2 className="h-4 w-4 mr-2" />
                 Cấu hình
               </Button>
               <Button
-                size="sm"
-                className="gap-2"
+                className="bg-orange-500 hover:bg-orange-600 text-white gap-2 shadow-sm rounded-xl px-5 h-10 font-semibold transition-all active:scale-95"
                 onClick={() => setAddOpen(true)}
                 disabled={shopId == null || ingredients.length === 0}
               >
@@ -583,7 +580,7 @@ function ShopOwnerInventoryView() {
           </div>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-3">
           <StatBox
             title="Dòng tồn kho"
             value={rows.length}
@@ -658,36 +655,43 @@ function ShopOwnerInventoryView() {
           </Card>
         )}
 
-        <Card>
-          <CardHeader className="space-y-2">
-            <CardTitle>Chi tiết tồn kho</CardTitle>
-            <CardDescription>
-              Mỗi dòng là một nguyên liệu đã từng nhập kho tại cửa hàng này.
-            </CardDescription>
-            <div className="max-w-md pt-2">
-              <Input
-                placeholder="Tìm theo tên nguyên liệu, đơn vị..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+        <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden dark:bg-gray-900/50">
+          <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5 bg-white/50 dark:bg-gray-900/50">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <CardTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">Chi tiết tồn kho</CardTitle>
+                <CardDescription className="text-[13px] mt-1">
+                  Mỗi dòng là một nguyên liệu đã từng nhập kho tại cửa hàng này.
+                </CardDescription>
+              </div>
+              <div className="relative w-full max-w-sm">
+                <Input
+                  placeholder="Tìm theo tên nguyên liệu, đơn vị..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-4 rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 h-10"
+                />
+              </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {loading ? (
-              <div className="flex items-center justify-center py-16 text-muted-foreground">
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Đang tải tồn kho...
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+                <span className="text-sm font-medium text-gray-500">Đang tải tồn kho...</span>
               </div>
             ) : (
-              <DataTable
-                columns={columns}
-                data={filteredRows}
-                emptyMessage={
-                  search
-                    ? "Không tìm thấy dòng tồn kho phù hợp."
-                    : "Chưa có tồn kho. Dùng «Nhập kho» để thêm nguyên liệu đầu tiên."
-                }
-              />
+              <div className="px-6 py-4 overflow-x-auto">
+                <DataTable
+                  columns={columns}
+                  data={filteredRows}
+                  emptyMessage={
+                    search
+                      ? "Không tìm thấy dòng tồn kho phù hợp."
+                      : "Chưa có tồn kho. Dùng «Nhập kho» để thêm nguyên liệu đầu tiên."
+                  }
+                />
+              </div>
             )}
           </CardContent>
         </Card>
@@ -938,22 +942,26 @@ function StatBox({
 }) {
   const toneClass =
     tone === "green"
-      ? "text-green-600 dark:text-green-400"
+      ? "text-green-500"
       : tone === "amber"
-        ? "text-amber-600 dark:text-amber-400"
+        ? "text-orange-500"
         : tone === "red"
-          ? "text-red-600 dark:text-red-400"
-          : "text-gray-600 dark:text-gray-400";
+          ? "text-red-500"
+          : "text-blue-500";
 
   return (
-    <div className="rounded-xl border border-gray-200 px-4 py-3 dark:border-gray-800">
-      <div className="flex items-center justify-between text-xs uppercase tracking-wider text-gray-500">
-        {title}
-        <span className={toneClass}>{icon}</span>
+    <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden relative group dark:bg-gray-900/50">
+      <div className={`absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500 ${toneClass}`}>
+        <div className="[&>svg]:w-24 [&>svg]:h-24">{icon}</div>
       </div>
-      <div className="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100">
-        {value}
-      </div>
-    </div>
+      <CardContent className="p-6">
+        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          {title}
+        </p>
+        <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+          {value}
+        </h3>
+      </CardContent>
+    </Card>
   );
 }

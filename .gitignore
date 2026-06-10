@@ -39,3 +39,6 @@ next-env.d.ts
 
 # local notes
 AUTH_THEME_README.md
+# AI Agent Skills
+.agents/
+skills-lock.json

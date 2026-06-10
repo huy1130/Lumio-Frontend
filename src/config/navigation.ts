@@ -44,10 +44,7 @@ const adminNav: NavSection[] = [
     items: [
       { title: "Configure AI", href: "/ai/config", icon: BrainCircuit },
       { title: "AI Statistics", href: "/ai/stats", icon: BarChart3 },
-      { title: "AI Charts", href: "/ai/charts", icon: BrainCircuit },
-      { title: "Trends", href: "/trends", icon: TrendingUp },
-      { title: "Reports", href: "/reports", icon: BarChart3 },
-      { title: "Audit Logs", href: "/audit-logs", icon: ClipboardList },
+
       { title: "Export Data", href: "/export", icon: FileDown },
     ],
   },
