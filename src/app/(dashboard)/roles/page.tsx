@@ -47,15 +47,7 @@ const EMPTY_FORM: CreateRolePayload = {
   permissions: undefined,
 };
 
-function parsePermissionsJson(raw: string): Record<string, unknown> | undefined {
-  const trimmed = raw.trim();
-  if (!trimmed) return undefined;
-  const parsed = JSON.parse(trimmed) as unknown;
-  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-    return parsed as Record<string, unknown>;
-  }
-  throw new Error("Permissions phải là object JSON hợp lệ.");
-}
+
 
 export default function RolesPage() {
   return (
@@ -73,7 +65,7 @@ function RolesContent() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<ApiRole | null>(null);
   const [form, setForm] = useState<CreateRolePayload>(EMPTY_FORM);
-  const [permissionsJson, setPermissionsJson] = useState("");
+  const [availablePermissions, setAvailablePermissions] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -86,6 +78,8 @@ function RolesContent() {
     try {
       const data = await roleService.getAll();
       setRoles(data);
+      const perms = await roleService.getPermissions();
+      setAvailablePermissions(perms);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Không tải được danh sách role");
     } finally {
@@ -99,8 +93,11 @@ function RolesContent() {
 
   function openCreate() {
     setEditing(null);
-    setForm(EMPTY_FORM);
-    setPermissionsJson("");
+    setForm({
+      role_code: "",
+      description: "",
+      permissions: {},
+    });
     setFormError(null);
     setModalOpen(true);
   }
@@ -110,11 +107,8 @@ function RolesContent() {
     setForm({
       role_code: role.role_code,
       description: role.description ?? "",
-      permissions: role.permissions ?? undefined,
+      permissions: role.permissions ?? {},
     });
-    setPermissionsJson(
-      role.permissions ? JSON.stringify(role.permissions, null, 2) : "",
-    );
     setFormError(null);
     setModalOpen(true);
   }
@@ -127,19 +121,10 @@ function RolesContent() {
     setSaving(true);
     setFormError(null);
     try {
-      let permissions: Record<string, unknown> | undefined;
-      try {
-        permissions = parsePermissionsJson(permissionsJson);
-      } catch (e: unknown) {
-        setFormError(e instanceof Error ? e.message : "JSON permissions không hợp lệ");
-        setSaving(false);
-        return;
-      }
-
       const payload: CreateRolePayload = {
         role_code: form.role_code.trim().toUpperCase(),
         description: form.description?.trim() || undefined,
-        permissions,
+        permissions: form.permissions || {},
       };
 
       if (editing) {
@@ -317,15 +302,49 @@ function RolesContent() {
                 }
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="permissions">Permissions (JSON, tùy chọn)</Label>
-              <textarea
-                id="permissions"
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
-                value={permissionsJson}
-                onChange={(e) => setPermissionsJson(e.target.value)}
-                placeholder='{"can_manage_products": true}'
-              />
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Quyền hạn (Permissions)</Label>
+              {availablePermissions.length === 0 ? (
+                <div className="text-xs text-muted-foreground py-2">Đang tải danh sách quyền từ hệ thống...</div>
+              ) : (
+                <div className="space-y-4 max-h-[200px] overflow-y-auto pr-1 border rounded-lg p-3 bg-gray-50/50 dark:bg-gray-900/30">
+                  {availablePermissions.map((group) => (
+                    <div key={group.module} className="space-y-1.5">
+                      <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{group.module}</h4>
+                      <div className="grid gap-2">
+                        {group.permissions.map((p: any) => {
+                          const isChecked = !!(form.permissions as Record<string, any>)?.[p.key];
+                          return (
+                            <label key={p.key} className="flex items-start gap-2.5 text-xs text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setForm((prev) => {
+                                    const currentPerms = { ...(prev.permissions as Record<string, any> || {}) };
+                                    if (checked) {
+                                      currentPerms[p.key] = true;
+                                    } else {
+                                      delete currentPerms[p.key];
+                                    }
+                                    return { ...prev, permissions: currentPerms };
+                                  });
+                                }}
+                              />
+                              <div>
+                                <span className="font-semibold block">{p.key}</span>
+                                <span className="text-[11px] text-muted-foreground">{p.name}</span>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>

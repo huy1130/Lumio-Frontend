@@ -12,6 +12,10 @@ export const roleService = {
     return api.get<ApiRole>(`${BASE}/${id}`);
   },
 
+  getPermissions(): Promise<Array<{ module: string; permissions: Array<{ key: string; name: string }> }>> {
+    return api.get<Array<{ module: string; permissions: Array<{ key: string; name: string }> }>>(`${BASE}/permissions`);
+  },
+
   create(payload: CreateRolePayload): Promise<ApiRole> {
     return api.post<ApiRole>(BASE, payload);
   },

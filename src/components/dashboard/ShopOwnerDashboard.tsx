@@ -17,12 +17,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { orderService, type ApiOrder } from "@/lib/services/orderService";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Loader2, ChevronLeft, ChevronRight, DollarSign, ShoppingBag, TrendingUp, Calendar } from "lucide-react";
+import { Loader2, DollarSign, ShoppingBag, TrendingUp, Percent } from "lucide-react";
+import { reportService, type SalesReportResponse } from "@/lib/services/reportService";
 
 const SKELETON_ROWS = 5;
 const SKELETON_BARS = [40, 65, 50, 80, 55, 70, 45];
@@ -227,7 +227,7 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
   const { user } = useAuth();
   const shopId = user?.shop_id;
   
-  const [orders, setOrders] = useState<ApiOrder[]>([]);
+  const [report, setReport] = useState<SalesReportResponse | null>(null);
   const [loading, setLoading] = useState(true);
   
   const getLocalISO = (d: Date) => {
@@ -246,112 +246,31 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
   });
 
   useEffect(() => {
-    if (!shopId) return;
-    orderService.getAll(shopId).then(res => {
-      // Only care about completed orders for dashboard stats
-      setOrders(res.filter(o => o.order_status === "COMPLETED"));
-    }).catch(console.error).finally(() => setLoading(false));
-  }, [shopId]);
+    setLoading(true);
+    reportService.getSalesReport({
+      startDate: dateRange.from,
+      endDate: dateRange.to,
+      shopId: shopId || undefined
+    })
+    .then(res => {
+      setReport(res);
+    })
+    .catch(console.error)
+    .finally(() => setLoading(false));
+  }, [shopId, dateRange.from, dateRange.to]);
 
-  // Compute Product Stats
-  const productStats = useMemo(() => {
-    const map = new Map<number, { name: string; qty: number; revenue: number }>();
-    orders.forEach(o => {
-      o.order_items?.forEach(item => {
-        const id = item.product_id;
-        const name = item.product?.product_name || `Món #${id}`;
-        const qty = Number(item.quantity) || 0;
-        const rev = qty * (Number(item.unit_price) || 0);
-        
-        if (map.has(id)) {
-          const e = map.get(id)!;
-          e.qty += qty;
-          e.revenue += rev;
-        } else {
-          map.set(id, { name, qty, revenue: rev });
-        }
-      });
-    });
-    
-    const arr = Array.from(map.values());
-    const sortedDesc = [...arr].sort((a, b) => b.qty - a.qty);
-    const sortedAsc = [...arr].sort((a, b) => a.qty - b.qty);
-    
-    return { top: sortedDesc.slice(0, 5), bottom: sortedAsc.slice(0, 5) };
-  }, [orders]);
+  const summary = report?.summary || {
+    totalRevenue: 0,
+    totalOrders: 0,
+    averageOrderValue: 0,
+    cancelRatio: 0,
+    estimatedProfit: 0
+  };
 
-  // Compute Daily Revenue (custom date range)
-  const dateRangedRevenue = useMemo(() => {
-    const map = new Map<string, number>();
-
-    orders.forEach(o => {
-      if (!o.created_at) return;
-      const d = new Date(o.created_at);
-      const iso = getLocalISO(d);
-      const total = Number(o.grand_total) || 0;
-      map.set(iso, (map.get(iso) || 0) + total);
-    });
-
-    const start = new Date(dateRange.from);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(dateRange.to);
-    end.setHours(23, 59, 59, 999);
-
-    // Limit maximum range to 60 days to prevent chart crowding / performance issues
-    const diffTime = end.getTime() - start.getTime();
-    let totalDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-    if (totalDays > 60) totalDays = 60; 
-
-    const data = [];
-    for (let i = 0; i < totalDays; i++) {
-      const d = new Date(start);
-      d.setDate(d.getDate() + i);
-      const iso = getLocalISO(d);
-      data.push({
-        date: d.toLocaleDateString("vi-VN", { day: '2-digit', month: '2-digit' }),
-        revenue: map.get(iso) || 0
-      });
-    }
-
-    return data;
-  }, [orders, dateRange]);
-
-  // Compute Monthly Revenue (last 6 months)
-  const monthlyRevenue = useMemo(() => {
-    const map = new Map<string, number>();
-
-    orders.forEach(o => {
-      if (!o.created_at) return;
-      const d = new Date(o.created_at);
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const key = `${yyyy}-${mm}`;
-      const total = Number(o.grand_total) || 0;
-      map.set(key, (map.get(key) || 0) + total);
-    });
-
-    const data = [];
-    const today = new Date();
-    
-    // Generate the last 6 months including current month
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const key = `${yyyy}-${mm}`;
-      
-      data.push({
-        date: `Th ${mm}/${yyyy.toString().slice(2)}`,
-        revenue: map.get(key) || 0
-      });
-    }
-
-    return data;
-  }, [orders]);
-
-  const totalRevenue = useMemo(() => orders.reduce((sum, o) => sum + (Number(o.grand_total) || 0), 0), [orders]);
-  const totalOrders = orders.length;
-  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+  const topProducts = report?.topProducts || [];
+  const bottomProducts = report?.bottomProducts || [];
+  const dateRangedRevenue = report?.dailyBreakdown || [];
+  const monthlyRevenue = report?.monthlyBreakdown || [];
 
   return (
     <div>
@@ -364,7 +283,7 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
           breadcrumbs={[{ label: role === "cashier" ? "Thu ngân" : "Quản lý Cửa hàng" }, { label: "Dashboard" }]}
         />
 
-        {loading ? (
+        {loading && !report ? (
           <div className="flex justify-center items-center py-32">
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
@@ -374,48 +293,78 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
         ) : (
           <div className="flex flex-col gap-8 animate-in fade-in duration-500">
             {/* KPI Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] dark:bg-gray-900/50 rounded-2xl overflow-hidden relative group">
                 <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
-                  <DollarSign className="w-32 h-32 text-orange-500" />
+                  <DollarSign className="w-24 h-24 text-orange-500" />
                 </div>
-                <CardContent className="p-6">
-                  <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Tổng Doanh Thu</p>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    {formatCurrency(totalRevenue)}
+                <CardContent className="p-5">
+                  <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Tổng Doanh Thu</p>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    {formatCurrency(summary.totalRevenue)}
                   </h3>
-                  <p className="text-xs text-green-600 dark:text-green-400 mt-2 font-medium flex items-center">
-                    Tất cả thời gian
+                  <p className="text-[11px] text-green-600 dark:text-green-400 mt-2 font-medium">
+                    Trong khoảng lọc
                   </p>
                 </CardContent>
               </Card>
 
               <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] dark:bg-gray-900/50 rounded-2xl overflow-hidden relative group">
                 <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
-                  <ShoppingBag className="w-32 h-32 text-blue-500" />
+                  <ShoppingBag className="w-24 h-24 text-blue-500" />
                 </div>
-                <CardContent className="p-6">
-                  <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Tổng Đơn Hàng</p>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    {totalOrders} <span className="text-base font-medium text-gray-500">đơn</span>
+                <CardContent className="p-5">
+                  <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Tổng Đơn Hàng</p>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    {summary.totalOrders} <span className="text-sm font-medium text-gray-500">đơn</span>
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium flex items-center">
-                    Đã thanh toán thành công
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-2 font-medium">
+                    Đã hoàn thành
                   </p>
                 </CardContent>
               </Card>
 
               <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] dark:bg-gray-900/50 rounded-2xl overflow-hidden relative group">
                 <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
-                  <TrendingUp className="w-32 h-32 text-green-500" />
+                  <TrendingUp className="w-24 h-24 text-green-500" />
                 </div>
-                <CardContent className="p-6">
-                  <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Giá Trị Trung Bình</p>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    {formatCurrency(avgOrderValue)}
+                <CardContent className="p-5">
+                  <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Giá Trị Trung Bình</p>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    {formatCurrency(summary.averageOrderValue)}
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium flex items-center">
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-2 font-medium">
                     / đơn hàng
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] dark:bg-gray-900/50 rounded-2xl overflow-hidden relative group">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
+                  <DollarSign className="w-24 h-24 text-emerald-500" />
+                </div>
+                <CardContent className="p-5">
+                  <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Lợi Nhuận Ước Tính</p>
+                  <h3 className="text-xl font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">
+                    {formatCurrency(summary.estimatedProfit)}
+                  </h3>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-2 font-medium">
+                    (Doanh thu - Giá vốn)
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] dark:bg-gray-900/50 rounded-2xl overflow-hidden relative group">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
+                  <Percent className="w-24 h-24 text-red-500" />
+                </div>
+                <CardContent className="p-5">
+                  <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Tỉ Lệ Hủy Đơn</p>
+                  <h3 className="text-xl font-bold text-red-600 dark:text-red-400 tracking-tight">
+                    {(summary.cancelRatio * 100).toFixed(1)}%
+                  </h3>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-2 font-medium">
+                    Số đơn hủy / Tổng đơn
                   </p>
                 </CardContent>
               </Card>
@@ -460,13 +409,13 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
               <RealProductList
                 title="Các món bán chạy nhất"
                 description="Top 5 món được khách hàng yêu thích và đặt nhiều nhất"
-                data={productStats.top}
+                data={topProducts.map((p: any) => ({ name: p.name, qty: p.quantity, revenue: p.revenue }))}
                 isTop={true}
               />
               <RealProductList
                 title="Các món bán chậm"
                 description="Top 5 món có lượt mua thấp nhất (cần xem xét lại)"
-                data={productStats.bottom}
+                data={bottomProducts.map((p: any) => ({ name: p.name, qty: p.quantity, revenue: p.revenue }))}
                 isTop={false}
               />
             </div>

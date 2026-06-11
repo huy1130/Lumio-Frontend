@@ -161,6 +161,14 @@ export function Sidebar() {
                     <li key={item.href}>
                       <Link
                         href={item.href}
+                        onClick={() => {
+                          console.log("[Sidebar Link Clicked]", {
+                            title: item.title,
+                            href: item.href,
+                            currentRole: role,
+                            currentPathname: pathname
+                          });
+                        }}
                         title={isCollapsed ? item.title : undefined}
                         className={linkClass}
                       >
