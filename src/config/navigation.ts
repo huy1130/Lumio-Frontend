@@ -85,6 +85,10 @@ const shopOwnerNav: NavSection[] = [
 
 
   {
+    title: "AI",
+    items: [{ title: "AI Chatbot", href: "/ai/chatbot", icon: BrainCircuit }],
+  },
+  {
     title: "System",
     items: [
       { title: "Nhân viên", href: "/cashier", icon: Users },

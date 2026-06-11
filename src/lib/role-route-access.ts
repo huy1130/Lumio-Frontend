@@ -53,6 +53,7 @@ export const SHOP_OWNER_ALLOWED_PATH_PREFIXES = [
   "/audit-logs",
   "/export",
   "/ai/charts",
+  "/ai/chatbot",
   "/cashier",
   "/shifts",
 ] as const;

@@ -6,12 +6,14 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BrainCircuit, Send, Bot, User } from "lucide-react";
+import { BrainCircuit, Send, Bot, User, Loader2 } from "lucide-react";
 import { AccessGuard } from "@/components/shared/AccessGuard";
+import { chatbotService } from "@/lib/services/chatbotService";
 
 export default function AIChatbotPage() {
+  // Chatbot accesses by shop_owner and cashier to query operations and statistics
   return (
-    <AccessGuard roles={["cashier"]}>
+    <AccessGuard roles={["shop_owner", "cashier"]}>
       <AIChatbotContent />
     </AccessGuard>
   );
@@ -20,35 +22,42 @@ export default function AIChatbotPage() {
 interface Message { role: "user" | "bot"; text: string; }
 
 const INITIAL: Message[] = [
-  { role: "bot", text: "👋 Hi! I'm your AI assistant. Ask me anything about products, orders, or how to use the POS system." },
+  { role: "bot", text: "👋 Xin chào! Tôi là trợ lý AI thông minh Lumio. Tôi có thể hỗ trợ bạn kiểm tra báo cáo doanh số, lợi nhuận, top món bán chạy, quy trình POS hoặc trả hàng. Hãy hỏi tôi bất cứ điều gì!" },
 ];
 
 const QUICK = [
-  "How do I process a return?",
-  "What's our best-selling product today?",
-  "How to apply a discount?",
-  "Check stock for Espresso Beans",
+  "Doanh thu tháng này thế nào?",
+  "Món nào bán chạy nhất?",
+  "Cách áp dụng giảm giá?",
+  "Quy trình hoàn tiền thế nào?",
 ];
-
-const BOT_REPLIES: Record<string, string> = {
-  "How do I process a return?":        "To process a return: go to Payments → find the order → click 'Refund'. Select items and reason, then confirm.",
-  "What's our best-selling product today?": "Today's top seller is **Espresso Beans 1kg** with 18 units sold, generating $449.82 in revenue.",
-  "How to apply a discount?":          "When creating an order, tap the discount icon (%) in the order summary panel. You can enter a % or fixed amount.",
-  "Check stock for Espresso Beans":    "**Espresso Beans 1kg** — Current stock: 50 kg ✅. (Min: 10 kg). Stock is healthy!",
-};
 
 function AIChatbotContent() {
   const [messages, setMessages] = useState<Message[]>(INITIAL);
   const [input, setInput]       = useState("");
+  const [loading, setLoading]   = useState(false);
 
-  function send(text: string) {
-    if (!text.trim()) return;
-    const botReply: Message = {
-      role: "bot",
-      text: BOT_REPLIES[text] ?? `I understand you're asking about "${text}". This feature will connect to the AI backend when available.`,
-    };
-    setMessages((prev) => [...prev, { role: "user", text }, botReply]);
+  async function send(text: string) {
+    if (!text.trim() || loading) return;
+
+    // 1. Add user message
+    setMessages((prev) => [...prev, { role: "user", text }]);
     setInput("");
+    setLoading(true);
+
+    try {
+      // 2. Call backend chatbot API
+      const res = await chatbotService.ask(text);
+      setMessages((prev) => [...prev, { role: "bot", text: res.reply }]);
+    } catch (err: any) {
+      console.error(err);
+      setMessages((prev) => [
+        ...prev,
+        { role: "bot", text: `⚠️ Đã có lỗi xảy ra: ${err.message || "Không thể kết nối đến máy chủ AI."}` }
+      ]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -57,9 +66,9 @@ function AIChatbotContent() {
       <div className="p-6 space-y-6">
         <PageHeader
           title="AI Chatbot"
-          description="Ask the AI assistant for help with orders, products, and procedures"
-          role="cashier"
-          breadcrumbs={[{ label: "Cashier" }, { label: "AI Chatbot" }]}
+          description="Hỏi trợ lý ảo thông minh về doanh thu, các quy trình và thông tin cửa hàng."
+          role="shop_owner"
+          breadcrumbs={[{ label: "Trợ lý ảo" }, { label: "AI Chatbot" }]}
         />
         <div className="grid gap-6 lg:grid-cols-4">
           <Card className="lg:col-span-3 flex flex-col" style={{ minHeight: "520px" }}>
@@ -69,7 +78,7 @@ function AIChatbotContent() {
                 AI Assistant
                 <span className="ml-auto flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 font-normal">
                   <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                  Online (demo)
+                  Trực tuyến
                 </span>
               </CardTitle>
             </CardHeader>
@@ -84,7 +93,7 @@ function AIChatbotContent() {
                     }`}>
                       {m.role === "bot" ? <Bot className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
                     </div>
-                    <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm ${
+                    <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap ${
                       m.role === "bot"
                         ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-sm"
                         : "bg-indigo-600 text-white rounded-tr-sm"
@@ -93,16 +102,27 @@ function AIChatbotContent() {
                     </div>
                   </div>
                 ))}
+                {loading && (
+                  <div className="flex gap-2.5">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    </div>
+                    <div className="max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-tl-sm italic">
+                      Đang xử lý câu trả lời...
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="flex gap-2 mt-2">
                 <Input
-                  placeholder="Ask me anything..."
+                  placeholder="Hỏi bất cứ điều gì..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && send(input)}
                   className="flex-1"
+                  disabled={loading}
                 />
-                <Button size="icon" onClick={() => send(input)} className="bg-indigo-600 hover:bg-indigo-700 shrink-0">
+                <Button size="icon" onClick={() => send(input)} className="bg-indigo-600 hover:bg-indigo-700 shrink-0" disabled={loading}>
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
@@ -110,13 +130,14 @@ function AIChatbotContent() {
           </Card>
 
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-sm">Quick Questions</CardTitle></CardHeader>
+            <CardHeader className="pb-3"><CardTitle className="text-sm">Câu hỏi gợi ý</CardTitle></CardHeader>
             <CardContent className="space-y-2">
               {QUICK.map((q) => (
                 <button
                   key={q}
                   onClick={() => send(q)}
                   className="w-full text-left rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-xs text-gray-700 dark:text-gray-300 hover:border-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 dark:hover:border-indigo-700 transition-colors"
+                  disabled={loading}
                 >
                   {q}
                 </button>
