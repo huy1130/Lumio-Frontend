@@ -13,6 +13,19 @@ export interface SalesReportResponse {
     quantity: number;
     revenue: number;
   }>;
+  bottomProducts: Array<{
+    name: string;
+    quantity: number;
+    revenue: number;
+  }>;
+  dailyBreakdown: Array<{
+    date: string;
+    revenue: number;
+  }>;
+  monthlyBreakdown: Array<{
+    date: string;
+    revenue: number;
+  }>;
   metadata: {
     startDate: string | null;
     endDate: string | null;
