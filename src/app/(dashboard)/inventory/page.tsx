@@ -62,6 +62,7 @@ type InventoryRow = {
   theorical_quantity: number;
   adjusted_quantity: number | null;
   actual_quantity: number;
+  minimum_threshold: number;
   status: StockStatus;
   updated_at: string;
 } & Record<string, unknown>;
@@ -103,7 +104,8 @@ function toRows(
     theorical_quantity: item.theorical_quantity,
     adjusted_quantity: item.adjusted_quantity,
     actual_quantity: item.actual_quantity ?? 0,
-    status: getStockStatus(item.actual_quantity, threshold),
+    minimum_threshold: item.minimum_threshold ?? 0,
+    status: getStockStatus(item.actual_quantity, item.minimum_threshold ?? threshold),
     updated_at: item.updated_at,
   }));
 }
@@ -158,7 +160,6 @@ function ShopOwnerInventoryView() {
 
   const [configureOpen, setConfigureOpen] = useState(false);
   const [configureForm, setConfigureForm] = useState({
-    minimum_threshold: "",
     reorder_quantity: "",
   });
   const [configureSaving, setConfigureSaving] = useState(false);
@@ -178,6 +179,7 @@ function ShopOwnerInventoryView() {
     actual_quantity: "",
     theorical_quantity: "",
     adjusted_quantity: "",
+    minimum_threshold: "",
   });
   const [adjustSaving, setAdjustSaving] = useState(false);
 
@@ -216,8 +218,6 @@ function ShopOwnerInventoryView() {
       setAlerts(alertList);
       setIngredients(ingredientList.filter((i) => i.is_active));
       setConfigureForm({
-        minimum_threshold:
-          inv.minimum_threshold != null ? String(inv.minimum_threshold) : "",
         reorder_quantity:
           inv.reorder_quantity != null ? String(inv.reorder_quantity) : "",
       });
@@ -255,12 +255,8 @@ function ShopOwnerInventoryView() {
     setConfigureSaving(true);
     try {
       const payload: {
-        minimum_threshold?: number;
         reorder_quantity?: number;
       } = {};
-      if (configureForm.minimum_threshold.trim() !== "") {
-        payload.minimum_threshold = Number(configureForm.minimum_threshold);
-      }
       if (configureForm.reorder_quantity.trim() !== "") {
         payload.reorder_quantity = Number(configureForm.reorder_quantity);
       }
@@ -334,6 +330,7 @@ function ShopOwnerInventoryView() {
       actual_quantity?: number;
       theorical_quantity?: number;
       adjusted_quantity?: number;
+      minimum_threshold?: number;
     } = { ingredient_id: adjustTarget.ingredient_id };
 
     if (adjustForm.actual_quantity.trim() !== "") {
@@ -345,11 +342,15 @@ function ShopOwnerInventoryView() {
     if (adjustForm.adjusted_quantity.trim() !== "") {
       payload.adjusted_quantity = Number(adjustForm.adjusted_quantity);
     }
+    if (adjustForm.minimum_threshold.trim() !== "") {
+      payload.minimum_threshold = Number(adjustForm.minimum_threshold);
+    }
 
     if (
       payload.actual_quantity === undefined &&
       payload.theorical_quantity === undefined &&
-      payload.adjusted_quantity === undefined
+      payload.adjusted_quantity === undefined &&
+      payload.minimum_threshold === undefined
     ) {
       toast.error("Nhập ít nhất một giá trị số lượng");
       return;
@@ -384,6 +385,7 @@ function ShopOwnerInventoryView() {
       theorical_quantity: String(row.theorical_quantity),
       adjusted_quantity:
         row.adjusted_quantity != null ? String(row.adjusted_quantity) : "",
+      minimum_threshold: String(row.minimum_threshold ?? 0),
     });
     setAdjustOpen(true);
   }
@@ -431,6 +433,11 @@ function ShopOwnerInventoryView() {
         key: "theorical_quantity",
         label: "Tồn lý thuyết",
         render: (row) => <span>{row.theorical_quantity}</span>,
+      },
+      {
+        key: "minimum_threshold",
+        label: "Ngưỡng báo",
+        render: (row) => <span className="text-orange-600 font-semibold">{row.minimum_threshold}</span>,
       },
       {
         key: "status",
@@ -701,28 +708,12 @@ function ShopOwnerInventoryView() {
       <Dialog open={configureOpen} onOpenChange={setConfigureOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Cấu hình tồn kho</DialogTitle>
+            <DialogTitle>Cấu hình tồn kho chung</DialogTitle>
             <DialogDescription>
-              Ngưỡng cảnh báo áp dụng cho mọi nguyên liệu trong cửa hàng này.
+              Cấu hình các chỉ số chung cho toàn cửa hàng.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
-            <div className="grid gap-2">
-              <Label htmlFor="minimum_threshold">Ngưỡng cảnh báo (minimum)</Label>
-              <Input
-                id="minimum_threshold"
-                type="number"
-                min={0}
-                value={configureForm.minimum_threshold}
-                onChange={(e) =>
-                  setConfigureForm((p) => ({
-                    ...p,
-                    minimum_threshold: e.target.value,
-                  }))
-                }
-                placeholder="Ví dụ: 5"
-              />
-            </div>
             <div className="grid gap-2">
               <Label htmlFor="reorder_quantity">Số lượng gợi ý đặt lại</Label>
               <Input
@@ -907,6 +898,21 @@ function ShopOwnerInventoryView() {
                   setAdjustForm((p) => ({
                     ...p,
                     adjusted_quantity: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="adj_min">Ngưỡng tối thiểu (chặn bán)</Label>
+              <Input
+                id="adj_min"
+                type="number"
+                min={0}
+                value={adjustForm.minimum_threshold}
+                onChange={(e) =>
+                  setAdjustForm((p) => ({
+                    ...p,
+                    minimum_threshold: e.target.value,
                   }))
                 }
               />

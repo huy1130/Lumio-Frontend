@@ -1,4 +1,4 @@
-// ── Roles ─────────────────────────────────────────────────────────────────────
+import React from "react";
 import type { Role } from "@/lib/roles";
 export type { Role } from "@/lib/roles";
 
@@ -155,6 +155,8 @@ export interface ApiProduct {
   created_at: string;
   update_at: string;
   category?: { id: number; category_name: string };
+  is_out_of_stock?: boolean;
+  max_sellable_quantity?: number;
 }
 
 export interface CreateProductPayload {
@@ -216,6 +218,7 @@ export interface ApiInventoryItem {
   theorical_quantity: number;
   adjusted_quantity: number | null;
   actual_quantity: number | null;
+  minimum_threshold: number | null;
   updated_at: string;
   ingredient: ApiIngredient;
 }
@@ -235,6 +238,7 @@ export interface UpdateInventoryQuantitiesPayload {
   theorical_quantity?: number;
   adjusted_quantity?: number;
   actual_quantity?: number;
+  minimum_threshold?: number;
 }
 
 // ── Order ─────────────────────────────────────────────────────────────────────

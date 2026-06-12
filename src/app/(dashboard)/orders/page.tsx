@@ -127,7 +127,7 @@ function AdminOrdersView() {
 // ─────────────────────────────────────────────────────────────────────────────
 // STAFF VIEW  —  POS cart interface (products loaded from API later)
 // ─────────────────────────────────────────────────────────────────────────────
-interface POSProduct { id: string; name: string; price: number; category: string; unit: string; emoji: string; description: string; emojiBg: string; }
+interface POSProduct { id: string; name: string; price: number; category: string; unit: string; emoji: string; description: string; emojiBg: string; isOutOfStock?: boolean; maxSellableQty?: number; }
 
 interface CartItem { product: POSProduct; qty: number }
 
@@ -186,7 +186,9 @@ function StaffOrdersView() {
       unit: p.measure_unit || "Item",
       emoji: "📦",
       description: p.description || "",
-      emojiBg: "bg-gray-100"
+      emojiBg: "bg-gray-100",
+      isOutOfStock: !!(p as any).is_out_of_stock,
+      maxSellableQty: p.max_sellable_quantity,
     }));
   }, [products]);
 
@@ -210,12 +212,29 @@ function StaffOrdersView() {
   const addToCart = (product: POSProduct) =>
     setCart((prev) => {
       const hit = prev.find((c) => c.product.id === product.id);
-      if (hit) return prev.map((c) => c.product.id === product.id ? { ...c, qty: c.qty + 1 } : c);
+      if (hit) {
+        if (product.maxSellableQty !== undefined && hit.qty >= product.maxSellableQty) {
+          toast.error(`Chỉ còn đủ nguyên liệu cho ${product.maxSellableQty} sản phẩm`);
+          return prev;
+        }
+        return prev.map((c) => c.product.id === product.id ? { ...c, qty: c.qty + 1 } : c);
+      }
+      if (product.maxSellableQty !== undefined && product.maxSellableQty < 1) return prev;
       return [...prev, { product, qty: 1 }];
     });
 
   const updateQty = (id: string, delta: number) =>
-    setCart((prev) => prev.map((c) => c.product.id === id ? { ...c, qty: c.qty + delta } : c).filter((c) => c.qty > 0));
+    setCart((prev) => prev.map((c) => {
+      if (c.product.id === id) {
+        const newQty = c.qty + delta;
+        if (delta > 0 && c.product.maxSellableQty !== undefined && newQty > c.product.maxSellableQty) {
+          toast.error(`Chỉ còn đủ nguyên liệu cho ${c.product.maxSellableQty} sản phẩm`);
+          return { ...c, qty: c.product.maxSellableQty };
+        }
+        return { ...c, qty: newQty };
+      }
+      return c;
+    }).filter((c) => c.qty > 0));
   const removeItem = (id: string) => setCart((prev) => prev.filter((c) => c.product.id !== id));
   const clearCart = () => setCart([]);
 
@@ -745,17 +764,34 @@ function StaffOrdersView() {
 }
 
 function POSProductCard({ product, inCart, onAdd }: { product: POSProduct; inCart: number; onAdd: () => void }) {
+  const isOutOfStock = product.isOutOfStock;
+  const isMaxReached = product.maxSellableQty !== undefined && inCart >= product.maxSellableQty;
+
   return (
     <div 
-      onClick={onAdd} 
+      onClick={() => { if (!isOutOfStock && !isMaxReached) onAdd(); else if (isMaxReached) toast.error(`Chỉ còn đủ nguyên liệu cho ${product.maxSellableQty} sản phẩm`) }} 
       className={cn(
-        "group relative flex flex-col items-center justify-center text-center p-4 rounded-2xl bg-white dark:bg-gray-800/50 border cursor-pointer transition-all duration-300 min-h-[120px]",
-        "hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:border-orange-300 dark:hover:border-orange-700",
-        inCart > 0 ? "border-orange-500 dark:border-orange-500 ring-1 ring-orange-500" : "border-gray-100 dark:border-gray-800"
+        "group relative flex flex-col items-center justify-center text-center p-4 rounded-2xl bg-white dark:bg-gray-800/50 border transition-all duration-300 min-h-[120px]",
+        isOutOfStock 
+          ? "opacity-60 cursor-not-allowed border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-900/10 grayscale-[30%]"
+          : (isMaxReached ? "cursor-not-allowed hover:border-orange-300 opacity-90" : "cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:border-orange-300 dark:hover:border-orange-700"),
+        inCart > 0 && !isOutOfStock ? "border-orange-500 dark:border-orange-500 ring-1 ring-orange-500" : (!isOutOfStock ? "border-gray-100 dark:border-gray-800" : "")
       )}
     >
-      {inCart > 0 && (
-        <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-xs font-bold text-white shadow-sm animate-in zoom-in duration-200">
+      {isOutOfStock && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/40 dark:bg-black/40 backdrop-blur-[0.5px]">
+          <Badge variant="destructive" className="shadow-sm border border-red-200 dark:border-red-800">Hết nguyên liệu</Badge>
+        </div>
+      )}
+
+      {!isOutOfStock && product.maxSellableQty !== undefined && product.maxSellableQty < 9999 && (
+        <div className="absolute top-2 left-2 z-10">
+           <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200 text-[10px] px-1.5 py-0 font-bold shadow-sm">Còn {product.maxSellableQty}</Badge>
+        </div>
+      )}
+      
+      {inCart > 0 && !isOutOfStock && (
+        <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-xs font-bold text-white shadow-sm animate-in zoom-in duration-200 z-20">
           {inCart}
         </div>
       )}
@@ -788,7 +824,7 @@ function POSCartRow({ product, qty, onIncrease, onDecrease, onRemove }: { produc
               <Minus className="h-3 w-3" />
             </button>
             <span className="w-6 text-center text-sm font-semibold text-gray-900 dark:text-gray-100 tabular-nums">{qty}</span>
-            <button onClick={onIncrease} className="flex h-6 w-6 items-center justify-center rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm border border-gray-200 dark:border-gray-700 hover:border-orange-500 hover:text-orange-600 transition-all">
+            <button onClick={onIncrease} disabled={product.maxSellableQty !== undefined && qty >= product.maxSellableQty} className={cn("flex h-6 w-6 items-center justify-center rounded bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 transition-all", product.maxSellableQty !== undefined && qty >= product.maxSellableQty ? "opacity-50 cursor-not-allowed" : "text-gray-900 dark:text-gray-100 hover:border-orange-500 hover:text-orange-600")}>
               <Plus className="h-3 w-3" />
             </button>
           </div>
