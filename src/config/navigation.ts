@@ -134,10 +134,6 @@ const cashierNav: NavSection[] = [
     ],
   },
   {
-    title: "Tổng quan",
-    items: [{ title: "Báo cáo", href: "/dashboard", icon: LayoutDashboard }],
-  },
-  {
     title: "Tra cứu",
     items: [
       { title: "Khách hàng", href: "/customers", icon: Users },

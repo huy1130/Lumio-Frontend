@@ -24,6 +24,7 @@ import type { Order, ApiProduct } from "@/types";
 import { productService } from "@/lib/services/productService";
 import { orderService, type ApiOrder } from "@/lib/services/orderService";
 import { customerService, type ApiCustomer } from "@/lib/services/customerService";
+import { shiftService, type ApiShift } from "@/lib/services/shiftService";
 
 export default function OrdersPage() {
   return (
@@ -163,17 +164,21 @@ function StaffOrdersView() {
   const [cashReceived, setCashReceived] = useState<string>("");
   const [showTransferConfirm, setShowTransferConfirm] = useState(false);
   const [filterDateStr, setFilterDateStr] = useState<string>(getLocalISODate(new Date()));
+  const [activeShift, setActiveShift] = useState<ApiShift | null>(null);
 
   useEffect(() => {
     if (!shopId) return;
     Promise.all([
       productService.getAll(),
       orderService.getAll(shopId).catch(() => []),
-      customerService.getAll().catch(() => [])
-    ]).then(([prodRes, ordRes, custRes]) => {
+      customerService.getAll().catch(() => []),
+      shiftService.getShiftsByShop(shopId).catch(() => [])
+    ]).then(([prodRes, ordRes, custRes, shiftRes]) => {
       setProducts(prodRes.filter((p) => p.is_active !== false));
       setRecentOrders(ordRes);
       setCustomers(custRes);
+      const active = shiftRes.find(s => s.shift_status === 'OPEN');
+      setActiveShift(active || null);
     }).finally(() => setLoading(false));
   }, [shopId]);
 
@@ -246,10 +251,14 @@ function StaffOrdersView() {
 
   const processCheckout = async () => {
     if (!shopId || cart.length === 0) return;
+    if (!activeShift) {
+      toast.error("Vui lòng mở ca làm việc trước khi tạo đơn hàng (Chưa có ca làm việc nào đang mở).");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const payload = {
-        shift_id: 1, // Defaulting to 1 for MVP as it's required by backend. In real world, fetch active shift.
+        shift_id: activeShift.id,
         customer_id: selectedCustomerId || undefined,
         notes: `Thanh toán: ${paymentMethod === "CASH" ? "Tiền mặt" : "Chuyển khoản"}`,
         items: cart.map(c => ({

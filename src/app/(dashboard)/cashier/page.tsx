@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, UserCheck, UserX, Shield, Plus, Loader2, MoreHorizontal } from "lucide-react";
+import { Users, UserCheck, UserX, Shield, Plus, Loader2, MoreHorizontal, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { PlaceholderPage } from "@/components/shared/PlaceholderPage";
 import { AccessGuard } from "@/components/shared/AccessGuard";
@@ -55,6 +55,7 @@ function ShopOwnerCashierView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [isLoadingStaff, setIsLoadingStaff] = useState(true);
+  const [showPw, setShowPw] = useState(false);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -90,11 +91,6 @@ function ShopOwnerCashierView() {
     e.preventDefault();
     if (!shopId) {
       toast.error("Không tìm thấy thông tin cửa hàng");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      toast.error("Mật khẩu phải có ít nhất 6 ký tự");
       return;
     }
 
@@ -177,15 +173,29 @@ function ShopOwnerCashierView() {
 
                 <div className="space-y-2">
                   <Label htmlFor="password">Mật khẩu <span className="text-red-500">*</span></Label>
-                  <Input 
-                    id="password" 
-                    name="password" 
-                    type="password" 
-                    value={formData.password} 
-                    onChange={handleChange} 
-                    required 
-                    minLength={6}
-                  />
+                  <div className="relative">
+                    <Input 
+                      id="password" 
+                      name="password" 
+                      type={showPw ? "text" : "password"} 
+                      value={formData.password} 
+                      onChange={handleChange} 
+                      required 
+                      placeholder="••••••••"
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw(!showPw)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+                    >
+                      {showPw ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-2">

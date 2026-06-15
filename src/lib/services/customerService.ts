@@ -15,5 +15,11 @@ export const customerService = {
   },
   create: (payload: { phone: string; full_name: string; tenant_id?: number }) => {
     return api.post<ApiCustomer>("/customers", payload);
+  },
+  update: (id: number, payload: { phone?: string; full_name?: string; tenant_id?: number }) => {
+    return api.patch<ApiCustomer>(`/customers/${id}`, payload);
+  },
+  delete: (id: number) => {
+    return api.delete(`/customers/${id}`);
   }
 };

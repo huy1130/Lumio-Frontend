@@ -14,6 +14,7 @@ import { DashboardShell } from "@/components/shared/DashboardShell";
 import { AdminDashboard } from "@/components/dashboard/AdminDashboard";
 import { ShopOwnerDashboard } from "@/components/dashboard/ShopOwnerDashboard";
 import { useAuth } from "@/context/AuthContext";
+import { redirect } from "next/navigation";
 
 const SHELL_CONFIGS = {
   inventory_staff: {
@@ -115,7 +116,11 @@ export default function DashboardPage() {
     return <AdminDashboard />;
   }
 
-  if (role === "shop_owner" || role === "cashier") {
+  if (role === "cashier") {
+    redirect("/orders");
+  }
+
+  if (role === "shop_owner") {
     return <ShopOwnerDashboard role={role} />;
   }
 
