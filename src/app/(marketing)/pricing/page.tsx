@@ -101,6 +101,7 @@ function fromApi(sub: ApiSubscription): PricingPlan {
 export default function PricingPage() {
   const [openFaq, setOpenFaq]           = useState<number | null>(null);
   const [plans, setPlans]               = useState<PricingPlan[]>([]);
+  const [billingFilter, setBillingFilter] = useState<"monthly" | "yearly">("monthly");
   const [loading, setLoading]           = useState(true);
   const [isLive, setIsLive]             = useState(false);
 
@@ -176,25 +177,71 @@ export default function PricingPage() {
               </p>
             </div>
           ) : (
-            <motion.div
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-80px" }}
-              variants={stagger}
-              className={cn(
-                "grid gap-6 items-start",
-                plans.length === 1 && "max-w-sm mx-auto",
-                plans.length === 2 && "md:grid-cols-2 max-w-3xl mx-auto",
-                plans.length >= 3 && "md:grid-cols-3",
-              )}
-            >
-              {plans.map((plan, i) => {
-                const isPopular = i === Math.floor(plans.length / 2) && plans.length > 1;
-                const periodSuffix = pricePeriodSuffix(plan.billingCycle);
+            <>
+              {/* Tabs */}
+              <div className="flex justify-center mb-12">
+                <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl inline-flex relative">
+                  <button
+                    onClick={() => setBillingFilter("monthly")}
+                    className={cn(
+                      "px-6 py-2.5 rounded-lg text-sm font-bold transition-all z-10",
+                      billingFilter === "monthly"
+                        ? "bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-gray-200/50 dark:ring-gray-700/50"
+                        : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                    )}
+                  >
+                    Thanh toán hàng tháng
+                  </button>
+                  <button
+                    onClick={() => setBillingFilter("yearly")}
+                    className={cn(
+                      "px-6 py-2.5 rounded-lg text-sm font-bold transition-all z-10 flex items-center gap-2",
+                      billingFilter === "yearly"
+                        ? "bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-gray-200/50 dark:ring-gray-700/50"
+                        : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                    )}
+                  >
+                    Thanh toán hàng năm
+                    <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 pointer-events-none rounded px-1.5 py-0">Tiết kiệm</Badge>
+                  </button>
+                </div>
+              </div>
+
+              {(() => {
+                const displayedPlans = plans.filter((p) => {
+                  const c = p.billingCycle.toLowerCase();
+                  if (billingFilter === "monthly") return /(month|monthly|tháng)/.test(c);
+                  return /(year|annual|yearly|năm)/.test(c);
+                });
+
+                if (displayedPlans.length === 0) {
+                  return (
+                    <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                      Chưa có gói dịch vụ {billingFilter === "monthly" ? "hàng tháng" : "hàng năm"} nào được cấu hình.
+                    </div>
+                  );
+                }
 
                 return (
                   <motion.div
-                    key={plan.id}
+                    key={billingFilter}
+                    initial="hidden"
+                    animate="show"
+                    variants={stagger}
+                    className={cn(
+                      "grid gap-6 items-start",
+                      displayedPlans.length === 1 && "max-w-sm mx-auto",
+                      displayedPlans.length === 2 && "md:grid-cols-2 max-w-3xl mx-auto",
+                      displayedPlans.length >= 3 && "md:grid-cols-3",
+                    )}
+                  >
+                    {displayedPlans.map((plan, i) => {
+                      const isPopular = i === Math.floor(displayedPlans.length / 2) && displayedPlans.length > 1;
+                      const periodSuffix = pricePeriodSuffix(plan.billingCycle);
+
+                      return (
+                        <motion.div
+                          key={plan.id}
                     variants={fadeUp}
                     className={cn(
                       "relative flex flex-col rounded-2xl border p-8",
@@ -266,7 +313,10 @@ export default function PricingPage() {
                 );
               })}
             </motion.div>
-          )}
+          );
+        })()}
+        </>
+      )}
 
           {/* Trial note */}
           {!loading && plans.length > 0 && (

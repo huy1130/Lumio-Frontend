@@ -49,7 +49,7 @@ export default function LoginPage() {
             toast.success("Đăng nhập thành công. Vui lòng thiết lập cửa hàng.", {
               closeButton: true,
             });
-            router.push("/shop");
+              router.push("/settings");
             return;
           }
           if (shopStatus.status === "needs_select") {
@@ -69,7 +69,7 @@ export default function LoginPage() {
           const shopMessage =
             shopErr instanceof Error ? shopErr.message : "Không thể tải thông tin cửa hàng";
           toast.error(shopMessage);
-          router.push("/shop");
+          router.push("/settings");
           return;
         }
       } else {

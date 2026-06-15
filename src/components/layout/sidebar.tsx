@@ -60,7 +60,7 @@ export function Sidebar() {
   const navigation: NavSection[] = getNavigationByRole(role).map((section) => ({
     ...section,
     items: section.items.map((item) => {
-      if (item.href !== "/shop" || role !== "shop_owner") return item;
+      if (item.href !== "/settings" || role !== "shop_owner") return item;
       if (user && shouldShowShopSetup(user, tenantShopCount)) {
         return { ...item, badge: "!" };
       }

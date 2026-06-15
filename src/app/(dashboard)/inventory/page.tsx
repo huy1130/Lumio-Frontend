@@ -501,8 +501,8 @@ function ShopOwnerInventoryView() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button asChild>
-                <Link href="/shop">Đi tới Cửa hàng</Link>
+              <Button variant="outline" asChild>
+                <Link href="/settings">Đi tới Cửa hàng</Link>
               </Button>
             </CardContent>
           </Card>

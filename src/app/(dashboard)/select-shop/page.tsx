@@ -40,7 +40,7 @@ function SelectShopPageContent() {
       setShops(forTenant);
 
       if (forTenant.length === 0) {
-        router.replace("/shop");
+        router.replace("/settings");
         return;
       }
       if (forTenant.length === 1 && accessToken) {
@@ -131,7 +131,7 @@ function SelectShopPageContent() {
               type="button"
               variant="outline"
               className="mt-2 w-full rounded-xl"
-              onClick={() => router.push("/shop")}
+              onClick={() => router.push("/settings")}
             >
               Quản lý / thêm cửa hàng
             </Button>
