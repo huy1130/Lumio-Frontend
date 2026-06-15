@@ -35,7 +35,7 @@ export const ADMIN_ALLOWED_PATH_PREFIXES = [
 export const SHOP_OWNER_ALLOWED_PATH_PREFIXES = [
   "/dashboard",
   "/settings",
-  "/shop",
+  "/settings",
   "/select-shop",
   "/subscription/renew",
   "/subscription/success",
