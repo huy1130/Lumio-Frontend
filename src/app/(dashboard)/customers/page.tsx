@@ -39,6 +39,8 @@ import {
   Users,
   Phone,
 } from "lucide-react";
+import { customerService } from "@/lib/services/customerService";
+import { tenantService } from "@/lib/services/tenantService";
 
 type CustomerFormState = {
   full_name: string;
@@ -151,16 +153,7 @@ export default function CustomersPage() {
     setError(null);
 
     try {
-      const response = await fetch("/api/customers", { cache: "no-store" });
-      const payload = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(
-          (payload as { message?: string })?.message ??
-            "Không thể tải danh sách khách hàng",
-        );
-      }
-
+      const payload = await customerService.getAll();
       setCustomers(normalizeCustomerList(payload));
     } catch (err) {
       setError(
@@ -179,16 +172,7 @@ export default function CustomersPage() {
     setTenantLoading(true);
 
     try {
-      const response = await fetch("/api/tenants", { cache: "no-store" });
-      const payload = await response.json().catch(() => []);
-
-      if (!response.ok) {
-        throw new Error(
-          (payload as { message?: string })?.message ??
-            "Không thể tải danh sách tenant",
-        );
-      }
-
+      const payload = await tenantService.getAll();
       setTenants(normalizeTenantList(payload));
     } catch (err) {
       setTenants([]);
@@ -380,23 +364,10 @@ export default function CustomersPage() {
         payload.tenant_id = resolvedTenantId;
       }
 
-      const response = await fetch(
-        editingCustomer
-          ? `/api/customers/${editingCustomer.id}`
-          : "/api/customers",
-        {
-          method: editingCustomer ? "PATCH" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(
-          (data as { message?: string })?.message ?? "Không thể lưu khách hàng",
-        );
+      if (editingCustomer) {
+        await customerService.update(editingCustomer.id, payload);
+      } else {
+        await customerService.create(payload);
       }
 
       setIsFormOpen(false);
@@ -417,16 +388,7 @@ export default function CustomersPage() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/customers/${deleteTarget.id}`, {
-        method: "DELETE",
-      });
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(
-          (data as { message?: string })?.message ?? "Không thể xoá khách hàng",
-        );
-      }
+      await customerService.delete(deleteTarget.id);
 
       setDeleteTarget(null);
       await loadCustomers(true);
