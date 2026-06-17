@@ -140,9 +140,9 @@ export function Sidebar() {
               )}
               <ul className="space-y-1">
                 {section.items.map((item) => {
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href !== "/" && pathname.startsWith(item.href + "/"));
+                  const isActive = item.exact
+                    ? pathname === item.href
+                    : pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
                   const Icon = item.icon;
                   const linkClass = cn(
                     "group flex items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] font-medium transition-all",

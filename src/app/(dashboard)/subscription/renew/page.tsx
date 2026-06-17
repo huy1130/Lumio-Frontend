@@ -8,7 +8,11 @@ import {
   ArrowLeft,
   CreditCard,
   Loader2,
+  Copy,
+  CheckCircle2,
+  Check,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { useAuth } from "@/context/AuthContext";
 import { AccessGuard } from "@/components/shared/AccessGuard";
 import { Button } from "@/components/ui/button";
@@ -38,6 +42,9 @@ function SubscriptionRenewContent() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [copied, setCopied] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'PAYOS' | 'CASH'>('PAYOS');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -69,6 +76,31 @@ function SubscriptionRenewContent() {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    if (!paymentData?.orderCode || paymentData?.isCash) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`${API_URL}/subscriptions/purchase/status/${paymentData.orderCode}`);
+        const statusData = await res.json();
+        if (statusData?.status === 'PAID') {
+          clearInterval(interval);
+          toast.success("Thanh toán thành công!");
+          router.push("/subscription/success?renew=1");
+        }
+      } catch (err) {
+        console.error("Lỗi kiểm tra trạng thái", err);
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [paymentData?.orderCode, paymentData?.isCash, router]);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success("Đã copy!");
+  };
+
   async function handlePayOs() {
     if (!selectedId) return;
     const token = getToken();
@@ -86,7 +118,7 @@ function SubscriptionRenewContent() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ subscription_id: selectedId }),
+        body: JSON.stringify({ subscription_id: selectedId, payment_method: paymentMethod }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -94,21 +126,25 @@ function SubscriptionRenewContent() {
           (data as { message?: string }).message ?? "Không khởi tạo được thanh toán",
         );
       }
-      if (data?.checkoutUrl) {
+      if (data?.isCash) {
+        setPaymentData({ ...data, isCash: true });
+        return;
+      } else if (data?.qrCode) {
         if (data.orderCode) {
           try {
-            sessionStorage.setItem(
-              "lumio_payos_order_code",
-              String(data.orderCode),
-            );
+            sessionStorage.setItem("lumio_payos_order_code", String(data.orderCode));
           } catch {
             /* ignore */
           }
         }
+        setPaymentData(data);
+        return;
+      } else if (data?.checkoutUrl) {
+        // Fallback in case qrCode is not returned
         window.location.href = data.checkoutUrl as string;
         return;
       }
-      throw new Error("Không nhận được link PayOS");
+      throw new Error("Không nhận được phản hồi thanh toán");
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Lỗi thanh toán");
     } finally {
@@ -128,9 +164,9 @@ function SubscriptionRenewContent() {
       </Button>
 
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Gia hạn gói qua PayOS</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Gia hạn gói</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Gia hạn chỉ hoàn tất khi PayOS báo thanh toán thành công.
+          Gia hạn chỉ hoàn tất khi thanh toán thành công.
         </p>
       </div>
 
@@ -144,6 +180,94 @@ function SubscriptionRenewContent() {
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
+      ) : paymentData?.isCash ? (
+        <Card className="mx-auto max-w-sm text-center py-8">
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
+                <Check className="h-8 w-8 text-green-600" />
+              </div>
+            </div>
+            <CardTitle>Yêu cầu thành công!</CardTitle>
+            <CardDescription className="mt-2">
+              Bạn đã chọn thanh toán bằng tiền mặt/chuyển khoản thủ công. Vui lòng thanh toán cho nhân viên để được duyệt gói gia hạn.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+             <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-left space-y-2 text-sm border border-gray-200 dark:border-gray-700">
+               <p className="text-gray-500 dark:text-gray-400">Mã đơn hàng: <span className="font-semibold text-gray-900 dark:text-gray-100">{paymentData.orderCode}</span></p>
+               <p className="text-gray-500 dark:text-gray-400">Trạng thái: <span className="font-semibold text-amber-500">Chờ Admin duyệt</span></p>
+             </div>
+             <Button
+                variant="outline"
+                className="w-full h-11 rounded-xl mt-2"
+                onClick={() => setPaymentData(null)}
+              >
+                Trở lại
+              </Button>
+          </CardContent>
+        </Card>
+      ) : paymentData ? (
+        <Card className="mx-auto max-w-sm">
+          <CardHeader className="text-center">
+            <CardTitle>Thanh toán đơn hàng</CardTitle>
+            <CardDescription>
+              Quét mã QR qua ứng dụng ngân hàng để thanh toán
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex justify-center rounded-xl bg-white p-4 shadow-sm border">
+              <QRCodeSVG
+                value={paymentData.qrCode}
+                size={220}
+                level="M"
+                includeMargin={false}
+              />
+            </div>
+            
+            <div className="space-y-3 rounded-lg bg-muted/50 p-4 text-sm">
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-muted-foreground">Ngân hàng</span>
+                <span className="font-medium text-right">{paymentData.bin}</span>
+              </div>
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-muted-foreground">Chủ tài khoản</span>
+                <span className="font-medium text-right">{paymentData.accountName}</span>
+              </div>
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-muted-foreground">Số tài khoản</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{paymentData.accountNumber}</span>
+                  <button onClick={() => copyToClipboard(paymentData.accountNumber)} className="text-indigo-600 hover:text-indigo-800">
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-muted-foreground">Số tiền</span>
+                <span className="font-medium text-indigo-600">{formatCurrency(paymentData.amount)}</span>
+              </div>
+              <div className="flex justify-between pt-1">
+                <span className="text-muted-foreground">Nội dung</span>
+                <div className="flex items-center gap-2 text-right">
+                  <span className="font-medium break-all">{paymentData.description}</span>
+                  <button onClick={() => copyToClipboard(paymentData.description)} className="text-indigo-600 hover:text-indigo-800 shrink-0">
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
+              Đang chờ thanh toán...
+            </div>
+            
+            <Button variant="outline" className="w-full" onClick={() => setPaymentData(null)}>
+              Hủy thanh toán
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
         <>
           <Card>
@@ -170,7 +294,7 @@ function SubscriptionRenewContent() {
             <CardHeader>
               <CardTitle className="text-base">Chọn gói thanh toán</CardTitle>
               <CardDescription>
-                Chọn gói và thanh toán qua PayOS để gia hạn tenant hiện tại.
+                Chọn gói gia hạn bên dưới.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -215,6 +339,62 @@ function SubscriptionRenewContent() {
                 ))
               )}
 
+                  {/* Payment Method Selection */}
+                  <div className="space-y-3 mt-6 mb-4">
+                    <p className="text-sm font-medium">Phương thức thanh toán</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <label
+                        className={`flex cursor-pointer items-center justify-between rounded-xl border p-3.5 transition-all ${
+                          paymentMethod === 'PAYOS'
+                            ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-500"
+                            : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+                            <CreditCard className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">PayOS</p>
+                            <p className="text-[10px] text-gray-500">Quét mã QR tự động</p>
+                          </div>
+                        </div>
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          className="sr-only"
+                          checked={paymentMethod === 'PAYOS'}
+                          onChange={() => setPaymentMethod('PAYOS')}
+                        />
+                      </label>
+
+                      <label
+                        className={`flex cursor-pointer items-center justify-between rounded-xl border p-3.5 transition-all ${
+                          paymentMethod === 'CASH'
+                            ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-500"
+                            : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+                            <span className="text-green-600 dark:text-green-400 font-bold text-sm">$$</span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">Tiền mặt</p>
+                            <p className="text-[10px] text-gray-500">Thủ công</p>
+                          </div>
+                        </div>
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          className="sr-only"
+                          checked={paymentMethod === 'CASH'}
+                          onChange={() => setPaymentMethod('CASH')}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
               <Button
                 className="w-full gap-2"
                 size="lg"
@@ -224,9 +404,9 @@ function SubscriptionRenewContent() {
                 {paying ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <CreditCard className="h-4 w-4" />
+                  paymentMethod === 'PAYOS' && <CreditCard className="h-4 w-4" />
                 )}
-                {paying ? "Đang chuyển PayOS…" : "Thanh toán PayOS để gia hạn"}
+                {paying ? "Đang xử lý…" : paymentMethod === 'CASH' ? "Gửi yêu cầu thanh toán" : "Thanh toán PayOS để gia hạn"}
               </Button>
 
               {selected && (

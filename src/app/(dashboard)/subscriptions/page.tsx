@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Loader2, AlertCircle, Package, CheckCircle2, XCircle } from "lucide-react";
+import { Plus, Pencil, Loader2, AlertCircle, Package, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatsCard } from "@/components/shared/stats-card";
@@ -270,13 +270,15 @@ function SubscriptionsContent() {
               </CardDescription>
             </div>
             {isRealAdmin && (
-              <Button 
-                className="gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-10 px-5 font-semibold shadow-sm transition-all active:scale-95" 
-                onClick={openCreate} 
-                disabled={loading}
-              >
-                <Plus className="h-4 w-4" /> Tạo Gói Mới
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  className="gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-10 px-5 font-semibold shadow-sm transition-all active:scale-95" 
+                  onClick={openCreate} 
+                  disabled={loading}
+                >
+                  <Plus className="h-4 w-4" /> Tạo Gói Mới
+                </Button>
+              </div>
             )}
           </CardHeader>
           <CardContent className="p-0">

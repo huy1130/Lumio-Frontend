@@ -136,11 +136,11 @@ export function ShopOwnerSubscriptionCard() {
 
             {showRenewCta && (
               <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
-               
+
                 <Button asChild className="gap-2">
                   <Link href="/subscription/renew">
                     <ExternalLink className="h-4 w-4" />
-                    Gia hạn / thanh toán PayOS
+                    Gia hạn gói
                   </Link>
                 </Button>
               </div>

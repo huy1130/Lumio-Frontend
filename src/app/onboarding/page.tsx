@@ -16,6 +16,7 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,8 @@ import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { ApiSubscription } from "@/types";
 import { savePendingShop } from "@/lib/pending-shop";
+import { QRCodeSVG } from "qrcode.react";
+import { toast } from "sonner";
 
 const BRAND = "#5B4EE8";
 
@@ -179,6 +182,8 @@ function OnboardingContent() {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [copied, setCopied] = useState(false);
 
   // Các trường gửi lên POST /api/checkout/initiate (proxy → Nest subscriptions/purchase/initiate)
   const [tenantName, setTenantName] = useState("");
@@ -189,6 +194,7 @@ function OnboardingContent() {
 
   const [showPw, setShowPw] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'PAYOS' | 'CASH'>('PAYOS');
 
   // ── Validation ─────────────────────────────────────────────────────────────
   const step0Valid =
@@ -197,6 +203,31 @@ function OnboardingContent() {
     email.includes("@") &&
     password.length >= 8 &&
     password === confirmPw;
+
+  useEffect(() => {
+    if (!paymentData?.orderCode) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`${API_URL}/subscriptions/purchase/status/${paymentData.orderCode}`);
+        const statusData = await res.json();
+        if (statusData?.status === 'PAID') {
+          clearInterval(interval);
+          toast.success("Thanh toán thành công!");
+          router.push("/subscription/success");
+        }
+      } catch (err) {
+        console.error("Lỗi kiểm tra trạng thái", err);
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [paymentData?.orderCode, router]);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success("Đã copy!");
+  };
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   function goToConfirm(e: React.FormEvent) {
@@ -224,6 +255,7 @@ function OnboardingContent() {
           username,
           email,
           password,
+          payment_method: paymentMethod,
         }),
       });
 
@@ -237,7 +269,20 @@ function OnboardingContent() {
         return;
       }
 
-      if (data?.checkoutUrl) {
+      if (data?.isCash) {
+        savePendingShop({ shop_name: tenantName.trim() });
+        setPaymentData({ ...data, isCash: true });
+      } else if (data?.qrCode) {
+        savePendingShop({ shop_name: tenantName.trim() });
+        if (data.orderCode) {
+          try {
+            sessionStorage.setItem("lumio_payos_order_code", String(data.orderCode));
+          } catch {
+            /* ignore */
+          }
+        }
+        setPaymentData(data);
+      } else if (data?.checkoutUrl) {
         savePendingShop({ shop_name: tenantName.trim() });
         if (data.orderCode) {
           try {
@@ -532,7 +577,7 @@ function OnboardingContent() {
                   )}
 
                   {/* ── STEP 1: Xác nhận & Thanh toán ──────────────────────── */}
-                  {step === 1 && (
+                  {step === 1 && !paymentData && (
                     <motion.div key="s1" {...fadeSlide} className="space-y-4">
                       <div>
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -592,22 +637,64 @@ function OnboardingContent() {
                         </div>
                       )}
 
-                      {/* PayOS badge */}
-                      <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-3.5 flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                          <CreditCard className="h-5 w-5 text-gray-500" />
+                      {/* Payment Method Selection */}
+                      <div className="space-y-3 mt-6">
+                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Phương thức thanh toán
+                        </Label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <label
+                            className={cn(
+                              "flex cursor-pointer items-center justify-between rounded-xl border p-3.5 transition-all",
+                              paymentMethod === 'PAYOS'
+                                ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-500"
+                                : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+                                <CreditCard className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">PayOS</p>
+                                <p className="text-[10px] text-gray-500">Quét mã QR tự động</p>
+                              </div>
+                            </div>
+                            <input
+                              type="radio"
+                              name="paymentMethod"
+                              className="sr-only"
+                              checked={paymentMethod === 'PAYOS'}
+                              onChange={() => setPaymentMethod('PAYOS')}
+                            />
+                          </label>
+
+                          <label
+                            className={cn(
+                              "flex cursor-pointer items-center justify-between rounded-xl border p-3.5 transition-all",
+                              paymentMethod === 'CASH'
+                                ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-500"
+                                : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+                                <span className="text-green-600 dark:text-green-400 font-bold text-sm">$$</span>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">Tiền mặt</p>
+                                <p className="text-[10px] text-gray-500">Chuyển khoản thủ công</p>
+                              </div>
+                            </div>
+                            <input
+                              type="radio"
+                              name="paymentMethod"
+                              className="sr-only"
+                              checked={paymentMethod === 'CASH'}
+                              onChange={() => setPaymentMethod('CASH')}
+                            />
+                          </label>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Thanh toán qua PayOS
-                          </p>
-                          <p className="text-xs text-gray-400 truncate">
-                            Chuyển khoản · Thẻ nội địa · QR Code
-                          </p>
-                        </div>
-                        <span className="text-xs bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full px-2 py-0.5 font-medium shrink-0">
-                          Bảo mật
-                        </span>
                       </div>
 
                       {error && (
@@ -636,19 +723,120 @@ function OnboardingContent() {
                               <Loader2 className="h-4 w-4 animate-spin" />
                               Đang xử lý…
                             </span>
-                          ) : (
-                            "Thanh toán qua PayOS →"
-                          )}
+                          ) : paymentMethod === 'CASH' ? "Gửi yêu cầu thanh toán →" : "Thanh toán qua PayOS →"}
                         </Button>
                       </div>
 
-                      <p className="text-center text-xs text-gray-400">
+                      <p className="text-center text-xs text-gray-400 mt-4">
                         Bằng cách thanh toán, bạn đồng ý với{" "}
                         <Link href="#" className="underline hover:text-indigo-600">
                           Điều khoản dịch vụ
                         </Link>{" "}
                         của Lumio.
                       </p>
+                    </motion.div>
+                  )}
+
+                  {/* ── STEP 1 (Trạng thái hiển thị QR) ──────────────────────── */}
+                  {step === 1 && paymentData && !paymentData.isCash && (
+                    <motion.div key="s1-qr" {...fadeSlide} className="space-y-6">
+                      <div className="text-center">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                          Thanh toán đơn hàng
+                        </h3>
+                        <p className="text-sm text-gray-400 mt-0.5">
+                          Mở ứng dụng ngân hàng và quét mã QR để thanh toán.
+                        </p>
+                      </div>
+
+                      <div className="flex justify-center rounded-xl bg-white p-4 shadow-sm border dark:border-gray-700">
+                        <QRCodeSVG
+                          value={paymentData.qrCode}
+                          size={220}
+                          level="M"
+                          includeMargin={false}
+                        />
+                      </div>
+
+                      <div className="space-y-3 rounded-lg bg-gray-50 dark:bg-gray-800 p-4 text-sm">
+                        <div className="flex justify-between border-b border-gray-200 dark:border-gray-700 pb-2">
+                          <span className="text-gray-500 dark:text-gray-400">Ngân hàng</span>
+                          <span className="font-medium text-right text-gray-900 dark:text-gray-100">{paymentData.bin}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-gray-200 dark:border-gray-700 pb-2">
+                          <span className="text-gray-500 dark:text-gray-400">Chủ tài khoản</span>
+                          <span className="font-medium text-right text-gray-900 dark:text-gray-100">{paymentData.accountName}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-gray-200 dark:border-gray-700 pb-2">
+                          <span className="text-gray-500 dark:text-gray-400">Số tài khoản</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-gray-900 dark:text-gray-100">{paymentData.accountNumber}</span>
+                            <button onClick={() => copyToClipboard(paymentData.accountNumber)} className="text-indigo-600 hover:text-indigo-500">
+                              <Copy className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between border-b border-gray-200 dark:border-gray-700 pb-2">
+                          <span className="text-gray-500 dark:text-gray-400">Số tiền</span>
+                          <span className="font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(paymentData.amount)}</span>
+                        </div>
+                        <div className="flex justify-between pt-1">
+                          <span className="text-gray-500 dark:text-gray-400">Nội dung</span>
+                          <div className="flex items-center gap-2 text-right">
+                            <span className="font-medium text-gray-900 dark:text-gray-100 break-all">{paymentData.description}</span>
+                            <button onClick={() => copyToClipboard(paymentData.description)} className="text-indigo-600 hover:text-indigo-500 shrink-0">
+                              <Copy className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
+                        Hệ thống đang chờ thanh toán...
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        className="w-full h-11 rounded-xl"
+                        onClick={() => { setPaymentData(null); setLoading(false); }}
+                      >
+                        Hủy thanh toán
+                      </Button>
+                    </motion.div>
+                  )}
+
+                  {/* ── STEP 1 (Trạng thái thanh toán CASH) ──────────────────────── */}
+                  {step === 1 && paymentData && paymentData.isCash && (
+                    <motion.div key="s1-cash" {...fadeSlide} className="space-y-6 text-center">
+                      <div className="flex justify-center mt-4">
+                        <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
+                          <Check className="h-8 w-8 text-green-600" />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                          Đã gửi yêu cầu tạo tài khoản!
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-3 leading-relaxed">
+                          Yêu cầu thanh toán tiền mặt (hoặc chuyển khoản thủ công) của bạn đã được ghi nhận. 
+                          <br/><br/>
+                          Vui lòng liên hệ nhân viên sale hoặc thanh toán thủ công. Hệ thống sẽ kích hoạt tài khoản của bạn ngay khi Admin xác nhận đã nhận được tiền.
+                        </p>
+                      </div>
+
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mt-6 text-left space-y-2 text-sm border border-gray-200 dark:border-gray-700">
+                        <p className="text-gray-500 dark:text-gray-400">Mã đơn hàng: <span className="font-semibold text-gray-900 dark:text-gray-100">{paymentData.orderCode}</span></p>
+                        <p className="text-gray-500 dark:text-gray-400">Trạng thái: <span className="font-semibold text-amber-500">Chờ Admin duyệt</span></p>
+                      </div>
+
+                      <Button
+                        className="w-full h-11 rounded-xl mt-4"
+                        variant="outline"
+                        onClick={() => router.push("/")}
+                      >
+                        Về trang chủ
+                      </Button>
                     </motion.div>
                   )}
 

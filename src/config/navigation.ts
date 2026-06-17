@@ -14,6 +14,7 @@ export interface NavItem {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: ComponentType<any>;
   badge?: string | number;
+  exact?: boolean;
 }
 
 export interface NavSection {
@@ -30,12 +31,13 @@ const adminNav: NavSection[] = [
   {
     title: "Admin",
     items: [
-      { title: "Subscriptions", href: "/subscriptions", icon: Tag },
-      { title: "Plan Features", href: "/plan-features", icon: Sparkles },
-      { title: "Roles", href: "/roles", icon: Shield },
-      { title: "Tenants", href: "/tenants", icon: Building2 },
-      { title: "Users", href: "/users", icon: Users },
-      { title: "Manage Admins", href: "/admins", icon: UserCog },
+      { title: "Quản lý gói", href: "/subscriptions", icon: Tag, exact: true },
+      { title: "Duyệt Thanh Toán", href: "/subscriptions/requests", icon: DollarSign },
+      { title: "Phân Quyền Tính Năng", href: "/plan-features", icon: Sparkles },
+      { title: "vai trò", href: "/roles", icon: Shield },
+      { title: "Danh sách tenants", href: "/tenants", icon: Building2 },
+      { title: "Quản lý user", href: "/users", icon: Users },
+      { title: "Quản lý Admin", href: "/admins", icon: UserCog },
     ],
   },
 
