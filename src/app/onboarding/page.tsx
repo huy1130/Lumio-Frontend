@@ -34,6 +34,21 @@ const BRAND = "#5B4EE8";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:2999";
 
+const getBankName = (bin: string) => {
+  const map: Record<string, string> = {
+    "970422": "MBBank",
+    "970436": "Vietcombank",
+    "970415": "VietinBank",
+    "970418": "BIDV",
+    "970405": "Agribank",
+    "970407": "Techcombank",
+    "970416": "ACB",
+    "970432": "VPBank",
+    "970423": "TPBank",
+  };
+  return map[bin] || bin;
+};
+
 function pricePeriodSuffix(billingCycle: string): string {
   const c = billingCycle.toLowerCase();
   if (/(year|annual|yearly|năm)/.test(c)) return "/năm";
@@ -761,7 +776,7 @@ function OnboardingContent() {
                       <div className="space-y-3 rounded-lg bg-gray-50 dark:bg-gray-800 p-4 text-sm">
                         <div className="flex justify-between border-b border-gray-200 dark:border-gray-700 pb-2">
                           <span className="text-gray-500 dark:text-gray-400">Ngân hàng</span>
-                          <span className="font-medium text-right text-gray-900 dark:text-gray-100">{paymentData.bin}</span>
+                          <span className="font-medium text-right text-gray-900 dark:text-gray-100">{getBankName(String(paymentData.bin))}</span>
                         </div>
                         <div className="flex justify-between border-b border-gray-200 dark:border-gray-700 pb-2">
                           <span className="text-gray-500 dark:text-gray-400">Chủ tài khoản</span>

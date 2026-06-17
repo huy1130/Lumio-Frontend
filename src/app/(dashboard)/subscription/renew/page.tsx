@@ -33,6 +33,21 @@ import { getToken } from "@/lib/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
+const getBankName = (bin: string) => {
+  const map: Record<string, string> = {
+    "970422": "MBBank",
+    "970436": "Vietcombank",
+    "970415": "VietinBank",
+    "970418": "BIDV",
+    "970405": "Agribank",
+    "970407": "Techcombank",
+    "970416": "ACB",
+    "970432": "VPBank",
+    "970423": "TPBank",
+  };
+  return map[bin] || bin;
+};
+
 function SubscriptionRenewContent() {
   const router = useRouter();
   const { user } = useAuth();
@@ -228,7 +243,7 @@ function SubscriptionRenewContent() {
             <div className="space-y-3 rounded-lg bg-muted/50 p-4 text-sm">
               <div className="flex justify-between border-b pb-2">
                 <span className="text-muted-foreground">Ngân hàng</span>
-                <span className="font-medium text-right">{paymentData.bin}</span>
+                <span className="font-medium text-right">{getBankName(String(paymentData.bin))}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
                 <span className="text-muted-foreground">Chủ tài khoản</span>
