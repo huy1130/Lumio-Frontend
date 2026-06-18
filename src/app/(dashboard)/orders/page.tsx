@@ -25,6 +25,8 @@ import { productService } from "@/lib/services/productService";
 import { orderService, type ApiOrder } from "@/lib/services/orderService";
 import { customerService, type ApiCustomer } from "@/lib/services/customerService";
 import { shiftService, type ApiShift } from "@/lib/services/shiftService";
+import { inventoryService } from "@/lib/services/inventoryService";
+import type { ApiInventory } from "@/types";
 
 export default function OrdersPage() {
   return (
@@ -144,7 +146,7 @@ const getLocalISODate = (d: Date) => {
 };
 
 function StaffOrdersView() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const shopId = user?.shop_id;
 
   const [search, setSearch] = useState("");
@@ -165,37 +167,76 @@ function StaffOrdersView() {
   const [showTransferConfirm, setShowTransferConfirm] = useState(false);
   const [filterDateStr, setFilterDateStr] = useState<string>(getLocalISODate(new Date()));
   const [activeShift, setActiveShift] = useState<ApiShift | null>(null);
+  const [shopInventory, setShopInventory] = useState<ApiInventory | null>(null);
 
   useEffect(() => {
     if (!shopId) return;
-    Promise.all([
+    const promises: Promise<any>[] = [
       productService.getAll(),
       orderService.getAll(shopId).catch(() => []),
       customerService.getAll().catch(() => []),
       shiftService.getShiftsByShop(shopId).catch(() => [])
-    ]).then(([prodRes, ordRes, custRes, shiftRes]) => {
-      setProducts(prodRes.filter((p) => p.is_active !== false));
+    ];
+    
+    if (role === "shop_owner") {
+      promises.push(inventoryService.getInventory(shopId).catch(() => null));
+    }
+
+    Promise.all(promises).then((res) => {
+      const [prodRes, ordRes, custRes, shiftRes, invRes] = res;
+      setProducts(prodRes.filter((p: any) => p.is_active !== false));
       setRecentOrders(ordRes);
       setCustomers(custRes);
-      const active = shiftRes.find(s => s.shift_status === 'OPEN');
+      const active = shiftRes.find((s: any) => s.shift_status === 'OPEN');
       setActiveShift(active || null);
+      if (invRes) setShopInventory(invRes);
     }).finally(() => setLoading(false));
-  }, [shopId]);
+  }, [shopId, role]);
 
   const posProducts: POSProduct[] = useMemo(() => {
-    return products.map(p => ({
-      id: String(p.id),
-      name: p.product_name,
-      price: Number(p.unit_price) || 0,
-      category: p.category?.category_name || "Uncategorized",
-      unit: p.measure_unit || "Item",
-      emoji: "📦",
-      description: p.description || "",
-      emojiBg: "bg-gray-100",
-      isOutOfStock: !!(p as any).is_out_of_stock,
-      maxSellableQty: p.max_sellable_quantity,
-    }));
-  }, [products]);
+    return products.map(p => {
+      let isOutOfStock = !!(p as any).is_out_of_stock;
+      let maxSellableQty = p.max_sellable_quantity;
+
+      if (role === "shop_owner" && shopInventory) {
+        let maxSellable = p.ingredient_products?.length ? Number.MAX_SAFE_INTEGER : 9999;
+        const inventoryMap = new Map((shopInventory.inventory_items || []).map((i: any) => [i.ingredient_id, i]));
+        
+        for (const ip of (p.ingredient_products || [])) {
+          const invItem = inventoryMap.get(ip.ingredient_id);
+          const qty = invItem?.theorical_quantity || 0;
+          const threshold = invItem?.minimum_threshold || 0;
+          const available = qty - threshold;
+          const reqQty = Number(ip.quantity_required);
+          
+          if (reqQty > 0) {
+            const maxWithThisIngredient = Math.max(0, Math.floor(available / reqQty));
+            if (maxWithThisIngredient < maxSellable) {
+              maxSellable = maxWithThisIngredient;
+            }
+          }
+        }
+        
+        if (p.ingredient_products?.length) {
+          isOutOfStock = maxSellable <= 0;
+          maxSellableQty = maxSellable;
+        }
+      }
+
+      return {
+        id: String(p.id),
+        name: p.product_name,
+        price: Number(p.unit_price) || 0,
+        category: p.category?.category_name || "Uncategorized",
+        unit: p.measure_unit || "Item",
+        emoji: "📦",
+        description: p.description || "",
+        emojiBg: "bg-gray-100",
+        isOutOfStock,
+        maxSellableQty,
+      };
+    });
+  }, [products, role, shopInventory]);
 
   const categories = useMemo(() => ["All", ...Array.from(new Set(posProducts.map((p) => p.category)))], [posProducts]);
 
@@ -405,81 +446,81 @@ function StaffOrdersView() {
             <div className="space-y-4 max-w-5xl mx-auto pb-10">
               <div className="flex items-center justify-between px-2">
                 <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 tracking-tight">Đơn hàng <span className="text-gray-400 font-normal text-sm ml-1">({filteredRecentOrders.length})</span></h3>
-                <input 
+                <input
                   type="date"
                   value={filterDateStr}
                   onChange={(e) => setFilterDateStr(e.target.value)}
                   className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors"
                 />
               </div>
-              
-              <div className="grid grid-cols-1 gap-3">
-                  {filteredRecentOrders.length === 0 ? (
-                    <div className="py-12 text-center text-sm text-gray-500 bg-gray-50 dark:bg-gray-800/30 rounded-2xl border border-gray-100 dark:border-gray-800">
-                      Chưa có đơn hàng nào trong ngày này.
-                    </div>
-                  ) : (
-                    filteredRecentOrders.map((order) => (
-                      <div
-                        key={order.id}
-                        onClick={() => setSelectedOrder(order)}
-                        className={cn(
-                          "group relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer bg-white dark:bg-gray-800/50",
-                          selectedOrder?.id === order.id 
-                            ? "border-orange-500 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-orange-900/20 ring-1 ring-orange-500/50" 
-                            : "border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-[0_4px_20px_rgb(0,0,0,0.04)]"
-                        )}
-                      >
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-5 flex-1">
-                            <div className={cn("flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center transition-colors", 
-                              order.order_status === "PENDING" ? "bg-orange-50/80 text-orange-600 dark:bg-orange-900/30" : 
-                              order.order_status === "COMPLETED" ? "bg-green-50/80 text-green-600 dark:bg-green-900/30" : "bg-gray-50 text-gray-500 dark:bg-gray-800"
-                            )}>
-                              {order.order_status === "PENDING" ? <Clock className="w-5 h-5" /> : 
-                               order.order_status === "COMPLETED" ? <CheckCircle className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
-                            </div>
 
-                            <div className="flex flex-col gap-1.5">
-                              <div className="flex items-center gap-2.5">
-                                <span className="font-bold text-gray-900 dark:text-gray-100 text-[15px]">#{order.id}</span>
-                                <Badge variant={STATUS_VARIANT[order.order_status?.toLowerCase()] || "secondary"} className="h-5 text-[10px] px-2 uppercase font-bold tracking-widest rounded-md">
-                                  {order.order_status}
-                                </Badge>
-                              </div>
-                              <span className="text-[13px] font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                <span>{order.customer?.full_name || "Khách lẻ"}</span>
-                                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                                <span>{formatDate(order.created_at)}</span>
-                              </span>
-                              {order.notes && (
-                                <span className="text-[13px] text-gray-400 dark:text-gray-500 line-clamp-1 italic">"{order.notes}"</span>
-                              )}
-                            </div>
+              <div className="grid grid-cols-1 gap-3">
+                {filteredRecentOrders.length === 0 ? (
+                  <div className="py-12 text-center text-sm text-gray-500 bg-gray-50 dark:bg-gray-800/30 rounded-2xl border border-gray-100 dark:border-gray-800">
+                    Chưa có đơn hàng nào trong ngày này.
+                  </div>
+                ) : (
+                  filteredRecentOrders.map((order) => (
+                    <div
+                      key={order.id}
+                      onClick={() => setSelectedOrder(order)}
+                      className={cn(
+                        "group relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer bg-white dark:bg-gray-800/50",
+                        selectedOrder?.id === order.id
+                          ? "border-orange-500 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-orange-900/20 ring-1 ring-orange-500/50"
+                          : "border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-[0_4px_20px_rgb(0,0,0,0.04)]"
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-5 flex-1">
+                          <div className={cn("flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center transition-colors",
+                            order.order_status === "PENDING" ? "bg-orange-50/80 text-orange-600 dark:bg-orange-900/30" :
+                              order.order_status === "COMPLETED" ? "bg-green-50/80 text-green-600 dark:bg-green-900/30" : "bg-gray-50 text-gray-500 dark:bg-gray-800"
+                          )}>
+                            {order.order_status === "PENDING" ? <Clock className="w-5 h-5" /> :
+                              order.order_status === "COMPLETED" ? <CheckCircle className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
                           </div>
 
-                          <div className="flex flex-col items-end gap-3 justify-center">
-                            <span className="text-[15px] font-semibold text-gray-800 dark:text-gray-200 tracking-tight">
-                              {formatCurrency(Number(order.grand_total))}
-                            </span>
-                            
-                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                              {order.order_status === "PENDING" && (
-                                <>
-                                  <Button size="sm" variant="ghost" className="h-8 text-xs font-medium text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg px-3 transition-colors" onClick={() => setCancelOrderId(order.id)}>
-                                    Huỷ đơn
-                                  </Button>
-                                  <Button size="sm" className="h-8 text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white shadow-sm rounded-lg px-4 transition-colors" onClick={() => handleCheckoutExisting(order.id)}>
-                                    Hoàn thành
-                                  </Button>
-                                </>
-                              )}
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center gap-2.5">
+                              <span className="font-bold text-gray-900 dark:text-gray-100 text-[15px]">#{order.id}</span>
+                              <Badge variant={STATUS_VARIANT[order.order_status?.toLowerCase()] || "secondary"} className="h-5 text-[10px] px-2 uppercase font-bold tracking-widest rounded-md">
+                                {order.order_status}
+                              </Badge>
                             </div>
+                            <span className="text-[13px] font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                              <span>{order.customer?.full_name || "Khách lẻ"}</span>
+                              <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                              <span>{formatDate(order.created_at)}</span>
+                            </span>
+                            {order.notes && (
+                              <span className="text-[13px] text-gray-400 dark:text-gray-500 line-clamp-1 italic">"{order.notes}"</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col items-end gap-3 justify-center">
+                          <span className="text-[15px] font-semibold text-gray-800 dark:text-gray-200 tracking-tight">
+                            {formatCurrency(Number(order.grand_total))}
+                          </span>
+
+                          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                            {order.order_status === "PENDING" && (
+                              <>
+                                <Button size="sm" variant="ghost" className="h-8 text-xs font-medium text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg px-3 transition-colors" onClick={() => setCancelOrderId(order.id)}>
+                                  Huỷ đơn
+                                </Button>
+                                <Button size="sm" className="h-8 text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white shadow-sm rounded-lg px-4 transition-colors" onClick={() => handleCheckoutExisting(order.id)}>
+                                  Hoàn thành
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
-                    ))
-                  )}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -635,29 +676,29 @@ function StaffOrdersView() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tiền khách đưa</p>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-6 text-xs text-orange-600 hover:text-orange-700 dark:text-orange-400 p-0" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 text-xs text-orange-600 hover:text-orange-700 dark:text-orange-400 p-0"
                           onClick={() => setCashReceived(total.toString())}
                         >
                           Khách đưa đủ
                         </Button>
                       </div>
-                      <Input 
-                        placeholder="0" 
-                        type="number" 
+                      <Input
+                        placeholder="0"
+                        type="number"
                         value={cashReceived}
                         onChange={(e) => setCashReceived(e.target.value)}
                         className="text-lg font-medium h-10 border-gray-200 dark:border-gray-700"
                       />
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-1.5">
                       {QUICK_CASH_AMOUNTS.map((amt) => (
-                        <Button 
-                          key={amt} 
-                          variant="outline" 
+                        <Button
+                          key={amt}
+                          variant="outline"
                           size="sm"
                           className="flex-1 min-w-[30%] text-xs border-gray-200 dark:border-gray-700 hover:border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all"
                           onClick={() => {
@@ -668,41 +709,38 @@ function StaffOrdersView() {
                           +{formatCurrency(amt).replace(/\.00$/, '').replace(/,00$/, '')}
                         </Button>
                       ))}
-                      <Button 
-                         variant="secondary" 
-                         size="sm"
-                         className="flex-1 min-w-[30%] text-xs"
-                         onClick={() => setCashReceived("")}
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="flex-1 min-w-[30%] text-xs"
+                        onClick={() => setCashReceived("")}
                       >
                         Xóa
                       </Button>
                     </div>
 
                     {(() => {
-                       const received = parseFloat(cashReceived) || 0;
-                       if (received === 0 && cashReceived === "") return null;
-                       
-                       const change = received - total;
-                       const isSufficient = change >= 0;
-                       
-                       return (
-                         <div className={`p-3 rounded-lg border flex justify-between items-center transition-colors duration-300 ${
-                           isSufficient 
-                             ? "bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-800/50" 
-                             : "bg-red-50/50 border-red-200 dark:bg-red-900/10 dark:border-red-800/50"
-                         }`}>
-                           <span className={`text-sm font-medium ${
-                             isSufficient ? "text-green-700 dark:text-green-400" : "text-red-600 dark:text-red-400"
-                           }`}>
-                             {isSufficient ? "Tiền thối lại" : "Khách đưa thiếu"}
-                           </span>
-                           <span className={`text-lg font-bold tracking-tight ${
-                             isSufficient ? "text-green-700 dark:text-green-400" : "text-red-600 dark:text-red-400"
-                           }`}>
-                             {isSufficient ? formatCurrency(change) : formatCurrency(Math.abs(change))}
-                           </span>
-                         </div>
-                       );
+                      const received = parseFloat(cashReceived) || 0;
+                      if (received === 0 && cashReceived === "") return null;
+
+                      const change = received - total;
+                      const isSufficient = change >= 0;
+
+                      return (
+                        <div className={`p-3 rounded-lg border flex justify-between items-center transition-colors duration-300 ${isSufficient
+                            ? "bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-800/50"
+                            : "bg-red-50/50 border-red-200 dark:bg-red-900/10 dark:border-red-800/50"
+                          }`}>
+                          <span className={`text-sm font-medium ${isSufficient ? "text-green-700 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                            }`}>
+                            {isSufficient ? "Tiền thối lại" : "Khách đưa thiếu"}
+                          </span>
+                          <span className={`text-lg font-bold tracking-tight ${isSufficient ? "text-green-700 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                            }`}>
+                            {isSufficient ? formatCurrency(change) : formatCurrency(Math.abs(change))}
+                          </span>
+                        </div>
+                      );
                     })()}
                   </div>
                 )}
@@ -777,11 +815,11 @@ function POSProductCard({ product, inCart, onAdd }: { product: POSProduct; inCar
   const isMaxReached = product.maxSellableQty !== undefined && inCart >= product.maxSellableQty;
 
   return (
-    <div 
-      onClick={() => { if (!isOutOfStock && !isMaxReached) onAdd(); else if (isMaxReached) toast.error(`Chỉ còn đủ nguyên liệu cho ${product.maxSellableQty} sản phẩm`) }} 
+    <div
+      onClick={() => { if (!isOutOfStock && !isMaxReached) onAdd(); else if (isMaxReached) toast.error(`Chỉ còn đủ nguyên liệu cho ${product.maxSellableQty} sản phẩm`) }}
       className={cn(
         "group relative flex flex-col items-center justify-center text-center p-4 rounded-2xl bg-white dark:bg-gray-800/50 border transition-all duration-300 min-h-[120px]",
-        isOutOfStock 
+        isOutOfStock
           ? "opacity-60 cursor-not-allowed border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-900/10 grayscale-[30%]"
           : (isMaxReached ? "cursor-not-allowed hover:border-orange-300 opacity-90" : "cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:border-orange-300 dark:hover:border-orange-700"),
         inCart > 0 && !isOutOfStock ? "border-orange-500 dark:border-orange-500 ring-1 ring-orange-500" : (!isOutOfStock ? "border-gray-100 dark:border-gray-800" : "")
@@ -795,19 +833,19 @@ function POSProductCard({ product, inCart, onAdd }: { product: POSProduct; inCar
 
       {!isOutOfStock && product.maxSellableQty !== undefined && product.maxSellableQty < 9999 && (
         <div className="absolute top-2 left-2 z-10">
-           <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200 text-[10px] px-1.5 py-0 font-bold shadow-sm">Còn {product.maxSellableQty}</Badge>
+          <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200 text-[10px] px-1.5 py-0 font-bold shadow-sm">Còn {product.maxSellableQty}</Badge>
         </div>
       )}
-      
+
       {inCart > 0 && !isOutOfStock && (
         <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-xs font-bold text-white shadow-sm animate-in zoom-in duration-200 z-20">
           {inCart}
         </div>
       )}
-      
+
       <p className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-500 font-bold mb-1.5">{product.category}</p>
       <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug line-clamp-2 mb-2">{product.name}</p>
-      
+
       <div className="flex items-baseline justify-center gap-1 mt-auto">
         <span className="text-base font-bold text-orange-600 dark:text-orange-400">{formatCurrency(product.price)}</span>
         <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">/{product.unit}</span>

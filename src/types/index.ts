@@ -157,6 +157,7 @@ export interface ApiProduct {
   category?: { id: number; category_name: string };
   is_out_of_stock?: boolean;
   max_sellable_quantity?: number;
+  ingredient_products?: IngredientProductLink[];
 }
 
 export interface CreateProductPayload {
