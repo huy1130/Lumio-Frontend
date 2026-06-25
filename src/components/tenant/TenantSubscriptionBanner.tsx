@@ -107,8 +107,8 @@ export function TenantSubscriptionBanner({
           ) : null}
         </div>
       </div>
-      <Button asChild size="sm" variant="outline" className="shrink-0 rounded-lg">
-        <Link href="/settings">Xem gói đăng ký</Link>
+      <Button asChild size="sm" variant="outline" className="shrink-0 rounded-lg border-current bg-transparent hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+        <Link href="/subscription/renew">Gia hạn ngay</Link>
       </Button>
     </div>
   );
