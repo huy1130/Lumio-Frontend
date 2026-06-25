@@ -97,9 +97,9 @@ export default function LandingPage() {
             ? (raw as { data: ApiSubscription[] }).data
             : [];
         const active = data.filter((s) => s.is_active !== false);
-        const trial = active.find((s) => s.package_code === 'TRIAL_14_DAYS');
+        const trial = active.find((s) => s.package_code === 'TRIAL_7_DAYS');
         if (trial) setTrialPlanId(String(trial.id));
-        setPlans(active.filter((s) => s.package_code !== 'TRIAL_14_DAYS'));
+        setPlans(active.filter((s) => s.package_code !== 'TRIAL_7_DAYS'));
       })
       .catch(() => setPlans([]))
       .finally(() => setPlansLoading(false));
@@ -490,7 +490,7 @@ export default function LandingPage() {
               <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
             </div>
             <div className="relative z-10">
-              <Badge className="mb-6 rounded-full border-white/10 bg-white/5 px-4 py-1.5 text-[13px] font-bold text-gray-300">Dùng thử 14 ngày · Không cần thẻ tín dụng</Badge>
+              <Badge className="mb-6 rounded-full border-white/10 bg-white/5 px-4 py-1.5 text-[13px] font-bold text-gray-300">Dùng thử 7 ngày · Không cần thẻ tín dụng</Badge>
               <h2 className="text-[2.5rem] font-extrabold sm:text-5xl mb-5 text-white tracking-tight leading-[1.1]">Sẵn sàng phát triển<br />cùng Lumio?</h2>
               <p className="text-gray-400 text-[16px] font-medium mb-10 max-w-lg mx-auto leading-relaxed">
                 Hàng nghìn doanh nghiệp F&amp;B đang vận hành thông minh hơn mỗi ngày. Đăng ký ngay hôm nay.
@@ -498,7 +498,7 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href={trialPlanId ? `/onboarding?plan=${trialPlanId}` : "/register"}>
                   <Button size="lg" className="h-14 gap-2 bg-gradient-to-r from-indigo-500 to-blue-500 text-white hover:from-indigo-400 hover:to-blue-400 px-9 font-bold rounded-2xl shadow-lg transition-transform hover:scale-105">
-                    Sử dụng miễn phí (14 ngày) <ArrowRight className="h-4 w-4" />
+                    Sử dụng miễn phí (7 ngày) <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Link href="/login">
