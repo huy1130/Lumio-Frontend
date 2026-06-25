@@ -216,8 +216,7 @@ function SubscriptionRenewContent() {
             <Button
               variant="outline"
               className="w-full h-11 rounded-xl mt-2"
-              onClick={() => setPaymentData(null)}
-            >
+              onClick={() => router.push('/settings')}            >
               Trở lại
             </Button>
           </CardContent>
@@ -320,8 +319,8 @@ function SubscriptionRenewContent() {
                   <label
                     key={plan.id}
                     className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors ${selectedId === plan.id
-                        ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30"
-                        : "hover:bg-muted/50"
+                      ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30"
+                      : "hover:bg-muted/50"
                       }`}
                   >
                     <div className="flex items-center gap-3">
@@ -359,8 +358,8 @@ function SubscriptionRenewContent() {
                 <div className="grid grid-cols-2 gap-3">
                   <label
                     className={`flex cursor-pointer items-center justify-between rounded-xl border p-3.5 transition-all ${paymentMethod === 'PAYOS'
-                        ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-500"
-                        : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-500"
+                      : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
                       }`}
                   >
                     <div className="flex items-center gap-3">
@@ -383,8 +382,8 @@ function SubscriptionRenewContent() {
 
                   <label
                     className={`flex cursor-pointer items-center justify-between rounded-xl border p-3.5 transition-all ${paymentMethod === 'CASH'
-                        ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-500"
-                        : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-500"
+                      : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
                       }`}
                   >
                     <div className="flex items-center gap-3">

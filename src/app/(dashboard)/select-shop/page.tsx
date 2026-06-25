@@ -40,7 +40,7 @@ function SelectShopPageContent() {
       setShops(forTenant);
 
       if (forTenant.length === 0) {
-        router.replace("/settings");
+        router.replace("/settings?tab=shops");
         return;
       }
       if (forTenant.length === 1 && accessToken) {
