@@ -209,7 +209,15 @@ function OnboardingContent() {
 
   const [showPw, setShowPw] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'PAYOS' | 'CASH'>('PAYOS');
+  const [paymentMethod, setPaymentMethod] = useState<'PAYOS' | 'CASH' | 'TRIAL'>('PAYOS');
+
+  const isTrialPlan = plan?.packageCode === 'TRIAL_14_DAYS';
+
+  useEffect(() => {
+    if (isTrialPlan) {
+      setPaymentMethod('TRIAL');
+    }
+  }, [isTrialPlan]);
 
   // ── Validation ─────────────────────────────────────────────────────────────
   const step0Valid =
@@ -284,9 +292,9 @@ function OnboardingContent() {
         return;
       }
 
-      if (data?.isCash) {
+      if (data?.isCash || data?.isTrial) {
         savePendingShop({ shop_name: tenantName.trim() });
-        setPaymentData({ ...data, isCash: true });
+        setPaymentData({ ...data });
       } else if (data?.qrCode) {
         savePendingShop({ shop_name: tenantName.trim() });
         if (data.orderCode) {
@@ -653,6 +661,7 @@ function OnboardingContent() {
                       )}
 
                       {/* Payment Method Selection */}
+                      {!isTrialPlan && (
                       <div className="space-y-3 mt-6">
                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                           Phương thức thanh toán
@@ -711,6 +720,7 @@ function OnboardingContent() {
                           </label>
                         </div>
                       </div>
+                      )}
 
                       {error && (
                         <p className="flex items-center gap-2 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">
@@ -738,7 +748,7 @@ function OnboardingContent() {
                               <Loader2 className="h-4 w-4 animate-spin" />
                               Đang xử lý…
                             </span>
-                          ) : paymentMethod === 'CASH' ? "Gửi yêu cầu thanh toán →" : "Thanh toán qua PayOS →"}
+                          ) : isTrialPlan ? "Gửi yêu cầu dùng thử →" : paymentMethod === 'CASH' ? "Gửi yêu cầu thanh toán →" : "Thanh toán qua PayOS →"}
                         </Button>
                       </div>
 
@@ -753,7 +763,7 @@ function OnboardingContent() {
                   )}
 
                   {/* ── STEP 1 (Trạng thái hiển thị QR) ──────────────────────── */}
-                  {step === 1 && paymentData && !paymentData.isCash && (
+                  {step === 1 && paymentData && !paymentData.isCash && !paymentData.isTrial && (
                     <motion.div key="s1-qr" {...fadeSlide} className="space-y-6">
                       <div className="text-center">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -842,6 +852,40 @@ function OnboardingContent() {
 
                       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mt-6 text-left space-y-2 text-sm border border-gray-200 dark:border-gray-700">
                         <p className="text-gray-500 dark:text-gray-400">Mã đơn hàng: <span className="font-semibold text-gray-900 dark:text-gray-100">{paymentData.orderCode}</span></p>
+                        <p className="text-gray-500 dark:text-gray-400">Trạng thái: <span className="font-semibold text-amber-500">Chờ Admin duyệt</span></p>
+                      </div>
+
+                      <Button
+                        className="w-full h-11 rounded-xl mt-4"
+                        variant="outline"
+                        onClick={() => router.push("/")}
+                      >
+                        Về trang chủ
+                      </Button>
+                    </motion.div>
+                  )}
+
+                  {/* ── STEP 1 (Trạng thái TRIAL) ──────────────────────── */}
+                  {step === 1 && paymentData && paymentData.isTrial && (
+                    <motion.div key="s1-trial" {...fadeSlide} className="space-y-6 text-center">
+                      <div className="flex justify-center mt-4">
+                        <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center">
+                          <Check className="h-8 w-8 text-indigo-600" />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                          Đã gửi yêu cầu dùng thử!
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-3 leading-relaxed">
+                          Yêu cầu sử dụng thử 14 ngày của bạn đã được ghi nhận. 
+                          <br/><br/>
+                          Vui lòng đợi admin duyệt yêu cầu đó. Hãy kết bạn và gửi màn hình xác nhận này qua <span className="font-semibold text-indigo-600">Zalo: 0326989639</span> để được hỗ trợ nhanh nhất.
+                        </p>
+                      </div>
+
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mt-6 text-left space-y-2 text-sm border border-gray-200 dark:border-gray-700">
+                        <p className="text-gray-500 dark:text-gray-400">Mã yêu cầu: <span className="font-semibold text-gray-900 dark:text-gray-100">{paymentData.orderCode}</span></p>
                         <p className="text-gray-500 dark:text-gray-400">Trạng thái: <span className="font-semibold text-amber-500">Chờ Admin duyệt</span></p>
                       </div>
 

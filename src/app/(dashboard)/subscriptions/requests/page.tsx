@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, AlertCircle, CheckCircle2, Clock } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, Clock, Check } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
@@ -42,6 +42,7 @@ interface PendingCashRequest {
   purchase_type: string;
   status: string;
   created_at: string;
+  payment_method: string;
   subscription: {
     package_code: string;
     price: string;
@@ -50,9 +51,15 @@ interface PendingCashRequest {
 
 export default function CashRequestsPage() {
   const { accessToken, isRealAdmin } = useAuth();
+  
+  const [activeTab, setActiveTab] = useState<"CASH" | "TRIAL">("CASH");
+  
   const [requests, setRequests] = useState<PendingCashRequest[]>([]);
+  const [trialRequests, setTrialRequests] = useState<PendingCashRequest[]>([]);
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
   const [confirmingId, setConfirmingId] = useState<number | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<PendingCashRequest | null>(null);
 
@@ -60,14 +67,24 @@ export default function CashRequestsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/subscriptions/purchase/pending-cash`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      if (!res.ok) throw new Error("Failed to load requests");
-      const data = await res.json();
-      setRequests(data);
+      const [resCash, resTrial] = await Promise.all([
+        fetch(`${API_URL}/subscriptions/purchase/pending-cash`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+        fetch(`${API_URL}/subscriptions/purchase/pending-trial`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+      ]);
+
+      if (!resCash.ok || !resTrial.ok) {
+        throw new Error("Failed to load requests");
+      }
+
+      const dataCash = await resCash.json();
+      const dataTrial = await resTrial.json();
+      
+      setRequests(dataCash);
+      setTrialRequests(dataTrial);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to load requests");
     } finally {
@@ -86,7 +103,12 @@ export default function CashRequestsPage() {
     
     setConfirmingId(selectedRequest.id);
     try {
-      const res = await fetch(`${API_URL}/subscriptions/purchase/confirm-cash/${selectedRequest.payos_order_code}`, {
+      const isTrial = selectedRequest.payment_method === 'TRIAL';
+      const endpoint = isTrial 
+        ? `${API_URL}/subscriptions/purchase/confirm-trial/${selectedRequest.payos_order_code}`
+        : `${API_URL}/subscriptions/purchase/confirm-cash/${selectedRequest.payos_order_code}`;
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -98,12 +120,16 @@ export default function CashRequestsPage() {
         throw new Error(data.message || "Xác nhận thất bại");
       }
       
-      toast.success("Duyệt đơn thành công", {
+      toast.success(isTrial ? "Duyệt yêu cầu dùng thử thành công" : "Duyệt đơn thành công", {
         description: `Mã đơn hàng ${selectedRequest.payos_order_code} đã được kích hoạt.`,
       });
       
       // Loại bỏ đơn hàng khỏi danh sách chờ
-      setRequests((prev) => prev.filter((r) => r.id !== selectedRequest.id));
+      if (isTrial) {
+        setTrialRequests((prev) => prev.filter((r) => r.id !== selectedRequest.id));
+      } else {
+        setRequests((prev) => prev.filter((r) => r.id !== selectedRequest.id));
+      }
       setSelectedRequest(null);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Xác nhận thất bại";
@@ -121,13 +147,15 @@ export default function CashRequestsPage() {
     );
   }
 
+  const currentList = activeTab === "CASH" ? requests : trialRequests;
+
   return (
     <div>
       <Header />
       <div className="p-6 space-y-8 animate-in fade-in duration-500">
         <PageHeader
-          title="Yêu Cầu Thanh Toán Tiền Mặt"
-          description="Duyệt các yêu cầu kích hoạt gói/tài khoản thanh toán bằng thủ công."
+          title="Duyệt Yêu Cầu Gói Dịch Vụ"
+          description="Duyệt các yêu cầu kích hoạt gói/tài khoản mua bằng tiền mặt hoặc yêu cầu dùng thử."
           breadcrumbs={[{ label: "Admin" }, { label: "Duyệt yêu cầu" }]}
         />
 
@@ -146,12 +174,52 @@ export default function CashRequestsPage() {
           </div>
         )}
 
+        {/* Custom Tabs */}
+        <div className="flex space-x-1 bg-gray-100/50 p-1 rounded-xl w-max border border-gray-200/50 dark:bg-gray-800/50 dark:border-gray-700">
+          <button
+            onClick={() => setActiveTab("CASH")}
+            className={cn(
+              "px-5 py-2 text-sm font-medium rounded-lg transition-all",
+              activeTab === "CASH"
+                ? "bg-white shadow-sm text-gray-900 dark:bg-gray-700 dark:text-white"
+                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            )}
+          >
+            Mua Gói (Tiền mặt)
+            {requests.length > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-bold text-indigo-600">
+                {requests.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab("TRIAL")}
+            className={cn(
+              "px-5 py-2 text-sm font-medium rounded-lg transition-all",
+              activeTab === "TRIAL"
+                ? "bg-white shadow-sm text-gray-900 dark:bg-gray-700 dark:text-white"
+                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            )}
+          >
+            Dùng thử 14 ngày (Trial)
+            {trialRequests.length > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-600">
+                {trialRequests.length}
+              </span>
+            )}
+          </button>
+        </div>
+
         <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden dark:bg-gray-900/50">
           <CardHeader className="flex flex-row items-center justify-between border-b border-gray-100/50 pb-5 bg-white/50 dark:border-gray-800/50 dark:bg-gray-900/50">
             <div>
-              <CardTitle className="text-lg font-bold">Danh sách đang chờ duyệt</CardTitle>
+              <CardTitle className="text-lg font-bold">
+                {activeTab === "CASH" ? "Danh sách chờ xác nhận tiền mặt" : "Danh sách yêu cầu dùng thử"}
+              </CardTitle>
               <CardDescription className="text-[13px] mt-1">
-                Hiển thị các giao dịch chờ xác nhận nhận tiền thực tế.
+                {activeTab === "CASH" 
+                  ? "Hiển thị các giao dịch chờ xác nhận nhận tiền thực tế."
+                  : "Hiển thị các tài khoản đang chờ duyệt để được dùng thử 14 ngày."}
               </CardDescription>
             </div>
             <Button 
@@ -165,7 +233,7 @@ export default function CashRequestsPage() {
             </Button>
           </CardHeader>
           <CardContent className="p-0">
-            {loading && requests.length === 0 ? (
+            {loading && currentList.length === 0 ? (
               <div className="flex items-center justify-center py-16 text-muted-foreground">
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Đang tải dữ liệu…
@@ -185,7 +253,7 @@ export default function CashRequestsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                  {requests.length === 0 ? (
+                  {currentList.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={7}
@@ -195,7 +263,7 @@ export default function CashRequestsPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    requests.map((req) => (
+                    currentList.map((req) => (
                       <TableRow key={req.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/50">
                         <TableCell className="font-semibold px-6 py-4">
                           <span className="font-mono text-xs">{req.payos_order_code}</span>
@@ -223,14 +291,16 @@ export default function CashRequestsPage() {
                             size="sm"
                             onClick={() => setSelectedRequest(req)}
                             disabled={confirmingId === req.id}
-                            className="bg-green-600 hover:bg-green-700 text-white gap-2"
+                            className={cn("text-white gap-2", activeTab === "CASH" ? "bg-green-600 hover:bg-green-700" : "bg-indigo-600 hover:bg-indigo-700")}
                           >
                             {confirmingId === req.id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
+                            ) : activeTab === "CASH" ? (
                               <CheckCircle2 className="h-4 w-4" />
+                            ) : (
+                              <Check className="h-4 w-4" />
                             )}
-                            Đã nhận tiền
+                            {activeTab === "CASH" ? "Đã nhận tiền" : "Duyệt dùng thử"}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -249,13 +319,26 @@ export default function CashRequestsPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
-              <CheckCircle2 className="h-6 w-6 text-green-600" />
-              Xác nhận nhận tiền
+              {selectedRequest?.payment_method === 'TRIAL' ? (
+                <>
+                  <Check className="h-6 w-6 text-indigo-600" />
+                  Duyệt yêu cầu dùng thử
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                  Xác nhận nhận tiền
+                </>
+              )}
             </DialogTitle>
           </DialogHeader>
           
           <div className="py-4 text-sm text-gray-600 dark:text-gray-300">
-            <p className="mb-4 text-base">Bạn có chắc chắn muốn duyệt đơn hàng này?</p>
+            <p className="mb-4 text-base">
+              {selectedRequest?.payment_method === 'TRIAL' 
+                ? "Bạn có chắc chắn muốn cho phép khách hàng này sử dụng thử 14 ngày?" 
+                : "Bạn có chắc chắn muốn duyệt đơn hàng này?"}
+            </p>
             
             {selectedRequest && (
               <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 space-y-2 border border-gray-100 dark:border-gray-700">
@@ -278,7 +361,7 @@ export default function CashRequestsPage() {
             
             <p className="mt-4 text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg flex items-start gap-2 border border-amber-200 dark:border-amber-800">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-              Hệ thống sẽ ngay lập tức kích hoạt tài khoản hoặc gia hạn gói cước. Hành động này không thể hoàn tác.
+              Hệ thống sẽ ngay lập tức kích hoạt tài khoản. Hành động này không thể hoàn tác.
             </p>
           </div>
 
@@ -294,12 +377,14 @@ export default function CashRequestsPage() {
             </Button>
             <Button 
               type="button"
-              className="bg-green-600 hover:bg-green-700 text-white rounded-xl h-10 px-6 font-semibold"
+              className={cn("text-white rounded-xl h-10 px-6 font-semibold", selectedRequest?.payment_method === 'TRIAL' ? "bg-indigo-600 hover:bg-indigo-700" : "bg-green-600 hover:bg-green-700")}
               onClick={processConfirm}
               disabled={confirmingId !== null}
             >
               {confirmingId !== null ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Đang xử lý</>
+              ) : selectedRequest?.payment_method === 'TRIAL' ? (
+                "Duyệt ngay"
               ) : (
                 "Đã nhận đủ tiền"
               )}
