@@ -49,7 +49,7 @@ export default function LoginPage() {
             toast.success("Đăng nhập thành công. Vui lòng thiết lập cửa hàng.", {
               closeButton: true,
             });
-              router.push("/settings");
+            window.location.href = "/settings";
             return;
           }
           if (shopStatus.status === "needs_select") {
@@ -57,7 +57,7 @@ export default function LoginPage() {
               closeButton: true,
             });
             setSession(response.accessToken, shopStatus.user);
-            router.push("/select-shop");
+            window.location.href = "/select-shop";
             return;
           }
           if (shopStatus.user.shop_id !== user.shop_id) {
@@ -69,15 +69,15 @@ export default function LoginPage() {
           const shopMessage =
             shopErr instanceof Error ? shopErr.message : "Không thể tải thông tin cửa hàng";
           toast.error(shopMessage);
-          router.push("/settings");
+          router.push("/settings?tab=shops");
           return;
         }
       } else {
         toast.success("Đăng nhập thành công", { closeButton: true });
       }
 
-      const redirect = getRedirectByBackendRole(user);
-      router.push(redirect);
+      const redirectPath = getRedirectByBackendRole(user);
+      window.location.href = redirectPath;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Đăng nhập thất bại";
       setError(message);

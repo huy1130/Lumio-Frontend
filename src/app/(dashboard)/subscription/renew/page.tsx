@@ -77,7 +77,7 @@ function SubscriptionRenewContent() {
         : Array.isArray((raw as { data?: ApiSubscription[] })?.data)
           ? (raw as { data: ApiSubscription[] }).data
           : [];
-      const active = list.filter((p) => p.is_active && p.package_code !== 'TRIAL_14_DAYS');
+      const active = list.filter((p) => p.is_active && p.package_code !== 'TRIAL_7_DAYS');
       setPlans(active);
       setSelectedId(sub.subscription_id ?? active[0]?.id ?? null);
     } catch (e: unknown) {
@@ -179,7 +179,7 @@ function SubscriptionRenewContent() {
       </Button>
 
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Nâng cấp gói sử dụng</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Gia hạn gói sử dụng</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Giao dịch chỉ hoàn tất khi thanh toán thành công.
         </p>
@@ -209,17 +209,16 @@ function SubscriptionRenewContent() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-             <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-left space-y-2 text-sm border border-gray-200 dark:border-gray-700">
-               <p className="text-gray-500 dark:text-gray-400">Mã đơn hàng: <span className="font-semibold text-gray-900 dark:text-gray-100">{paymentData.orderCode}</span></p>
-               <p className="text-gray-500 dark:text-gray-400">Trạng thái: <span className="font-semibold text-amber-500">Chờ Admin duyệt</span></p>
-             </div>
-             <Button
-                variant="outline"
-                className="w-full h-11 rounded-xl mt-2"
-                onClick={() => setPaymentData(null)}
-              >
-                Trở lại
-              </Button>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-left space-y-2 text-sm border border-gray-200 dark:border-gray-700">
+              <p className="text-gray-500 dark:text-gray-400">Mã đơn hàng: <span className="font-semibold text-gray-900 dark:text-gray-100">{paymentData.orderCode}</span></p>
+              <p className="text-gray-500 dark:text-gray-400">Trạng thái: <span className="font-semibold text-amber-500">Chờ Admin duyệt</span></p>
+            </div>
+            <Button
+              variant="outline"
+              className="w-full h-11 rounded-xl mt-2"
+              onClick={() => router.push('/settings')}            >
+              Trở lại
+            </Button>
           </CardContent>
         </Card>
       ) : paymentData ? (
@@ -239,7 +238,7 @@ function SubscriptionRenewContent() {
                 includeMargin={false}
               />
             </div>
-            
+
             <div className="space-y-3 rounded-lg bg-muted/50 p-4 text-sm">
               <div className="flex justify-between border-b pb-2">
                 <span className="text-muted-foreground">Ngân hàng</span>
@@ -272,12 +271,12 @@ function SubscriptionRenewContent() {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
               Đang chờ thanh toán...
             </div>
-            
+
             <Button variant="outline" className="w-full" onClick={() => setPaymentData(null)}>
               Hủy thanh toán
             </Button>
@@ -319,11 +318,10 @@ function SubscriptionRenewContent() {
                 plans.map((plan) => (
                   <label
                     key={plan.id}
-                    className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors ${
-                      selectedId === plan.id
-                        ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30"
-                        : "hover:bg-muted/50"
-                    }`}
+                    className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors ${selectedId === plan.id
+                      ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30"
+                      : "hover:bg-muted/50"
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <input
@@ -354,61 +352,59 @@ function SubscriptionRenewContent() {
                 ))
               )}
 
-                  {/* Payment Method Selection */}
-                  <div className="space-y-3 mt-6 mb-4">
-                    <p className="text-sm font-medium">Phương thức thanh toán</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <label
-                        className={`flex cursor-pointer items-center justify-between rounded-xl border p-3.5 transition-all ${
-                          paymentMethod === 'PAYOS'
-                            ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-500"
-                            : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
-                            <CreditCard className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">PayOS</p>
-                            <p className="text-[10px] text-gray-500">Quét mã QR tự động</p>
-                          </div>
-                        </div>
-                        <input
-                          type="radio"
-                          name="paymentMethod"
-                          className="sr-only"
-                          checked={paymentMethod === 'PAYOS'}
-                          onChange={() => setPaymentMethod('PAYOS')}
-                        />
-                      </label>
-
-                      <label
-                        className={`flex cursor-pointer items-center justify-between rounded-xl border p-3.5 transition-all ${
-                          paymentMethod === 'CASH'
-                            ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-500"
-                            : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
-                            <span className="text-green-600 dark:text-green-400 font-bold text-sm">$$</span>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">Tiền mặt</p>
-                            <p className="text-[10px] text-gray-500">Thủ công</p>
-                          </div>
-                        </div>
-                        <input
-                          type="radio"
-                          name="paymentMethod"
-                          className="sr-only"
-                          checked={paymentMethod === 'CASH'}
-                          onChange={() => setPaymentMethod('CASH')}
-                        />
-                      </label>
+              {/* Payment Method Selection */}
+              <div className="space-y-3 mt-6 mb-4">
+                <p className="text-sm font-medium">Phương thức thanh toán</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <label
+                    className={`flex cursor-pointer items-center justify-between rounded-xl border p-3.5 transition-all ${paymentMethod === 'PAYOS'
+                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-500"
+                      : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+                        <CreditCard className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">PayOS</p>
+                        <p className="text-[10px] text-gray-500">Quét mã QR tự động</p>
+                      </div>
                     </div>
-                  </div>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      className="sr-only"
+                      checked={paymentMethod === 'PAYOS'}
+                      onChange={() => setPaymentMethod('PAYOS')}
+                    />
+                  </label>
+
+                  <label
+                    className={`flex cursor-pointer items-center justify-between rounded-xl border p-3.5 transition-all ${paymentMethod === 'CASH'
+                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-500"
+                      : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+                        <span className="text-green-600 dark:text-green-400 font-bold text-sm">$$</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">Tiền mặt</p>
+                        <p className="text-[10px] text-gray-500">Thủ công</p>
+                      </div>
+                    </div>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      className="sr-only"
+                      checked={paymentMethod === 'CASH'}
+                      onChange={() => setPaymentMethod('CASH')}
+                    />
+                  </label>
+                </div>
+              </div>
 
               <Button
                 className="w-full gap-2"

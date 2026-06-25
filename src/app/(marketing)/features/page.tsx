@@ -73,7 +73,7 @@ const COLOR_MAP: Record<string, { badge: string; accent: string; icon: string; d
 
 // ─── High-level capability list ───────────────────────────────────────────────
 const HIGHLIGHTS = [
-  "Dùng thử 14 ngày miễn phí, không cần thẻ tín dụng",
+  "Dùng thử 7 ngày miễn phí, không cần thẻ tín dụng",
   "Hoạt động trên máy tính bảng, máy tính và điện thoại",
   "Chế độ ngoại tuyến — bán hàng ngay cả khi không có mạng",
   "Khởi động ngay, cài đặt trong vòng 10 phút",
@@ -210,7 +210,7 @@ export default function FeaturesPage() {
               <div className="absolute -right-20 bottom-10 h-60 w-60 rounded-full bg-violet-500/20 blur-3xl" />
             </div>
             <div className="relative">
-              <Badge className="mb-5 border-white/20 bg-white/10 text-white">Dùng thử 14 ngày · Không cần thẻ tín dụng</Badge>
+              <Badge className="mb-5 border-white/20 bg-white/10 text-white">Dùng thử 7 ngày · Không cần thẻ tín dụng</Badge>
               <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Sẵn sàng trải nghiệm thực tế?</h2>
               <p className="text-indigo-100 mb-8 max-w-md mx-auto">
                 Bắt đầu dùng thử miễn phí ngay hôm nay và khám phá lý do hơn 300.000 doanh nghiệp tin dùng Lumio.

@@ -21,8 +21,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { formatCurrency } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Loader2, DollarSign, ShoppingBag, TrendingUp, Percent } from "lucide-react";
+import { Loader2, DollarSign, ShoppingBag, TrendingUp, Percent, Clock } from "lucide-react";
 import { reportService, type SalesReportResponse } from "@/lib/services/reportService";
+import { orderService } from "@/lib/services/orderService";
 
 const SKELETON_ROWS = 5;
 const SKELETON_BARS = [40, 65, 50, 80, 55, 70, 45];
@@ -159,6 +160,51 @@ function RealProductList({ title, description, data, isTop }: { title: string; d
   );
 }
 
+function HourlyRevenueList({ title, description, data }: { title: string; description: string; data: any[] }) {
+  return (
+    <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] dark:bg-gray-900/50 flex flex-col h-full rounded-2xl overflow-hidden">
+      <CardHeader className="border-b border-gray-100/50 pb-5 dark:border-gray-800/50 bg-white/50 dark:bg-gray-900/50">
+        <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <Clock className="w-5 h-5 text-indigo-500" />
+          {title}
+        </CardTitle>
+        <CardDescription className="text-[13px]">{description}</CardDescription>
+      </CardHeader>
+      <CardContent className="p-0 flex-1">
+        <div className="flex flex-col">
+          {data.map((item, i) => (
+            <div key={i} className="flex items-center justify-between p-4 border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                  i === 0 ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400" :
+                  i === 1 ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400" :
+                  i === 2 ? "bg-indigo-50/50 text-indigo-600/80 dark:bg-indigo-900/10 dark:text-indigo-400/80" :
+                  "bg-gray-50 text-gray-400 dark:bg-gray-800"
+                }`}>
+                  {i + 1}
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{item.name}</span>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{item.qty} đơn</span>
+                </div>
+              </div>
+              <div className="font-semibold text-gray-900 dark:text-gray-100">
+                {formatCurrency(item.revenue)}
+              </div>
+            </div>
+          ))}
+          {data.length === 0 && (
+            <div className="py-12 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+              <div className="text-4xl mb-3">📭</div>
+              <p className="text-sm">Chưa có dữ liệu thống kê</p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function RealColumnChart({ title, description, data, headerRight, color = "#f97316" }: { 
   title: string; description: string; data: any[];
   headerRight?: React.ReactNode;
@@ -228,6 +274,7 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
   const shopId = user?.shop_id;
   
   const [report, setReport] = useState<SalesReportResponse | null>(null);
+  const [hourlyRevenue, setHourlyRevenue] = useState<Array<{ name: string; revenue: number; qty: number }>>([]);
   const [loading, setLoading] = useState(true);
   
   const getLocalISO = (d: Date) => {
@@ -246,14 +293,55 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
   });
 
   useEffect(() => {
+    if (!shopId) return;
     setLoading(true);
-    reportService.getSalesReport({
-      startDate: dateRange.from,
-      endDate: dateRange.to,
-      shopId: shopId || undefined
-    })
-    .then(res => {
-      setReport(res);
+
+    Promise.all([
+      reportService.getSalesReport({
+        startDate: dateRange.from,
+        endDate: dateRange.to,
+        shopId: shopId || undefined
+      }),
+      orderService.getAll(shopId).catch(() => []) // Fallback in case of error
+    ])
+    .then(([reportRes, ordersRes]) => {
+      setReport(reportRes);
+      
+      // Calculate hourly revenue from orders
+      const fromDate = new Date(dateRange.from + "T00:00:00");
+      const toDate = new Date(dateRange.to + "T23:59:59");
+      
+      const filteredOrders = ordersRes.filter(o => {
+        if (o.order_status !== "COMPLETED") return false;
+        const created = new Date(o.created_at);
+        return created >= fromDate && created <= toDate;
+      });
+
+      const slotMap = new Map<number, { revenue: number; qty: number }>();
+      
+      filteredOrders.forEach(o => {
+        const d = new Date(o.created_at);
+        const hour = d.getHours();
+        const slot = Math.floor(hour / 2) * 2; // Group by 2 hours
+        
+        const current = slotMap.get(slot) || { revenue: 0, qty: 0 };
+        current.revenue += Number(o.grand_total || 0);
+        current.qty += 1;
+        slotMap.set(slot, current);
+      });
+      
+      const hourlyData = Array.from(slotMap.entries()).map(([slot, stats]) => {
+        const start = String(slot).padStart(2, '0') + ":00";
+        const end = String(slot + 2).padStart(2, '0') + ":00";
+        return {
+          name: `${start} - ${end}`,
+          qty: stats.qty,
+          revenue: stats.revenue
+        };
+      });
+      
+      hourlyData.sort((a, b) => b.revenue - a.revenue);
+      setHourlyRevenue(hourlyData.slice(0, 5)); // Top 5 time slots
     })
     .catch(console.error)
     .finally(() => setLoading(false));
@@ -405,7 +493,12 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
               />
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-2 items-start">
+            <div className="grid gap-6 lg:grid-cols-3 items-start">
+              <HourlyRevenueList
+                title="Khung giờ vàng"
+                description="Doanh thu theo các khung giờ (mỗi 2 tiếng)"
+                data={hourlyRevenue}
+              />
               <RealProductList
                 title="Các món bán chạy nhất"
                 description="Top 5 món được khách hàng yêu thích và đặt nhiều nhất"

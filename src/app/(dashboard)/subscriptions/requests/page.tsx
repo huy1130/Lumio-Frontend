@@ -201,7 +201,7 @@ export default function CashRequestsPage() {
                 : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             )}
           >
-            Dùng thử 14 ngày (Trial)
+            Dùng thử 7 ngày (Trial)
             {trialRequests.length > 0 && (
               <span className="ml-2 inline-flex items-center justify-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-600">
                 {trialRequests.length}
@@ -219,7 +219,7 @@ export default function CashRequestsPage() {
               <CardDescription className="text-[13px] mt-1">
                 {activeTab === "CASH" 
                   ? "Hiển thị các giao dịch chờ xác nhận nhận tiền thực tế."
-                  : "Hiển thị các tài khoản đang chờ duyệt để được dùng thử 14 ngày."}
+                  : "Hiển thị các tài khoản đang chờ duyệt để được dùng thử 7 ngày."}
               </CardDescription>
             </div>
             <Button 
@@ -336,7 +336,7 @@ export default function CashRequestsPage() {
           <div className="py-4 text-sm text-gray-600 dark:text-gray-300">
             <p className="mb-4 text-base">
               {selectedRequest?.payment_method === 'TRIAL' 
-                ? "Bạn có chắc chắn muốn cho phép khách hàng này sử dụng thử 14 ngày?" 
+                ? "Bạn có chắc chắn muốn cho phép khách hàng này sử dụng thử 7 ngày?" 
                 : "Bạn có chắc chắn muốn duyệt đơn hàng này?"}
             </p>
             

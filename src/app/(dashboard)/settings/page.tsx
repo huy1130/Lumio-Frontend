@@ -44,6 +44,15 @@ function SettingsPageContent({ role }: { role: string }) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [activeTab, setActiveTab] = useState<"subscription" | "shops">("subscription");
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") === "shops") {
+        setActiveTab("shops");
+      }
+    }
+  }, []);
+
   const isShopOwner = role === "shop_owner";
 
   const syncShops = useCallback(async () => {
@@ -82,6 +91,13 @@ function SettingsPageContent({ role }: { role: string }) {
   }, [syncShops, loadQuota]);
 
   const requiresSetup = user && isShopOwner ? shouldShowShopSetup(user, shops.length) : false;
+
+  useEffect(() => {
+    if (!loading && requiresSetup && activeTab !== "shops") {
+      setActiveTab("shops");
+    }
+  }, [loading, requiresSetup, activeTab]);
+
   const pending = readPendingShop();
   const activeId = user ? getActiveShopId(user.tenant_id) : null;
   const primaryShop = user ? pickPrimaryShop(shops, user) : shops[0] ?? null;

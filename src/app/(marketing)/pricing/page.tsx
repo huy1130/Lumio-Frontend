@@ -27,7 +27,7 @@ const FAQS = [
   },
   {
     q: "Có dùng thử miễn phí không?",
-    a: "Có — mỗi gói đều đi kèm 14 ngày dùng thử miễn phí. Không cần thẻ tín dụng để bắt đầu.",
+    a: "Có — mỗi gói đều đi kèm 7 ngày dùng thử miễn phí. Không cần thẻ tín dụng để bắt đầu.",
   },
   {
     q: "Bạn chấp nhận những hình thức thanh toán nào?",
@@ -114,11 +114,11 @@ export default function PricingPage() {
         });
         if (res.ok) {
           const data: ApiSubscription[] = await res.json();
-          const trial = data.find((s) => s.package_code === 'TRIAL_14_DAYS');
+          const trial = data.find((s) => s.package_code === 'TRIAL_7_DAYS');
           if (trial) setTrialPlan(fromApi(trial));
           
           const active = data
-            .filter((s) => s.is_active && s.package_code !== 'TRIAL_14_DAYS')
+            .filter((s) => s.is_active && s.package_code !== 'TRIAL_7_DAYS')
             .sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
           setPlans(active.map(fromApi));
           setIsLive(true);
@@ -326,7 +326,7 @@ export default function PricingPage() {
           {!loading && plans.length > 0 && (
             <div className="mt-10 flex justify-center">
               <p className="text-center text-sm text-gray-400 dark:text-gray-500">
-                Tất cả gói đều có 14 ngày dùng thử miễn phí · Không cần thẻ tín dụng · Hủy bất cứ lúc nào
+                Tất cả gói đều có 7 ngày dùng thử miễn phí · Không cần thẻ tín dụng · Hủy bất cứ lúc nào
               </p>
             </div>
           )}
@@ -433,7 +433,7 @@ export default function PricingPage() {
               <div className="absolute -right-20 bottom-10 h-60 w-60 rounded-full bg-violet-500/20 blur-3xl" />
             </div>
             <div className="relative">
-              <Badge className="mb-5 border-white/20 bg-white/10 text-white">Dùng thử 14 ngày · Không cần thẻ tín dụng</Badge>
+              <Badge className="mb-5 border-white/20 bg-white/10 text-white">Dùng thử 7 ngày · Không cần thẻ tín dụng</Badge>
               <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Sẵn sàng phát triển cùng Lumio?</h2>
               <p className="text-indigo-100 mb-8 max-w-md mx-auto">
                 Hơn 300.000 doanh nghiệp đang vận hành thông minh hơn cùng Lumio.
@@ -441,7 +441,7 @@ export default function PricingPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href={trialPlan ? `/onboarding?plan=${trialPlan.id}` : "/register"}>
                   <Button size="lg" className="h-12 gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-8 font-semibold shadow-lg">
-                    Sử dụng miễn phí ( 14 ngày ) <ArrowRight className="h-4 w-4" />
+                    Sử dụng miễn phí ( 7 ngày ) <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Link href="/contact">

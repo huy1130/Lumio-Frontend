@@ -211,7 +211,7 @@ function OnboardingContent() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'PAYOS' | 'CASH' | 'TRIAL'>('PAYOS');
 
-  const isTrialPlan = plan?.packageCode === 'TRIAL_14_DAYS';
+  const isTrialPlan = plan?.packageCode === 'TRIAL_7_DAYS';
 
   useEffect(() => {
     if (isTrialPlan) {
@@ -878,7 +878,7 @@ function OnboardingContent() {
                           Đã gửi yêu cầu dùng thử!
                         </h3>
                         <p className="text-sm text-gray-500 mt-3 leading-relaxed">
-                          Yêu cầu sử dụng thử 14 ngày của bạn đã được ghi nhận. 
+                          Yêu cầu sử dụng thử 7 ngày của bạn đã được ghi nhận. 
                           <br/><br/>
                           Vui lòng đợi admin duyệt yêu cầu đó. Hãy kết bạn và gửi màn hình xác nhận này qua <span className="font-semibold text-indigo-600">Zalo: 0326989639</span> để được hỗ trợ nhanh nhất.
                         </p>
