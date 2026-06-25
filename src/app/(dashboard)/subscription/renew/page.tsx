@@ -77,7 +77,7 @@ function SubscriptionRenewContent() {
         : Array.isArray((raw as { data?: ApiSubscription[] })?.data)
           ? (raw as { data: ApiSubscription[] }).data
           : [];
-      const active = list.filter((p) => p.is_active);
+      const active = list.filter((p) => p.is_active && p.package_code !== 'TRIAL_14_DAYS');
       setPlans(active);
       setSelectedId(sub.subscription_id ?? active[0]?.id ?? null);
     } catch (e: unknown) {
@@ -179,9 +179,9 @@ function SubscriptionRenewContent() {
       </Button>
 
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Gia hạn gói</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Nâng cấp gói sử dụng</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Gia hạn chỉ hoàn tất khi thanh toán thành công.
+          Giao dịch chỉ hoàn tất khi thanh toán thành công.
         </p>
       </div>
 
@@ -205,7 +205,7 @@ function SubscriptionRenewContent() {
             </div>
             <CardTitle>Yêu cầu thành công!</CardTitle>
             <CardDescription className="mt-2">
-              Bạn đã chọn thanh toán bằng tiền mặt/chuyển khoản thủ công. Vui lòng thanh toán cho nhân viên để được duyệt gói gia hạn.
+              Bạn đã chọn thanh toán bằng tiền mặt/chuyển khoản thủ công. Vui lòng thanh toán cho Admin để được duyệt gói.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -309,7 +309,7 @@ function SubscriptionRenewContent() {
             <CardHeader>
               <CardTitle className="text-base">Chọn gói thanh toán</CardTitle>
               <CardDescription>
-                Chọn gói gia hạn bên dưới.
+                Chọn gói mới bên dưới.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -421,7 +421,7 @@ function SubscriptionRenewContent() {
                 ) : (
                   paymentMethod === 'PAYOS' && <CreditCard className="h-4 w-4" />
                 )}
-                {paying ? "Đang xử lý…" : paymentMethod === 'CASH' ? "Gửi yêu cầu thanh toán" : "Thanh toán PayOS để gia hạn"}
+                {paying ? "Đang xử lý…" : paymentMethod === 'CASH' ? "Gửi yêu cầu thanh toán" : "Thanh toán PayOS để nâng cấp"}
               </Button>
 
               {selected && (

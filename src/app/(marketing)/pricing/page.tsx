@@ -101,6 +101,7 @@ function fromApi(sub: ApiSubscription): PricingPlan {
 export default function PricingPage() {
   const [openFaq, setOpenFaq]           = useState<number | null>(null);
   const [plans, setPlans]               = useState<PricingPlan[]>([]);
+  const [trialPlan, setTrialPlan]       = useState<PricingPlan | null>(null);
   const [billingFilter, setBillingFilter] = useState<"monthly" | "yearly">("monthly");
   const [loading, setLoading]           = useState(true);
   const [isLive, setIsLive]             = useState(false);
@@ -113,8 +114,11 @@ export default function PricingPage() {
         });
         if (res.ok) {
           const data: ApiSubscription[] = await res.json();
+          const trial = data.find((s) => s.package_code === 'TRIAL_14_DAYS');
+          if (trial) setTrialPlan(fromApi(trial));
+          
           const active = data
-            .filter((s) => s.is_active)
+            .filter((s) => s.is_active && s.package_code !== 'TRIAL_14_DAYS')
             .sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
           setPlans(active.map(fromApi));
           setIsLive(true);
@@ -430,14 +434,14 @@ export default function PricingPage() {
             </div>
             <div className="relative">
               <Badge className="mb-5 border-white/20 bg-white/10 text-white">Dùng thử 14 ngày · Không cần thẻ tín dụng</Badge>
-              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Bắt đầu phát triển ngay hôm nay</h2>
+              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Sẵn sàng phát triển cùng Lumio?</h2>
               <p className="text-indigo-100 mb-8 max-w-md mx-auto">
                 Hơn 300.000 doanh nghiệp đang vận hành thông minh hơn cùng Lumio.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/register">
+                <Link href={trialPlan ? `/onboarding?plan=${trialPlan.id}` : "/register"}>
                   <Button size="lg" className="h-12 gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-8 font-semibold shadow-lg">
-                    Dùng thử miễn phí <ArrowRight className="h-4 w-4" />
+                    Sử dụng miễn phí ( 14 ngày ) <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Link href="/contact">

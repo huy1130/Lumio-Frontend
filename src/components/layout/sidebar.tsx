@@ -15,6 +15,7 @@ import { shouldShowShopSetup } from "@/lib/ensure-shop-setup";
 import { getStoredShopForTenant } from "@/lib/shop-storage";
 import { pickPrimaryShop } from "@/lib/pick-primary-shop";
 import { shopService } from "@/lib/services/shopService";
+import { tenantService } from "@/lib/services/tenantService";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -24,13 +25,21 @@ export function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const [shopLabel, setShopLabel] = useState<string | null>(null);
+  const [tenantName, setTenantName] = useState<string | null>(null);
   const [tenantShopCount, setTenantShopCount] = useState(0);
 
   useEffect(() => {
     if (role !== "shop_owner" || !user) {
       setShopLabel(null);
+      setTenantName(null);
       setTenantShopCount(0);
       return;
+    }
+
+    if (user.tenant_id) {
+      tenantService.getById(user.tenant_id)
+        .then((t) => setTenantName(t.tenant_name))
+        .catch(console.error);
     }
 
     const stored = getStoredShopForTenant(user.tenant_id);
@@ -120,10 +129,10 @@ export function Sidebar() {
                 alt="Lumio Logo"
                 width={32}
                 height={32}
-                className="h-8 w-8 object-contain"
+                className="h-8 w-8 object-contain shrink-0"
               />
-              <span className="text-xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400">
-                Lumio
+              <span className="text-xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400 truncate max-w-[150px]" title={role === "shop_owner" && tenantName ? tenantName : "Lumio"}>
+                {role === "shop_owner" && tenantName ? tenantName : "Lumio"}
               </span>
             </div>
           )}
