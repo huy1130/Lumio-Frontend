@@ -81,7 +81,9 @@ function formatPackageCode(code: string): string {
 
 export default function LandingPage() {
   const [plans, setPlans] = useState<ApiSubscription[]>([]);
+  const [trialPlanId, setTrialPlanId] = useState<string | null>(null);
   const [plansLoading, setPlansLoading] = useState(true);
+  const [billingFilter, setBillingFilter] = useState<"monthly" | "yearly">("monthly");
 
   useEffect(() => {
     fetch("/api/public/subscriptions")
@@ -94,7 +96,10 @@ export default function LandingPage() {
             Array.isArray((raw as { data?: ApiSubscription[] }).data)
             ? (raw as { data: ApiSubscription[] }).data
             : [];
-        setPlans(data.filter((s) => s.is_active !== false));
+        const active = data.filter((s) => s.is_active !== false);
+        const trial = active.find((s) => s.package_code === 'TRIAL_14_DAYS');
+        if (trial) setTrialPlanId(String(trial.id));
+        setPlans(active.filter((s) => s.package_code !== 'TRIAL_14_DAYS'));
       })
       .catch(() => setPlans([]))
       .finally(() => setPlansLoading(false));
@@ -343,16 +348,62 @@ export default function LandingPage() {
               <Link href="/pricing" className="text-sm text-indigo-600 hover:underline">Xem trang giá →</Link>
             </div>
           ) : (
-            <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger}
+            <>
+              {/* Tabs */}
+              <div className="flex justify-center mb-12">
+                <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl inline-flex relative">
+                  <button
+                    onClick={() => setBillingFilter("monthly")}
+                    className={cn(
+                      "px-6 py-2.5 rounded-lg text-sm font-bold transition-all z-10",
+                      billingFilter === "monthly"
+                        ? "bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-gray-200/50 dark:ring-gray-700/50"
+                        : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                    )}
+                  >
+                    Thanh toán hàng tháng
+                  </button>
+                  <button
+                    onClick={() => setBillingFilter("yearly")}
+                    className={cn(
+                      "px-6 py-2.5 rounded-lg text-sm font-bold transition-all z-10 flex items-center gap-2",
+                      billingFilter === "yearly"
+                        ? "bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-gray-200/50 dark:ring-gray-700/50"
+                        : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                    )}
+                  >
+                    Thanh toán hàng năm
+                    <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 pointer-events-none rounded px-1.5 py-0">Tiết kiệm</Badge>
+                  </button>
+                </div>
+              </div>
+
+              {(() => {
+                const displayedPlans = plans.filter((p) => {
+                  const c = p.billing_cycle.toLowerCase();
+                  if (billingFilter === "monthly") return /(month|monthly|tháng)/.test(c);
+                  return /(year|annual|yearly|năm)/.test(c);
+                });
+
+                if (displayedPlans.length === 0) {
+                  return (
+                    <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                      Chưa có gói dịch vụ {billingFilter === "monthly" ? "hàng tháng" : "hàng năm"} nào được cấu hình.
+                    </div>
+                  );
+                }
+
+                return (
+            <motion.div key={billingFilter} initial="hidden" animate="show" variants={stagger}
               className={cn(
                 "grid gap-6",
-                plans.length === 1 && "max-w-sm mx-auto",
-                plans.length === 2 && "md:grid-cols-2 max-w-3xl mx-auto",
-                plans.length >= 3 && "md:grid-cols-3",
+                displayedPlans.length === 1 && "max-w-sm mx-auto",
+                displayedPlans.length === 2 && "md:grid-cols-2 max-w-3xl mx-auto",
+                displayedPlans.length >= 3 && "md:grid-cols-3",
               )}
             >
-              {plans.map((plan, i) => {
-                const isPopular = i === Math.floor(plans.length / 2) && plans.length > 1;
+              {displayedPlans.map((plan, i) => {
+                const isPopular = i === Math.floor(displayedPlans.length / 2) && displayedPlans.length > 1;
                 const features = parseFeatures(plan.description);
                 return (
                   <motion.div
@@ -417,6 +468,9 @@ export default function LandingPage() {
                 );
               })}
             </motion.div>
+                );
+              })()}
+            </>
           )}
         </div>
       </section>
@@ -442,9 +496,9 @@ export default function LandingPage() {
                 Hàng nghìn doanh nghiệp F&amp;B đang vận hành thông minh hơn mỗi ngày. Đăng ký ngay hôm nay.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/register">
+                <Link href={trialPlanId ? `/onboarding?plan=${trialPlanId}` : "/register"}>
                   <Button size="lg" className="h-14 gap-2 bg-gradient-to-r from-indigo-500 to-blue-500 text-white hover:from-indigo-400 hover:to-blue-400 px-9 font-bold rounded-2xl shadow-lg transition-transform hover:scale-105">
-                    Đăng ký miễn phí <ArrowRight className="h-4 w-4" />
+                    Sử dụng miễn phí (14 ngày) <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Link href="/login">
