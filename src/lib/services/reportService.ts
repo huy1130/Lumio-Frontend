@@ -18,6 +18,11 @@ export interface SalesReportResponse {
     quantity: number;
     revenue: number;
   }>;
+  hourlyBreakdown?: Array<{
+    hour: string;
+    revenue: number;
+    orderCount: number;
+  }>;
   dailyBreakdown: Array<{
     date: string;
     revenue: number;

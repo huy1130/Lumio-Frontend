@@ -52,7 +52,7 @@ function ProfileContent() {
               <p className="text-sm text-muted-foreground">{user?.email}</p>
               <RoleBadge role={role} className="mt-1" />
             </div>
-            <Button variant="outline" size="sm">Change Avatar</Button>
+            {/* <Button variant="outline" size="sm">Change Avatar</Button> */}
           </Card>
 
           <Card className="lg:col-span-2">
@@ -61,14 +61,10 @@ function ProfileContent() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Full Name</Label><Input defaultValue={user?.full_name ?? ""} /></div>
                 <div className="space-y-2"><Label>Email</Label><Input defaultValue={user?.email} type="email" /></div>
-                <div className="space-y-2"><Label>Phone</Label><Input defaultValue={user?.phone ?? ""} placeholder="+84 000 000 000" /></div>
                 <div className="space-y-2"><Label>Role</Label><Input defaultValue={roleLabel} disabled className="opacity-60" /></div>
               </div>
-              <div className="space-y-2">
-                <Label>New Password</Label>
-                <Input type="password" placeholder="Leave blank to keep current" />
-              </div>
-              <Button className="mt-2 bg-indigo-600 hover:bg-indigo-700">Save Changes</Button>
+
+              {/* <Button className="mt-2 bg-indigo-600 hover:bg-indigo-700">Save Changes</Button> */}
             </CardContent>
           </Card>
         </div>

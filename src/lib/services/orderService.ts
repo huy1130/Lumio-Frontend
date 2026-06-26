@@ -23,6 +23,7 @@ export interface ApiOrder {
   update_at: string;
   order_items: ApiOrderItem[];
   customer?: { id: number; full_name: string; phone?: string };
+  cashier?: { id: number; full_name: string | null; email: string };
 }
 
 export interface CreateOrderPayload {

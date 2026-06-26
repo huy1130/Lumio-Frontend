@@ -555,13 +555,23 @@ function StaffOrdersView() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Khách hàng</p>
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                  {selectedOrder.customer?.full_name || "Khách lẻ (Walk-in)"}
-                  {selectedOrder.customer?.phone && <span className="block text-xs font-normal text-gray-500 mt-0.5">{selectedOrder.customer.phone}</span>}
-                </p>
+              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-100 dark:border-gray-800 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Khách hàng</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      {selectedOrder.customer?.full_name || "Khách lẻ (Walk-in)"}
+                      {selectedOrder.customer?.phone && <span className="block text-xs font-normal text-gray-500 mt-0.5">{selectedOrder.customer.phone}</span>}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Người tạo đơn</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      {selectedOrder.cashier?.full_name || selectedOrder.cashier?.email || "Không rõ"}
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Trạng thái</p>
                     <Badge variant={STATUS_VARIANT[selectedOrder.order_status?.toLowerCase() || ""] || "secondary"} className="capitalize">

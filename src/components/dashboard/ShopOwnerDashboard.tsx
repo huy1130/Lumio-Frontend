@@ -214,10 +214,14 @@ function HourlyRevenueList({ title, description, data, headerRight, onClickItem,
   );
 }
 
-function RealColumnChart({ title, description, data, headerRight, color = "#f97316" }: {
+function RealColumnChart({ title, description, data, headerRight, color = "#f97316", dataKey = "revenue", tooltipLabel = "Doanh thu", valueFormatter = (val: number) => formatCurrency(val), tickFormatter = (val: number) => val === 0 ? "0" : `${(val / 1000).toFixed(0)}k` }: {
   title: string; description: string; data: any[];
   headerRight?: React.ReactNode;
   color?: string;
+  dataKey?: string;
+  tooltipLabel?: string;
+  valueFormatter?: (val: number) => string;
+  tickFormatter?: (val: number) => string;
 }) {
   return (
     <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] dark:bg-gray-900/50 rounded-2xl overflow-hidden">
@@ -249,17 +253,17 @@ function RealColumnChart({ title, description, data, headerRight, color = "#f973
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: '#9ca3af', fontSize: 12, fontWeight: 500 }}
-                  tickFormatter={(val) => val === 0 ? "0" : `${(val / 1000).toFixed(0)}k`}
+                  tickFormatter={tickFormatter}
                 />
                 <Tooltip
                   cursor={{ fill: 'rgba(249, 115, 22, 0.05)' }}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                  formatter={(value: any) => [formatCurrency(Number(value)), "Doanh thu"]}
+                  formatter={(value: any) => [valueFormatter(Number(value)), tooltipLabel]}
                   labelStyle={{ fontWeight: '700', color: '#111827', marginBottom: '8px' }}
                   itemStyle={{ fontWeight: '600', color: color }}
                 />
                 <Bar
-                  dataKey="revenue"
+                  dataKey={dataKey}
                   fill={color}
                   radius={[6, 6, 0, 0]}
                   maxBarSize={48}
@@ -431,20 +435,65 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
   const dateRangedRevenue = report?.dailyBreakdown || [];
   const monthlyRevenue = report?.monthlyBreakdown || [];
 
+  const hourlyChartData = Array.from({ length: 24 }, (_, i) => {
+    return { hour: `${i.toString().padStart(2, '0')}:00`, revenue: 0, orderCount: 0 };
+  });
+
+  const hFromDate = new Date(hourlyDate + "T00:00:00");
+  const hToDate = new Date(hourlyDate + "T23:59:59");
+
+  allOrders.forEach(o => {
+    if (o.order_status !== "COMPLETED") return;
+    const created = new Date(o.created_at);
+    if (created >= hFromDate && created <= hToDate) {
+      const hh = created.getHours();
+      hourlyChartData[hh].revenue += Number(o.grand_total || 0);
+      hourlyChartData[hh].orderCount += 1;
+    }
+  });
+
+  const handlePrevDay = () => {
+    const d = new Date(hourlyDate);
+    d.setDate(d.getDate() - 1);
+    setHourlyDate(getLocalISO(d));
+  };
+
+  const handleNextDay = () => {
+    const d = new Date(hourlyDate);
+    d.setDate(d.getDate() + 1);
+    setHourlyDate(getLocalISO(d));
+  };
+
+  const DateNavigator = (
+    <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
+      <button onClick={handlePrevDay} className="px-2 text-gray-500 hover:text-gray-900 dark:hover:text-white font-bold transition-colors">&lt;</button>
+      <input type="date" value={hourlyDate} onChange={e => setHourlyDate(e.target.value)} className="text-xs font-medium border-none bg-transparent text-gray-900 dark:text-white outline-none cursor-pointer w-[110px]" />
+      <button onClick={handleNextDay} className="px-2 text-gray-500 hover:text-gray-900 dark:hover:text-white font-bold transition-colors">&gt;</button>
+    </div>
+  );
+
   return (
     <div>
       <Header />
-      <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-        <div className="flex items-center gap-6 border-b border-gray-200 dark:border-gray-800 pb-px px-2">
+      <div className="p-6 space-y-6 w-full">
+        <div className="flex items-center gap-3 mb-6 px-2">
           <button
             onClick={() => setMainTab('revenue')}
-            className={`pb-3 text-sm font-bold border-b-2 transition-all ${mainTab === 'revenue' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+            className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+              mainTab === 'revenue' 
+                ? 'bg-indigo-500 text-white shadow-md' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+            }`}
           >
             Doanh thu
           </button>
           <button
             onClick={() => { setMainTab('details'); setSelectedOrder(null); }}
-            className={`pb-3 text-sm font-bold border-b-2 transition-all ${mainTab === 'details' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+            className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+              mainTab === 'details' 
+                ? 'bg-indigo-500 text-white shadow-md' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+            }`}
           >
             Chi tiết
           </button>
@@ -604,7 +653,27 @@ export function ShopOwnerDashboard({ role = "shop_owner" }: { role?: string }) {
               />
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-2 items-start">
+            <div className="grid gap-6 lg:grid-cols-2 items-start mt-6">
+              <RealColumnChart
+                title="Doanh thu theo giờ"
+                description="Tổng doanh thu từng khung giờ trong ngày"
+                data={hourlyChartData.map(d => ({ date: d.hour, revenue: d.revenue }))}
+                headerRight={DateNavigator}
+              />
+              <RealColumnChart
+                title="Số lượng đơn theo giờ"
+                description="Số lượng đơn hàng hoàn thành từng khung giờ"
+                data={hourlyChartData.map(d => ({ date: d.hour, orderCount: d.orderCount }))}
+                color="#10b981"
+                dataKey="orderCount"
+                tooltipLabel="Số đơn hàng"
+                valueFormatter={(val) => `${val} đơn`}
+                tickFormatter={(val) => val.toString()}
+                headerRight={DateNavigator}
+              />
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2 items-start mt-6">
               <RealProductList
                 title="Các món bán chạy nhất"
                 description="Top 5 món được khách hàng yêu thích và đặt nhiều nhất"
