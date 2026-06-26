@@ -15,7 +15,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:2999";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } },
 };
 const stagger = { show: { transition: { staggerChildren: 0.1 } } };
 
@@ -77,34 +77,34 @@ function pricePeriodSuffix(billingCycle: string): string {
 
 // ─── Plan shape (API subscriptions) ─────────────────────────────────────────
 interface PricingPlan {
-  id:           string;
-  name:         string;
-  price:        number;
+  id: string;
+  name: string;
+  price: number;
   billingCycle: string;
-  features:     string[];
-  description:  string;
+  features: string[];
+  description: string;
 }
 
 function fromApi(sub: ApiSubscription): PricingPlan {
   return {
-    id:           String(sub.id),
-    name:         formatPackageCode(sub.package_code),
-    price:        parseFloat(sub.price),
+    id: String(sub.id),
+    name: formatPackageCode(sub.package_code),
+    price: parseFloat(sub.price),
     billingCycle: sub.billing_cycle,
-    features:     parseFeatures(sub.description),
-    description:  sub.description ?? "",
+    features: parseFeatures(sub.description),
+    description: sub.description ?? "",
   };
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function PricingPage() {
-  const [openFaq, setOpenFaq]           = useState<number | null>(null);
-  const [plans, setPlans]               = useState<PricingPlan[]>([]);
-  const [trialPlan, setTrialPlan]       = useState<PricingPlan | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [plans, setPlans] = useState<PricingPlan[]>([]);
+  const [trialPlan, setTrialPlan] = useState<PricingPlan | null>(null);
   const [billingFilter, setBillingFilter] = useState<"monthly" | "yearly">("monthly");
-  const [loading, setLoading]           = useState(true);
-  const [isLive, setIsLive]             = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isLive, setIsLive] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -116,7 +116,7 @@ export default function PricingPage() {
           const data: ApiSubscription[] = await res.json();
           const trial = data.find((s) => s.package_code === 'TRIAL_7_DAYS');
           if (trial) setTrialPlan(fromApi(trial));
-          
+
           const active = data
             .filter((s) => s.is_active && s.package_code !== 'TRIAL_7_DAYS')
             .sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
@@ -246,81 +246,81 @@ export default function PricingPage() {
                       return (
                         <motion.div
                           key={plan.id}
-                    variants={fadeUp}
-                    className={cn(
-                      "relative flex flex-col rounded-2xl border p-8",
-                      isPopular
-                        ? "border-indigo-300 bg-indigo-600 text-white ring-4 ring-indigo-100 dark:ring-indigo-900 scale-[1.03] shadow-xl shadow-indigo-200 dark:shadow-indigo-900/50"
-                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md transition-all"
-                    )}
-                  >
-                    {isPopular && (
-                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                        <span className="rounded-full bg-white text-indigo-600 px-4 py-1 text-xs font-bold shadow-sm border border-indigo-100">
-                          Phổ biến nhất
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Header */}
-                    <div className="mb-6">
-                      <p className={cn("text-base font-semibold mb-2", isPopular ? "text-indigo-100" : "text-gray-900 dark:text-white")}>
-                        {plan.name}
-                      </p>
-                      <div className="flex items-baseline gap-1 mb-1">
-                        <span className={cn("text-4xl font-extrabold", isPopular ? "text-white" : "text-gray-900 dark:text-white")}>
-                          {formatCurrency(plan.price)}
-                        </span>
-                        {periodSuffix && (
-                          <span className={cn("text-sm", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
-                            {periodSuffix}
-                          </span>
-                        )}
-                      </div>
-                      {plan.description && plan.features.length === 0 && (
-                        <p className={cn("text-xs mt-1", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
-                          {plan.description}
-                        </p>
-                      )}
-                      <p className={cn("text-xs mt-1 capitalize", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
-                        Chu kỳ thanh toán: {plan.billingCycle}
-                      </p>
-                    </div>
-
-                    {/* Features */}
-                    {plan.features.length > 0 && (
-                      <ul className="flex-1 space-y-3 mb-8">
-                        {plan.features.map((f) => (
-                          <li key={f} className={cn("flex items-start gap-2.5 text-sm", isPopular ? "text-indigo-100" : "text-gray-600 dark:text-gray-300")}>
-                            <Check className={cn("h-4 w-4 shrink-0 mt-0.5", isPopular ? "text-indigo-200" : "text-green-500")} />
-                            {f}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    <div className={plan.features.length === 0 ? "mt-auto" : ""}>
-                      <Link href={`/onboarding?plan=${plan.id}`}>
-                        <Button
+                          variants={fadeUp}
                           className={cn(
-                            "w-full font-semibold h-11 rounded-xl",
+                            "relative flex flex-col rounded-2xl border p-8",
                             isPopular
-                              ? "bg-white text-indigo-600 hover:bg-indigo-50 shadow-sm"
-                              : "bg-indigo-600 hover:bg-indigo-500 text-white"
+                              ? "border-indigo-300 bg-indigo-600 text-white ring-4 ring-indigo-100 dark:ring-indigo-900 scale-[1.03] shadow-xl shadow-indigo-200 dark:shadow-indigo-900/50"
+                              : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md transition-all"
                           )}
                         >
-                          Bắt đầu
-                        </Button>
-                      </Link>
-                    </div>
+                          {isPopular && (
+                            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                              <span className="rounded-full bg-white text-indigo-600 px-4 py-1 text-xs font-bold shadow-sm border border-indigo-100">
+                                Phổ biến nhất
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Header */}
+                          <div className="mb-6">
+                            <p className={cn("text-base font-semibold mb-2", isPopular ? "text-indigo-100" : "text-gray-900 dark:text-white")}>
+                              {plan.name}
+                            </p>
+                            <div className="flex items-baseline gap-1 mb-1">
+                              <span className={cn("text-4xl font-extrabold", isPopular ? "text-white" : "text-gray-900 dark:text-white")}>
+                                {formatCurrency(plan.price)}
+                              </span>
+                              {periodSuffix && (
+                                <span className={cn("text-sm", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
+                                  {periodSuffix}
+                                </span>
+                              )}
+                            </div>
+                            {plan.description && plan.features.length === 0 && (
+                              <p className={cn("text-xs mt-1", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
+                                {plan.description}
+                              </p>
+                            )}
+                            <p className={cn("text-xs mt-1 capitalize", isPopular ? "text-indigo-200" : "text-gray-400 dark:text-gray-500")}>
+                              Chu kỳ thanh toán: {plan.billingCycle}
+                            </p>
+                          </div>
+
+                          {/* Features */}
+                          {plan.features.length > 0 && (
+                            <ul className="flex-1 space-y-3 mb-8">
+                              {plan.features.map((f) => (
+                                <li key={f} className={cn("flex items-start gap-2.5 text-sm", isPopular ? "text-indigo-100" : "text-gray-600 dark:text-gray-300")}>
+                                  <Check className={cn("h-4 w-4 shrink-0 mt-0.5", isPopular ? "text-indigo-200" : "text-green-500")} />
+                                  {f}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+
+                          <div className={plan.features.length === 0 ? "mt-auto" : ""}>
+                            <Link href={`/onboarding?plan=${plan.id}`}>
+                              <Button
+                                className={cn(
+                                  "w-full font-semibold h-11 rounded-xl",
+                                  isPopular
+                                    ? "bg-white text-indigo-600 hover:bg-indigo-50 shadow-sm"
+                                    : "bg-indigo-600 hover:bg-indigo-500 text-white"
+                                )}
+                              >
+                                Bắt đầu
+                              </Button>
+                            </Link>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                   </motion.div>
                 );
-              })}
-            </motion.div>
-          );
-        })()}
-        </>
-      )}
+              })()}
+            </>
+          )}
 
           {/* Trial note */}
           {!loading && plans.length > 0 && (
@@ -330,6 +330,44 @@ export default function PricingPage() {
               </p>
             </div>
           )}
+        </div>
+      </section>
+
+
+      <section className="py-20 px-6 bg-gray-50 dark:bg-gray-900/50">
+        <div className="mx-auto max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative overflow-hidden rounded-3xl bg-indigo-600 px-10 py-16 text-center shadow-2xl shadow-indigo-200 dark:shadow-indigo-900/40"
+          >
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-2/3 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+              <div className="absolute -left-20 top-10 h-60 w-60 rounded-full bg-white/10 blur-3xl" />
+              <div className="absolute -right-20 bottom-10 h-60 w-60 rounded-full bg-violet-500/20 blur-3xl" />
+            </div>
+            <div className="relative">
+              <Badge className="mb-5 border-white/20 bg-white/10 text-white">Dùng thử 7 ngày · Không cần thẻ tín dụng</Badge>
+              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Sẵn sàng phát triển cùng Lumio?</h2>
+              <p className="text-indigo-100 mb-8 max-w-md mx-auto">
+                Hơn 300.000 doanh nghiệp đang vận hành thông minh hơn cùng Lumio.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link href={trialPlan ? `/onboarding?plan=${trialPlan.id}` : "/register"}>
+                  <Button size="lg" className="h-12 gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-8 font-semibold shadow-lg">
+                    Sử dụng miễn phí ( 7 ngày ) <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/contact">
+                  <Button size="lg" variant="outline" className="h-12 border-white/30 bg-white/10 text-white hover:bg-white/20 px-8">
+                    Liên hệ kinh doanh
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -417,43 +455,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ── CTA ───────────────────────────────────────────────────────────── */}
-      <section className="py-20 px-6 bg-gray-50 dark:bg-gray-900/50">
-        <div className="mx-auto max-w-3xl">
-          <motion.div
-            initial={{ opacity: 0, y: 32 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="relative overflow-hidden rounded-3xl bg-indigo-600 px-10 py-16 text-center shadow-2xl shadow-indigo-200 dark:shadow-indigo-900/40"
-          >
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-2/3 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-              <div className="absolute -left-20 top-10 h-60 w-60 rounded-full bg-white/10 blur-3xl" />
-              <div className="absolute -right-20 bottom-10 h-60 w-60 rounded-full bg-violet-500/20 blur-3xl" />
-            </div>
-            <div className="relative">
-              <Badge className="mb-5 border-white/20 bg-white/10 text-white">Dùng thử 7 ngày · Không cần thẻ tín dụng</Badge>
-              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Sẵn sàng phát triển cùng Lumio?</h2>
-              <p className="text-indigo-100 mb-8 max-w-md mx-auto">
-                Hơn 300.000 doanh nghiệp đang vận hành thông minh hơn cùng Lumio.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href={trialPlan ? `/onboarding?plan=${trialPlan.id}` : "/register"}>
-                  <Button size="lg" className="h-12 gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-8 font-semibold shadow-lg">
-                    Sử dụng miễn phí ( 7 ngày ) <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/contact">
-                  <Button size="lg" variant="outline" className="h-12 border-white/30 bg-white/10 text-white hover:bg-white/20 px-8">
-                    Liên hệ kinh doanh
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+
 
     </div>
   );

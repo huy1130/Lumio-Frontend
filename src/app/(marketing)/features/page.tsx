@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import type { ApiSubscription } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -82,6 +84,26 @@ const HIGHLIGHTS = [
 ];
 
 export default function FeaturesPage() {
+  const [trialPlan, setTrialPlan] = useState<{ id: string } | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch(`/api/public/subscriptions`, {
+          headers: { Accept: "application/json" },
+        });
+        if (res.ok) {
+          const data: ApiSubscription[] = await res.json();
+          const trial = data.find((s) => s.package_code === 'TRIAL_7_DAYS');
+          if (trial) setTrialPlan({ id: String(trial.id) });
+        }
+      } catch {
+        // silently fail and fallback to /register
+      }
+    }
+    load();
+  }, []);
+
   return (
     <div className="pt-16">
 
@@ -109,7 +131,7 @@ export default function FeaturesPage() {
               để bạn tập trung vào điều quan trọng nhất — món ngon và khách hàng hài lòng.
             </motion.p>
             <motion.div variants={fadeUp} className="mt-10 flex flex-wrap justify-center gap-4">
-              <Link href="/pricing">
+              <Link href={trialPlan ? `/onboarding?plan=${trialPlan.id}` : "/register"}>
                 <Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200/50 dark:shadow-indigo-900/30">
                   Dùng thử miễn phí <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -211,19 +233,19 @@ export default function FeaturesPage() {
             </div>
             <div className="relative">
               <Badge className="mb-5 border-white/20 bg-white/10 text-white">Dùng thử 7 ngày · Không cần thẻ tín dụng</Badge>
-              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Sẵn sàng trải nghiệm thực tế?</h2>
+              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4 text-white">Sẵn sàng phát triển cùng Lumio?</h2>
               <p className="text-indigo-100 mb-8 max-w-md mx-auto">
-                Bắt đầu dùng thử miễn phí ngay hôm nay và khám phá lý do hơn 300.000 doanh nghiệp tin dùng Lumio.
+                Hơn 300.000 doanh nghiệp đang vận hành thông minh hơn cùng Lumio.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/pricing">
+                <Link href={trialPlan ? `/onboarding?plan=${trialPlan.id}` : "/register"}>
                   <Button size="lg" className="h-12 gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-8 font-semibold shadow-lg">
-                    Dùng thử miễn phí <ArrowRight className="h-4 w-4" />
+                    Sử dụng miễn phí ( 7 ngày ) <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/pricing">
+                <Link href="/contact">
                   <Button size="lg" variant="outline" className="h-12 border-white/30 bg-white/10 text-white hover:bg-white/20 px-8">
-                    Xem bảng giá
+                    Liên hệ kinh doanh
                   </Button>
                 </Link>
               </div>

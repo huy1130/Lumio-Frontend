@@ -6,7 +6,7 @@ import { Users, Globe, Activity, Calendar } from "lucide-react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } },
 };
 const stagger = { show: { transition: { staggerChildren: 0.12 } } };
 
@@ -15,53 +15,53 @@ const PILLARS = [
   {
     emoji: "🎯",
     title: "Sứ mệnh",
-    desc:  "Trao quyền cho mọi doanh nghiệp F&B — từ quán cà phê vỉa hè đến chuỗi nhà hàng nhiều chi nhánh — bằng phần mềm giá cả phải chăng, dễ dùng, giúp vận hành kinh doanh trở nên thực sự nhẹ nhàng.",
-    bg:    "bg-blue-50 dark:bg-blue-950/30",
-    border:"border-blue-100 dark:border-blue-800/40",
+    desc: "Trao quyền cho mọi doanh nghiệp F&B — từ quán cà phê vỉa hè đến chuỗi nhà hàng nhiều chi nhánh — bằng phần mềm giá cả phải chăng, dễ dùng, giúp vận hành kinh doanh trở nên thực sự nhẹ nhàng.",
+    bg: "bg-blue-50 dark:bg-blue-950/30",
+    border: "border-blue-100 dark:border-blue-800/40",
   },
   {
     emoji: "👁",
     title: "Tầm nhìn",
-    desc:  "Một thế giới nơi mọi chủ nhà hàng, quản lý quán cà phê và doanh nhân ẩm thực đều có thể tiếp cận những công cụ mạnh mẽ như các tập đoàn lớn — mà không cần chi phí khổng lồ.",
-    bg:    "bg-indigo-50 dark:bg-indigo-950/30",
-    border:"border-indigo-100 dark:border-indigo-800/40",
+    desc: "Một thế giới nơi mọi chủ nhà hàng, quản lý quán cà phê và doanh nhân ẩm thực đều có thể tiếp cận những công cụ mạnh mẽ như các tập đoàn lớn — mà không cần chi phí khổng lồ.",
+    bg: "bg-indigo-50 dark:bg-indigo-950/30",
+    border: "border-indigo-100 dark:border-indigo-800/40",
   },
   {
     emoji: "💎",
     title: "Giá trị cốt lõi",
-    desc:  "Minh bạch trong mọi thứ chúng tôi xây dựng. Đổi mới để giải quyết vấn đề thực tế. Tác động được đo bằng sự thành công của các doanh nghiệp chúng tôi phục vụ — không chỉ lợi nhuận của chính mình.",
-    bg:    "bg-purple-50 dark:bg-purple-950/30",
-    border:"border-purple-100 dark:border-purple-800/40",
+    desc: "Minh bạch trong mọi thứ chúng tôi xây dựng. Đổi mới để giải quyết vấn đề thực tế. Tác động được đo bằng sự thành công của các doanh nghiệp chúng tôi phục vụ — không chỉ lợi nhuận của chính mình.",
+    bg: "bg-purple-50 dark:bg-purple-950/30",
+    border: "border-purple-100 dark:border-purple-800/40",
   },
 ];
 
 // ─── Team ─────────────────────────────────────────────────────────────────────
 const TEAM = [
   {
-    name: "Nguyễn Văn A",
-    role: "Giám đốc điều hành",
-    bio:  "Hơn 10 năm phát triển sản phẩm SaaS tại Đông Nam Á. Cựu Phó Giám đốc tại một startup công nghệ F&B hàng đầu.",
+    name: "Khưu Trọng Quân",
+    role: "Đồng sáng lập hệ thống",
+    // bio: "Hơn 10 năm phát triển sản phẩm SaaS tại Đông Nam Á. Cựu Phó Giám đốc tại một startup công nghệ F&B hàng đầu.",
     initials: "NA",
     color: "bg-blue-600",
   },
   {
-    name: "Trần Thị B",
-    role: "Giám đốc công nghệ",
-    bio:  "Kỹ sư full-stack đam mê hệ thống phân tán. Dẫn dắt đội kỹ thuật tại hai startup kỳ lân.",
+    name: "Nguyễn Dương Phước Huy",
+    role: "Đồng sáng lập hệ thống",
+    // bio: "Kỹ sư full-stack đam mê hệ thống phân tán. Dẫn dắt đội kỹ thuật tại hai startup .",
     initials: "TB",
     color: "bg-emerald-600",
   },
   {
-    name: "Lê Văn C",
-    role: "Trưởng nhóm thiết kế",
-    bio:  "Nhà thiết kế sản phẩm từng đoạt giải thưởng, tập trung vào khả năng tiếp cận và trải nghiệm người dùng cho doanh nghiệp vừa và nhỏ.",
+    name: "Nguyễn Bá Anh Nguyên",
+    role: "Đồng sáng lập hệ thống",
+    // bio: "Nhà thiết kế sản phẩm từng đoạt giải thưởng, tập trung vào khả năng tiếp cận và trải nghiệm người dùng cho doanh nghiệp vừa và nhỏ.",
     initials: "LC",
     color: "bg-orange-500",
   },
   {
-    name: "Phạm Thị D",
-    role: "Trưởng bộ phận sản phẩm",
-    bio:  "Cựu chủ nhà hàng chuyển sang quản lý sản phẩm. Biến những điểm đau thực tế của người vận hành thành tính năng tinh tế.",
+    name: "Nguyễn Quang Huy",
+    role: "Đồng sáng lập hệ thống",
+    // bio: "Cựu chủ nhà hàng chuyển sang quản lý sản phẩm. Biến những điểm đau thực tế của người vận hành thành tính năng tinh tế.",
     initials: "PD",
     color: "bg-purple-600",
   },
@@ -69,10 +69,10 @@ const TEAM = [
 
 // ─── Stats ─────────────────────────────────────────────────────────────────────
 const STATS = [
-  { icon: Calendar, label: "Thành lập",    value: "2023"     },
-  { icon: Users,    label: "Người dùng",   value: "300.000+" },
-  { icon: Globe,    label: "Quốc gia",     value: "10+"      },
-  { icon: Activity, label: "Uptime",       value: "99.9%"    },
+  { icon: Calendar, label: "Thành lập", value: "2023" },
+  { icon: Users, label: "Người dùng", value: "300.000+" },
+  { icon: Globe, label: "Quốc gia", value: "10+" },
+  { icon: Activity, label: "Uptime", value: "99.9%" },
 ];
 
 export default function AboutPage() {
@@ -166,7 +166,6 @@ export default function AboutPage() {
                   </div>
                   <h4 className="text-base font-bold text-gray-900 dark:text-white">{member.name}</h4>
                   <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 mt-0.5 mb-3">{member.role}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{member.bio}</p>
                 </motion.div>
               ))}
             </div>
