@@ -34,7 +34,7 @@ function IconFacebook({ className }: { className?: string }) {
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } },
 };
 const stagger = { show: { transition: { staggerChildren: 0.1 } } };
 
@@ -42,57 +42,43 @@ const CONTACT_INFO = [
   {
     icon: Mail,
     label: "Email",
-    value: "hello@lumio.app",
-    href:  "mailto:hello@lumio.app",
+    value: "lumioviet2236@11355658.brevosend.com",
+    href: "mailto:hello@lumio.app",
   },
   {
     icon: Phone,
     label: "Điện thoại",
-    value: "+84 28 1234 5678",
-    href:  "tel:+842812345678",
+    value: "+84 32 698 96 39",
+    href: "tel:+84326989639",
   },
   {
     icon: MapPin,
     label: "Địa chỉ",
     value: "123 Nguyễn Huệ, Quận 1, TP.HCM",
-    href:  undefined,
+    href: undefined,
   },
   {
     icon: Clock,
-    label: "Giờ làm việc",
-    value: "Thứ 2–6, 9:00–18:00 ICT",
-    href:  undefined,
+    label: "Thời gian hỗ trợ",
+    value: "24/24 T2 - CN",
+    href: undefined,
   },
 ];
 
 const SOCIALS = [
-  { icon: IconTwitterX,  label: "Twitter",  href: "https://twitter.com"  },
-  { icon: IconLinkedin,  label: "LinkedIn", href: "https://linkedin.com" },
-  { icon: IconFacebook,  label: "Facebook", href: "https://facebook.com" },
+  { icon: IconTwitterX, label: "Twitter", href: "https://twitter.com" },
+  { icon: IconLinkedin, label: "LinkedIn", href: "https://linkedin.com" },
+  { icon: IconFacebook, label: "Facebook", href: "https://facebook.com" },
 ];
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-  const [loading, setLoading]   = useState(false);
-  const [success, setSuccess]   = useState(false);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setLoading(false);
-    setSuccess(true);
-  }
 
   return (
     <div className="pt-16">
 
       {/* ── Hero header ──────────────────────────────────────────────────── */}
-      <section className="py-28 bg-gradient-to-br from-blue-50 via-white to-indigo-50/60 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950/40">
+      <section className="pt-16 pb-10 bg-gradient-to-br from-blue-50 via-white to-indigo-50/60 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950/40">
         <div className="mx-auto max-w-3xl px-6 text-center">
           <motion.div initial="hidden" animate="show" variants={stagger}>
             <motion.div variants={fadeUp}>
@@ -108,127 +94,41 @@ export default function ContactPage() {
               <span className="text-indigo-600 dark:text-indigo-400">lắng nghe bạn</span>
             </motion.h1>
             <motion.p variants={fadeUp} className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-              Có câu hỏi, ý tưởng hoặc chỉ muốn chào hỏi? Nhắn tin cho chúng tôi và chúng tôi sẽ phản hồi trong vòng 24 giờ.
+              Có câu hỏi, ý tưởng hoặc chỉ muốn chào hỏi? Liên hệ với chúng tôi qua các kênh dưới đây và chúng tôi sẽ phản hồi trong vòng 24 giờ.
             </motion.p>
           </motion.div>
         </div>
       </section>
 
       {/* ── Main content: form + info ─────────────────────────────────────── */}
-      <section className="py-28 bg-white dark:bg-gray-950">
+      <section className="pb-16 bg-white dark:bg-gray-950">
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
 
-            {/* LEFT — Contact form */}
+            {/* LEFT — Zalo QR Code */}
             <motion.div
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, margin: "-80px" }}
               variants={stagger}
+              className="flex flex-col items-center justify-center rounded-[2rem] border border-blue-100 dark:border-blue-900/30 bg-gradient-to-b from-blue-50/50 to-white dark:from-blue-900/10 dark:to-gray-950 p-8 text-center h-full shadow-sm"
             >
-              <motion.h2 variants={fadeUp} className="mb-8 text-2xl font-bold text-gray-900 dark:text-white">
-                Gửi tin nhắn cho chúng tôi
+              <motion.div variants={fadeUp} className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-900/40 shadow-inner">
+                <span className="text-2xl font-black text-blue-600 dark:text-blue-400">Zalo</span>
+              </motion.div>
+              <motion.h2 variants={fadeUp} className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                Trực tuyến hỗ trợ 24/7
               </motion.h2>
-
-              {success ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center rounded-2xl border border-green-200 dark:border-green-800/40 bg-green-50 dark:bg-green-950/30 px-8 py-16 text-center"
-                >
-                  <CheckCircle2 className="mb-4 h-14 w-14 text-green-500" />
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Tin nhắn đã được gửi!</h3>
-                  <p className="text-gray-500 dark:text-gray-400">
-                    Chúng tôi sẽ liên lạc với bạn sớm. Vui lòng chờ phản hồi trong vòng 24 giờ.
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="mt-6"
-                    onClick={() => { setSuccess(false); setForm({ name: "", email: "", subject: "", message: "" }); }}
-                  >
-                    Gửi tin nhắn khác
-                  </Button>
-                </motion.div>
-              ) : (
-                <motion.form variants={fadeUp} onSubmit={handleSubmit} className="space-y-5">
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">Họ và tên</Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        placeholder="Nguyễn Văn A"
-                        value={form.name}
-                        onChange={handleChange}
-                        required
-                        className="h-11 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:border-indigo-400 dark:focus:border-indigo-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={form.email}
-                        onChange={handleChange}
-                        required
-                        className="h-11 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:border-indigo-400 dark:focus:border-indigo-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="subject" className="text-gray-700 dark:text-gray-300">Chủ đề</Label>
-                    <Input
-                      id="subject"
-                      name="subject"
-                      placeholder="Chúng tôi có thể giúp gì cho bạn?"
-                      value={form.subject}
-                      onChange={handleChange}
-                      required
-                      className="h-11 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:border-indigo-400 dark:focus:border-indigo-500"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="message" className="text-gray-700 dark:text-gray-300">Nội dung</Label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      placeholder="Hãy cho chúng tôi biết thêm về câu hỏi hoặc phản hồi của bạn..."
-                      rows={5}
-                      value={form.message}
-                      onChange={handleChange}
-                      required
-                      className="flex w-full rounded-md border px-3 py-2 text-sm resize-none
-                        border-gray-200 dark:border-gray-700
-                        bg-gray-50 dark:bg-gray-900
-                        text-gray-900 dark:text-gray-100
-                        placeholder:text-gray-400 dark:placeholder:text-gray-500
-                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full h-12 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200/50 dark:shadow-indigo-900/30 disabled:opacity-70"
-                  >
-                    {loading ? (
-                      <span className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Đang gửi…
-                      </span>
-                    ) : "Gửi tin nhắn"}
-                  </Button>
-
-                  <p className="text-center text-xs text-gray-400 dark:text-gray-500">
-                    Chúng tôi sẽ phản hồi trong vòng 24 giờ.
-                  </p>
-                </motion.form>
-              )}
+              <motion.p variants={fadeUp} className="mb-6 max-w-xs text-gray-600 dark:text-gray-400 text-sm">
+                Quét mã QR bằng ứng dụng Zalo trên điện thoại để trò chuyện trực tiếp với đội ngũ hỗ trợ của chúng tôi.
+              </motion.p>
+              <motion.div variants={fadeUp} className="relative h-56 w-56 overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 bg-white p-3 shadow-lg transition-transform hover:scale-105 duration-300">
+                <img
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://zalo.me/0326989639"
+                  alt="Zalo QR Code"
+                  className="h-full w-full object-contain"
+                />
+              </motion.div>
             </motion.div>
 
             {/* RIGHT — Contact info */}
@@ -286,6 +186,8 @@ export default function ContactPage() {
                   ))}
                 </div>
               </motion.div>
+
+
             </motion.div>
 
           </div>

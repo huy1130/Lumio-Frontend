@@ -17,10 +17,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 
 const adminStats = [
-  { title: "Total Cashiers",  value: "186", change: 12, changeLabel: "this month",   icon: <Users className="h-4 w-4" />,     iconClassName: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"     },
-  { title: "Active",       value: "172", change: 11, changeLabel: "this month",   icon: <UserCheck className="h-4 w-4" />, iconClassName: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300"  },
-  { title: "Inactive",     value: "14",  change: 1,  changeLabel: "this month",   icon: <UserX className="h-4 w-4" />,     iconClassName: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"          },
-  { title: "Roles",        value: "5",   change: 0,  changeLabel: "role types",   icon: <Shield className="h-4 w-4" />,    iconClassName: "bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300" },
+  { title: "Total Cashiers", value: "186", change: 12, changeLabel: "this month", icon: <Users className="h-4 w-4" />, iconClassName: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" },
+  { title: "Active", value: "172", change: 11, changeLabel: "this month", icon: <UserCheck className="h-4 w-4" />, iconClassName: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" },
+  { title: "Inactive", value: "14", change: 1, changeLabel: "this month", icon: <UserX className="h-4 w-4" />, iconClassName: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300" },
+  { title: "Roles", value: "5", change: 0, changeLabel: "role types", icon: <Shield className="h-4 w-4" />, iconClassName: "bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300" },
 ];
 
 export default function CashierPage() {
@@ -34,7 +34,7 @@ export default function CashierPage() {
 function CashierContent() {
   const { role } = useAuth();
   if (role === "shop_owner") return <ShopOwnerCashierView />;
-  
+
   return (
     <PlaceholderPage
       title="Thu ngân"
@@ -50,7 +50,7 @@ function CashierContent() {
 function ShopOwnerCashierView() {
   const { user } = useAuth();
   const shopId = user?.shop_id;
-  
+
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
@@ -143,44 +143,44 @@ function ShopOwnerCashierView() {
                   Tạo tài khoản mới để nhân viên có thể đăng nhập vào hệ thống bán hàng (POS).
                 </DialogDescription>
               </DialogHeader>
-              
+
               <form onSubmit={handleSubmit} className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="username">Tên đăng nhập (Username) <span className="text-red-500">*</span></Label>
-                  <Input 
-                    id="username" 
-                    name="username" 
-                    value={formData.username} 
-                    onChange={handleChange} 
-                    required 
+                  <Input
+                    id="username"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
                     minLength={3}
-                    placeholder="VD: thungan_01" 
+                    placeholder="VD: thungan_01"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
-                  <Input 
-                    id="email" 
-                    name="email" 
-                    type="email" 
-                    value={formData.email} 
-                    onChange={handleChange} 
-                    required 
-                    placeholder="VD: nhanvien@example.com" 
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    placeholder="VD: nhanvien@example.com"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="password">Mật khẩu <span className="text-red-500">*</span></Label>
                   <div className="relative">
-                    <Input 
-                      id="password" 
-                      name="password" 
-                      type={showPw ? "text" : "password"} 
-                      value={formData.password} 
-                      onChange={handleChange} 
-                      required 
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPw ? "text" : "password"}
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
                       placeholder="••••••••"
                       className="pr-10"
                     />
@@ -200,12 +200,12 @@ function ShopOwnerCashierView() {
 
                 <div className="space-y-2">
                   <Label htmlFor="full_name">Họ và tên</Label>
-                  <Input 
-                    id="full_name" 
-                    name="full_name" 
-                    value={formData.full_name} 
-                    onChange={handleChange} 
-                    placeholder="VD: Nguyễn Văn A" 
+                  <Input
+                    id="full_name"
+                    name="full_name"
+                    value={formData.full_name}
+                    onChange={handleChange}
+                    placeholder="VD: Nguyễn Văn A"
                   />
                 </div>
 

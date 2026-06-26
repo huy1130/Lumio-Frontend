@@ -177,7 +177,7 @@ function StaffOrdersView() {
       customerService.getAll().catch(() => []),
       shiftService.getShiftsByShop(shopId).catch(() => [])
     ];
-    
+
     if (role === "shop_owner") {
       promises.push(inventoryService.getInventory(shopId).catch(() => null));
     }
@@ -201,14 +201,14 @@ function StaffOrdersView() {
       if (role === "shop_owner" && shopInventory) {
         let maxSellable = p.ingredient_products?.length ? Number.MAX_SAFE_INTEGER : 9999;
         const inventoryMap = new Map((shopInventory.inventory_items || []).map((i: any) => [i.ingredient_id, i]));
-        
+
         for (const ip of (p.ingredient_products || [])) {
           const invItem = inventoryMap.get(ip.ingredient_id);
           const qty = invItem?.theorical_quantity || 0;
           const threshold = invItem?.minimum_threshold || 0;
           const available = qty - threshold;
           const reqQty = Number(ip.quantity_required);
-          
+
           if (reqQty > 0) {
             const maxWithThisIngredient = Math.max(0, Math.floor(available / reqQty));
             if (maxWithThisIngredient < maxSellable) {
@@ -216,7 +216,7 @@ function StaffOrdersView() {
             }
           }
         }
-        
+
         if (p.ingredient_products?.length) {
           isOutOfStock = maxSellable <= 0;
           maxSellableQty = maxSellable;
@@ -285,10 +285,20 @@ function StaffOrdersView() {
   const clearCart = () => setCart([]);
 
   const subtotal = cart.reduce((s, c) => s + c.product.price * c.qty, 0);
-  const discount = 0; // Or calculate discount if applicable
-  const tax = subtotal * 0.08;
-  const total = subtotal - discount + tax;
+  const discount = 0;
+  const tax = 0;
+  const total = subtotal;
   const totalQty = cart.reduce((s, c) => s + c.qty, 0);
+
+  const refreshData = () => {
+    if (!shopId) return;
+    productService.getAll().then(prods => setProducts(prods || [])).catch(() => {});
+    if (role === "shop_owner") {
+      inventoryService.getInventory(shopId).then(inv => {
+        if (inv) setShopInventory(inv);
+      }).catch(() => {});
+    }
+  };
 
   const processCheckout = async () => {
     if (!shopId || cart.length === 0) return;
@@ -315,6 +325,7 @@ function StaffOrdersView() {
       clearCart();
       setCashReceived("");
       setShowTransferConfirm(false);
+      refreshData();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Không thể tạo đơn hàng";
       toast.error(msg);
@@ -338,6 +349,7 @@ function StaffOrdersView() {
       const updatedOrder = res; // already unwrapped by api client
       toast.success("Đã hoàn thành đơn hàng!");
       setRecentOrders(prev => prev.map(o => o.id === orderId ? updatedOrder : o));
+      refreshData();
     } catch (err: any) {
       toast.error(err.message || "Lỗi khi hoàn thành đơn hàng");
     }
@@ -351,6 +363,7 @@ function StaffOrdersView() {
       const updatedOrder = res; // already unwrapped by api client
       toast.success("Đã huỷ đơn hàng!");
       setRecentOrders(prev => prev.map(o => o.id === orderId ? updatedOrder : o));
+      refreshData();
       setCancelOrderId(null);
     } catch (err: any) {
       toast.error(err.message || "Lỗi khi huỷ đơn hàng");
@@ -601,8 +614,8 @@ function StaffOrdersView() {
           <div className="flex flex-col h-full">
             <div className="shrink-0 flex items-center justify-between px-5 pt-6 pb-4">
               <div>
-                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Current Order</h2>
-                {totalQty > 0 && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{totalQty} item{totalQty !== 1 ? "s" : ""}</p>}
+                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Đơn hàng hiện tại</h2>
+                {totalQty > 0 && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{totalQty} sản phẩm</p>}
               </div>
               <button className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <Settings className="h-4 w-4" />
@@ -624,8 +637,8 @@ function StaffOrdersView() {
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 mb-4">
                     <ShoppingCart className="h-8 w-8 text-orange-400" />
                   </div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">No items yet</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Click a product card to add it</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Chưa có sản phẩm</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Chọn sản phẩm từ danh sách bên trái để thêm</p>
                 </div>
               ) : (
                 cart.map(({ product, qty }) => (
@@ -641,20 +654,20 @@ function StaffOrdersView() {
               <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 px-5 pt-4 pb-6 space-y-3">
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                    <span>Subtotal</span><span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(subtotal)}</span>
+                    <span>Tổng cộng</span><span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-red-500">
+                  {/* <div className="flex justify-between text-red-500">
                     <span>Discount (5%)</span><span className="font-medium">-{formatCurrency(discount)}</span>
                   </div>
                   <div className="flex justify-between text-gray-600 dark:text-gray-400">
                     <span>Sales tax (8%)</span><span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(tax)}</span>
-                  </div>
+                  </div> */}
                 </div>
                 <Separator />
-                <div className="flex justify-between items-center mb-1">
+                {/* <div className="flex justify-between items-center mb-1">
                   <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total</span>
                   <span className="text-xl font-extrabold text-orange-500">{formatCurrency(total)}</span>
-                </div>
+                </div> */}
 
                 <div className="flex gap-2 pb-1">
                   <button
@@ -687,9 +700,12 @@ function StaffOrdersView() {
                       </div>
                       <Input
                         placeholder="0"
-                        type="number"
-                        value={cashReceived}
-                        onChange={(e) => setCashReceived(e.target.value)}
+                        type="text"
+                        value={cashReceived ? new Intl.NumberFormat('vi-VN').format(Number(cashReceived.replace(/\D/g, ''))) : ""}
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/\D/g, '');
+                          setCashReceived(rawValue);
+                        }}
                         className="text-lg font-medium h-10 border-gray-200 dark:border-gray-700"
                       />
                     </div>
@@ -700,13 +716,10 @@ function StaffOrdersView() {
                           key={amt}
                           variant="outline"
                           size="sm"
-                          className="flex-1 min-w-[30%] text-xs border-gray-200 dark:border-gray-700 hover:border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all"
-                          onClick={() => {
-                            const current = parseFloat(cashReceived) || 0;
-                            setCashReceived((current + amt).toString());
-                          }}
+                          className="flex-1 min-w-[30%] text-xs font-semibold border-gray-200 dark:border-gray-700 hover:border-orange-200 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all"
+                          onClick={() => setCashReceived(amt.toString())}
                         >
-                          +{formatCurrency(amt).replace(/\.00$/, '').replace(/,00$/, '')}
+                          {new Intl.NumberFormat('vi-VN').format(amt)}
                         </Button>
                       ))}
                       <Button
@@ -728,8 +741,8 @@ function StaffOrdersView() {
 
                       return (
                         <div className={`p-3 rounded-lg border flex justify-between items-center transition-colors duration-300 ${isSufficient
-                            ? "bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-800/50"
-                            : "bg-red-50/50 border-red-200 dark:bg-red-900/10 dark:border-red-800/50"
+                          ? "bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-800/50"
+                          : "bg-red-50/50 border-red-200 dark:bg-red-900/10 dark:border-red-800/50"
                           }`}>
                           <span className={`text-sm font-medium ${isSufficient ? "text-green-700 dark:text-green-400" : "text-red-600 dark:text-red-400"
                             }`}>
@@ -753,7 +766,7 @@ function StaffOrdersView() {
                   {isSubmitting ? "Đang xử lý..." : "Thanh toán"}
                 </button>
                 <button onClick={clearCart} className="w-full text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors py-1">
-                  Clear order
+                  Xóa đơn hàng
                 </button>
               </div>
             )}
