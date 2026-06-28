@@ -29,8 +29,8 @@ const INITIAL: Message[] = [
 const QUICK = [
   "Doanh thu tháng này thế nào?",
   "Món nào bán chạy nhất?",
-  "Cách áp dụng giảm giá?",
-  "Quy trình hoàn tiền thế nào?",
+  "Món nào bán chậm nhất",
+  "Tôi nên áp dụng chiến thuật nào để thu được nhiều doanh thu hơn ?",
 ];
 
 function AIChatbotContent() {
@@ -110,14 +110,14 @@ function AIChatbotContent() {
                 {messages.map((m, i) => (
                   <div key={i} className={`flex gap-2.5 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
                     <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${m.role === "bot"
-                        ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400"
-                        : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                      ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
                       }`}>
                       {m.role === "bot" ? <Bot className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
                     </div>
                     <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap ${m.role === "bot"
-                        ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-sm"
-                        : "bg-indigo-600 text-white rounded-tr-sm"
+                      ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-sm"
+                      : "bg-indigo-600 text-white rounded-tr-sm"
                       }`}>
                       {m.text}
                     </div>
