@@ -33,5 +33,5 @@ export const FEATURE_ACCESS: Record<string, Role[]> = {
   "ai/charts": ["admin", "shop_owner", "inventory_staff"],
   "ai/config": ["admin"],
   "ai/stats": ["admin"],
-  "ai/chatbot": ["shop_owner", "cashier"],
+  "ai/chatbot": ["shop_owner"],
 };

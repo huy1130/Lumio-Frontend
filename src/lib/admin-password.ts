@@ -1,5 +1,5 @@
 /** Khớp CreateAdminDto / UpdateAdminDto (@MinLength(6)) trên backend. */
-export const ADMIN_PASSWORD_MIN_LENGTH = 6;
+export const ADMIN_PASSWORD_MIN_LENGTH = 8;
 
 export const ADMIN_PASSWORD_HINT = `Tối thiểu ${ADMIN_PASSWORD_MIN_LENGTH} ký tự`;
 

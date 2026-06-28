@@ -306,9 +306,9 @@ function AdminsContent() {
               </CardDescription>
             </div>
             {canManage && (
-              <Button 
-                className="gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-10 px-5 font-semibold shadow-sm transition-all active:scale-95" 
-                onClick={openCreate} 
+              <Button
+                className="gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-10 px-5 font-semibold shadow-sm transition-all active:scale-95"
+                onClick={openCreate}
                 disabled={loading}
               >
                 <Plus className="h-4 w-4" /> Thêm Admin
@@ -338,107 +338,107 @@ function AdminsContent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                  {admins.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={tableColSpan}
-                        className="py-12 text-center text-muted-foreground"
-                      >
-                        No admins found.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    admins.map((admin) => (
-                      <TableRow key={admin.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/50">
-                        <TableCell className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 text-indigo-700 font-bold shadow-sm dark:from-indigo-900/40 dark:to-blue-900/40 dark:text-indigo-300">
-                              {initials(admin.full_name, admin.email)}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-gray-900 dark:text-gray-100">
-                                {admin.full_name ?? "—"}
-                              </p>
-                              <p className="text-[13px] text-muted-foreground mt-0.5">
-                                Mã ID: #{admin.id}
-                              </p>
-                            </div>
-                          </div>
+                    {admins.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={tableColSpan}
+                          className="py-12 text-center text-muted-foreground"
+                        >
+                          No admins found.
                         </TableCell>
-                        <TableCell className="text-[13.5px] font-medium">{admin.email}</TableCell>
-                        <TableCell className="text-[13.5px] text-muted-foreground">
-                          {admin.phone ?? "—"}
-                        </TableCell>
-                        <TableCell>
-                          {admin.manager_id === null ? (
-                            <Badge
-                              variant="outline"
-                              className="gap-1 border-purple-200 text-purple-700 bg-purple-50 font-semibold dark:border-purple-800 dark:bg-purple-900/20 dark:text-purple-300"
-                            >
-                              <ShieldCheck className="h-3.5 w-3.5" />
-                              Khởi tạo
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary" className="font-medium bg-gray-100 text-gray-600">Phụ tá</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={admin.is_active ? "success" : "secondary"}
-                            className="font-medium"
-                          >
-                            {admin.is_active ? "Hoạt động" : "Bị khóa"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-[13.5px]">
-                          {admin.last_login
-                            ? new Date(admin.last_login).toLocaleString("vi-VN")
-                            : "Chưa từng"}
-                        </TableCell>
-                        {canManage && (
-                          <TableCell className="text-right px-6">
-                            <div className="flex justify-end gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8 w-8 rounded-full p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                                title="Sửa"
-                                onClick={() => openEdit(admin)}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className={cn(
-                                  "h-8 w-8 rounded-full p-0 transition-colors",
-                                  admin.is_active 
-                                    ? "text-gray-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" 
-                                    : "text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                                )}
-                                title={
-                                  admin.is_active ? "Khóa tài khoản" : "Mở khóa"
-                                }
-                                onClick={() => handleToggle(admin)}
-                                disabled={togglingId === admin.id}
-                              >
-                                {togglingId === admin.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : admin.is_active ? (
-                                  <ToggleRight className="h-5 w-5 text-emerald-500" />
-                                ) : (
-                                  <ToggleLeft className="h-5 w-5" />
-                                )}
-                              </Button>
+                      </TableRow>
+                    ) : (
+                      admins.map((admin) => (
+                        <TableRow key={admin.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/50">
+                          <TableCell className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 text-indigo-700 font-bold shadow-sm dark:from-indigo-900/40 dark:to-blue-900/40 dark:text-indigo-300">
+                                {initials(admin.full_name, admin.email)}
+                              </div>
+                              <div>
+                                <p className="font-semibold text-gray-900 dark:text-gray-100">
+                                  {admin.full_name ?? "—"}
+                                </p>
+                                <p className="text-[13px] text-muted-foreground mt-0.5">
+                                  Mã ID: #{admin.id}
+                                </p>
+                              </div>
                             </div>
                           </TableCell>
-                        )}
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                          <TableCell className="text-[13.5px] font-medium">{admin.email}</TableCell>
+                          <TableCell className="text-[13.5px] text-muted-foreground">
+                            {admin.phone ?? "—"}
+                          </TableCell>
+                          <TableCell>
+                            {admin.manager_id === null ? (
+                              <Badge
+                                variant="outline"
+                                className="gap-1 border-purple-200 text-purple-700 bg-purple-50 font-semibold dark:border-purple-800 dark:bg-purple-900/20 dark:text-purple-300"
+                              >
+                                <ShieldCheck className="h-3.5 w-3.5" />
+                                Khởi tạo
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary" className="font-medium bg-gray-100 text-gray-600">Phụ tá</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={admin.is_active ? "success" : "secondary"}
+                              className="font-medium"
+                            >
+                              {admin.is_active ? "Hoạt động" : "Bị khóa"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-[13.5px]">
+                            {admin.last_login
+                              ? new Date(admin.last_login).toLocaleString("vi-VN")
+                              : "Chưa từng"}
+                          </TableCell>
+                          {canManage && (
+                            <TableCell className="text-right px-6">
+                              <div className="flex justify-end gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 w-8 rounded-full p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                  title="Sửa"
+                                  onClick={() => openEdit(admin)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className={cn(
+                                    "h-8 w-8 rounded-full p-0 transition-colors",
+                                    admin.is_active
+                                      ? "text-gray-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                                      : "text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                  )}
+                                  title={
+                                    admin.is_active ? "Khóa tài khoản" : "Mở khóa"
+                                  }
+                                  onClick={() => handleToggle(admin)}
+                                  disabled={togglingId === admin.id}
+                                >
+                                  {togglingId === admin.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : admin.is_active ? (
+                                    <ToggleRight className="h-5 w-5 text-emerald-500" />
+                                  ) : (
+                                    <ToggleLeft className="h-5 w-5" />
+                                  )}
+                                </Button>
+                              </div>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -446,198 +446,198 @@ function AdminsContent() {
 
       {/* ── Create Admin Modal (initial admin only) ───────────────────────────── */}
       {canManage && (
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>New Admin</DialogTitle>
-          </DialogHeader>
+        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Tạo Admin mới</DialogTitle>
+            </DialogHeader>
 
-          <div className="space-y-4 py-2">
-            {createError && (
-              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {createError}
-              </p>
-            )}
+            <div className="space-y-4 py-2">
+              {createError && (
+                <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {createError}
+                </p>
+              )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2 space-y-1.5">
-                <Label htmlFor="c-email">Email *</Label>
-                <Input
-                  id="c-email"
-                  type="email"
-                  value={createForm.email}
-                  onChange={(e) =>
-                    setCreateForm((f) => ({ ...f, email: e.target.value }))
-                  }
-                  placeholder="admin@lumio.app"
-                />
-              </div>
-              <div className="col-span-2 space-y-1.5">
-                <Label htmlFor="c-password">
-                  Mật khẩu * ({ADMIN_PASSWORD_HINT})
-                </Label>
-                <Input
-                  id="c-password"
-                  type="password"
-                  value={createForm.password}
-                  onChange={(e) =>
-                    setCreateForm((f) => ({ ...f, password: e.target.value }))
-                  }
-                  placeholder="••••••••"
-                  minLength={ADMIN_PASSWORD_MIN_LENGTH}
-                  autoComplete="new-password"
-                />
-                {createForm.password.length > 0 &&
-                  createForm.password.length < ADMIN_PASSWORD_MIN_LENGTH && (
-                    <p className="text-xs text-destructive">
-                      Mật khẩu phải có ít nhất {ADMIN_PASSWORD_MIN_LENGTH} ký
-                      tự.
-                    </p>
-                  )}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="c-name">Full Name</Label>
-                <Input
-                  id="c-name"
-                  value={createForm.full_name ?? ""}
-                  onChange={(e) =>
-                    setCreateForm((f) => ({ ...f, full_name: e.target.value }))
-                  }
-                  placeholder="Nguyen Van A"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="c-phone">Phone</Label>
-                <Input
-                  id="c-phone"
-                  value={createForm.phone ?? ""}
-                  onChange={(e) =>
-                    setCreateForm((f) => ({ ...f, phone: e.target.value }))
-                  }
-                  placeholder="0901234567"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2 space-y-1.5">
+                  <Label htmlFor="c-email">Email *</Label>
+                  <Input
+                    id="c-email"
+                    type="email"
+                    value={createForm.email}
+                    onChange={(e) =>
+                      setCreateForm((f) => ({ ...f, email: e.target.value }))
+                    }
+                    placeholder="admin@lumio.app"
+                  />
+                </div>
+                <div className="col-span-2 space-y-1.5">
+                  <Label htmlFor="c-password">
+                    Mật khẩu * ({ADMIN_PASSWORD_HINT})
+                  </Label>
+                  <Input
+                    id="c-password"
+                    type="password"
+                    value={createForm.password}
+                    onChange={(e) =>
+                      setCreateForm((f) => ({ ...f, password: e.target.value }))
+                    }
+                    placeholder="••••••••"
+                    minLength={ADMIN_PASSWORD_MIN_LENGTH}
+                    autoComplete="new-password"
+                  />
+                  {createForm.password.length > 0 &&
+                    createForm.password.length < ADMIN_PASSWORD_MIN_LENGTH && (
+                      <p className="text-xs text-destructive">
+                        Mật khẩu phải có ít nhất {ADMIN_PASSWORD_MIN_LENGTH} ký
+                        tự.
+                      </p>
+                    )}
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="c-name">Họ và tên</Label>
+                  <Input
+                    id="c-name"
+                    value={createForm.full_name ?? ""}
+                    onChange={(e) =>
+                      setCreateForm((f) => ({ ...f, full_name: e.target.value }))
+                    }
+                    placeholder="Nguyen Van A"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="c-phone">Số điện thoại</Label>
+                  <Input
+                    id="c-phone"
+                    value={createForm.phone ?? ""}
+                    onChange={(e) =>
+                      setCreateForm((f) => ({ ...f, phone: e.target.value }))
+                    }
+                    placeholder="0901234567"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setCreateOpen(false)}
-              disabled={creating}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreate}
-              disabled={creating || createPasswordInvalid}
-            >
-              {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Admin
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setCreateOpen(false)}
+                disabled={creating}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreate}
+                disabled={creating || createPasswordInvalid}
+              >
+                {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create Admin
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* ── Edit Admin Modal (initial admin only) ─────────────────────────────── */}
       {canManage && (
-      <Dialog
-        open={!!editTarget}
-        onOpenChange={(o) => {
-          if (!o) setEditTarget(null);
-        }}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Admin</DialogTitle>
-          </DialogHeader>
+        <Dialog
+          open={!!editTarget}
+          onOpenChange={(o) => {
+            if (!o) setEditTarget(null);
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Admin</DialogTitle>
+            </DialogHeader>
 
-          <div className="space-y-4 py-2">
-            {editError && (
-              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {editError}
-              </p>
-            )}
+            <div className="space-y-4 py-2">
+              {editError && (
+                <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {editError}
+                </p>
+              )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2 space-y-1.5">
-                <Label htmlFor="e-email">Email</Label>
-                <Input
-                  id="e-email"
-                  type="email"
-                  value={editForm.email ?? ""}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, email: e.target.value }))
-                  }
-                />
-              </div>
-              <div className="col-span-2 space-y-1.5">
-                <Label htmlFor="e-password">
-                  Mật khẩu mới (để trống nếu không đổi — {ADMIN_PASSWORD_HINT})
-                </Label>
-                <Input
-                  id="e-password"
-                  type="password"
-                  value={editForm.password ?? ""}
-                  placeholder="••••••••"
-                  minLength={ADMIN_PASSWORD_MIN_LENGTH}
-                  autoComplete="new-password"
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setEditForm((f) => ({
-                      ...f,
-                      password: value === "" ? undefined : value,
-                    }));
-                    if (editError?.includes("Mật khẩu")) setEditError(null);
-                  }}
-                />
-                {editForm.password &&
-                  editForm.password.length < ADMIN_PASSWORD_MIN_LENGTH && (
-                    <p className="text-xs text-destructive">
-                      Mật khẩu phải có ít nhất {ADMIN_PASSWORD_MIN_LENGTH} ký
-                      tự.
-                    </p>
-                  )}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="e-name">Full Name</Label>
-                <Input
-                  id="e-name"
-                  value={editForm.full_name ?? ""}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, full_name: e.target.value }))
-                  }
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="e-phone">Phone</Label>
-                <Input
-                  id="e-phone"
-                  value={editForm.phone ?? ""}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, phone: e.target.value }))
-                  }
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2 space-y-1.5">
+                  <Label htmlFor="e-email">Email</Label>
+                  <Input
+                    id="e-email"
+                    type="email"
+                    value={editForm.email ?? ""}
+                    onChange={(e) =>
+                      setEditForm((f) => ({ ...f, email: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="col-span-2 space-y-1.5">
+                  <Label htmlFor="e-password">
+                    Mật khẩu mới (để trống nếu không đổi — {ADMIN_PASSWORD_HINT})
+                  </Label>
+                  <Input
+                    id="e-password"
+                    type="password"
+                    value={editForm.password ?? ""}
+                    placeholder="••••••••"
+                    minLength={ADMIN_PASSWORD_MIN_LENGTH}
+                    autoComplete="new-password"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setEditForm((f) => ({
+                        ...f,
+                        password: value === "" ? undefined : value,
+                      }));
+                      if (editError?.includes("Mật khẩu")) setEditError(null);
+                    }}
+                  />
+                  {editForm.password &&
+                    editForm.password.length < ADMIN_PASSWORD_MIN_LENGTH && (
+                      <p className="text-xs text-destructive">
+                        Mật khẩu phải có ít nhất {ADMIN_PASSWORD_MIN_LENGTH} ký
+                        tự.
+                      </p>
+                    )}
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="e-name">Full Name</Label>
+                  <Input
+                    id="e-name"
+                    value={editForm.full_name ?? ""}
+                    onChange={(e) =>
+                      setEditForm((f) => ({ ...f, full_name: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="e-phone">Phone</Label>
+                  <Input
+                    id="e-phone"
+                    value={editForm.phone ?? ""}
+                    onChange={(e) =>
+                      setEditForm((f) => ({ ...f, phone: e.target.value }))
+                    }
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setEditTarget(null)}
-              disabled={editing}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleEdit} disabled={editing || editPasswordInvalid}>
-              {editing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setEditTarget(null)}
+                disabled={editing}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleEdit} disabled={editing || editPasswordInvalid}>
+                {editing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

@@ -2,6 +2,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { TenantSubscriptionBanner } from "@/components/tenant/TenantSubscriptionBanner";
 import { RequireAuth } from "@/components/guards/RequireAuth";
 import { RequireSubscription } from "@/components/guards/RequireSubscription";
+import { RequireShop } from "@/components/guards/RequireShop";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +13,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <main className="flex-1 overflow-y-auto">
             <RequireSubscription>
               <TenantSubscriptionBanner className="mx-6 mt-4 mb-4" />
-              {children}
+              <RequireShop>
+                {children}
+              </RequireShop>
             </RequireSubscription>
           </main>
         </div>
