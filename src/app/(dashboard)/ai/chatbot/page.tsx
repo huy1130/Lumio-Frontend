@@ -12,9 +12,9 @@ import { aiAdvisorService } from "@/lib/services/aiAdvisorService";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AIChatbotPage() {
-  // Chatbot accesses by shop_owner and cashier to query operations and statistics
+  // Chatbot accesses by shop_owner to query operations and statistics
   return (
-    <AccessGuard roles={["shop_owner", "cashier"]}>
+    <AccessGuard roles={["shop_owner"]}>
       <AIChatbotContent />
     </AccessGuard>
   );
@@ -36,8 +36,8 @@ const QUICK = [
 function AIChatbotContent() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>(INITIAL);
-  const [input, setInput]       = useState("");
-  const [loading, setLoading]   = useState(false);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function send(text: string) {
     if (!text.trim() || loading) return;
@@ -70,7 +70,7 @@ function AIChatbotContent() {
         message: text,
         history,
       });
-      
+
       setMessages((prev) => [...prev, { role: "bot", text: res.data.message }]);
     } catch (err: any) {
       console.error(err);
@@ -109,18 +109,16 @@ function AIChatbotContent() {
               <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                 {messages.map((m, i) => (
                   <div key={i} className={`flex gap-2.5 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
-                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
-                      m.role === "bot"
+                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${m.role === "bot"
                         ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400"
                         : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-                    }`}>
+                      }`}>
                       {m.role === "bot" ? <Bot className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
                     </div>
-                    <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap ${
-                      m.role === "bot"
+                    <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap ${m.role === "bot"
                         ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-sm"
                         : "bg-indigo-600 text-white rounded-tr-sm"
-                    }`}>
+                      }`}>
                       {m.text}
                     </div>
                   </div>

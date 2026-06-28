@@ -91,23 +91,23 @@ export function TenantSubscriptionBanner({
 
   return (
     <div
-      className={`flex flex-col gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${borderTone} ${className}`}
+      className={`flex flex-col gap-2 rounded-lg border px-3 py-2 sm:flex-row sm:items-center sm:justify-between shadow-sm ${borderTone} ${className}`}
       role="alert"
     >
-      <div className={`flex gap-3 ${textTone}`}>
-        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-semibold">{view.title}</p>
-            <Badge variant={view.variant}>{info?.package_code ?? "—"}</Badge>
+      <div className={`flex items-center gap-2 ${textTone}`}>
+        <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-2">
+            <p className="text-[13px] font-bold">{view.title}</p>
+            <Badge variant={view.variant} className="text-[9px] px-1.5 py-0 h-4">
+              {info?.package_code ?? "—"}
+            </Badge>
           </div>
-          <p className="mt-0.5 text-xs opacity-90">{view.message}</p>
-          {info?.tenant_name ? (
-            <p className="mt-1 text-xs opacity-75">Tenant: {info.tenant_name}</p>
-          ) : null}
+          <span className="hidden sm:inline text-current opacity-40">•</span>
+          <p className="text-[12px] opacity-90">{view.message}</p>
         </div>
       </div>
-      <Button asChild size="sm" variant="outline" className="shrink-0 rounded-lg border-current bg-transparent hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+      <Button asChild size="sm" variant="outline" className="h-7 shrink-0 rounded-md border-current bg-transparent hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-xs font-semibold px-3">
         <Link href="/subscription/renew">Gia hạn ngay</Link>
       </Button>
     </div>

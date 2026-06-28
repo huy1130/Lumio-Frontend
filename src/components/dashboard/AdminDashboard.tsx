@@ -116,23 +116,23 @@ export function AdminDashboard() {
   const totalRenewals = stats?.totalRenewals ?? 0;
 
   return (
-    <div className="flex flex-col bg-gray-50/60 dark:bg-gray-950">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-indigo-50/40 via-white to-purple-50/40 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950/20">
       <Header />
 
-      <div className="w-full space-y-6 p-6">
+      <div className="w-full space-y-8 p-6 lg:p-10 max-w-[1600px] mx-auto">
         {/* Page header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-in fade-in duration-500">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div>
-            <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 mb-1.5">
-              <span>Admin</span>
-              <span className="text-gray-300 dark:text-gray-600">/</span>
-              <span className="text-gray-900 dark:text-gray-200">Dashboard</span>
+            <div className="flex items-center gap-2 text-[13px] font-bold text-indigo-600 dark:text-indigo-400 mb-2 uppercase tracking-wider">
+              <span>Platform Admin</span>
+              <span className="text-indigo-300 dark:text-indigo-700">•</span>
+              <span>Overview</span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+            <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">
               Thống kê Doanh thu
             </h1>
-            <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
-              Doanh thu từ các giao dịch thanh toán PayOS thành công (mua mới + gia hạn).
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 font-medium">
+              Theo dõi dòng tiền từ các giao dịch mua mới và gia hạn gói.
             </p>
           </div>
           <div className="flex gap-2 sm:shrink-0 animate-in fade-in duration-500">
@@ -201,7 +201,7 @@ export function AdminDashboard() {
             </div>
 
             <div className="grid gap-4 lg:grid-cols-2">
-              <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden dark:bg-gray-900/50">
+              <Card className="border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden bg-white/70 backdrop-blur-xl dark:bg-gray-900/70 dark:border-gray-800/60 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 group">
                 <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5 bg-white/50 dark:bg-gray-900/50">
                   <CardTitle className="text-base font-bold">Doanh thu theo gói</CardTitle>
                   <CardDescription className="text-[13px] mt-1">Biểu đồ cột thể hiện doanh thu (VNĐ)</CardDescription>
@@ -248,7 +248,7 @@ export function AdminDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden dark:bg-gray-900/50">
+              <Card className="border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden bg-white/70 backdrop-blur-xl dark:bg-gray-900/70 dark:border-gray-800/60 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 group">
                 <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5 bg-white/50 dark:bg-gray-900/50">
                   <CardTitle className="text-base font-bold">Lượt mua theo gói</CardTitle>
                   <CardDescription className="text-[13px] mt-1">So sánh mua mới và gia hạn</CardDescription>
@@ -300,7 +300,7 @@ export function AdminDashboard() {
               </Card>
             </div>
 
-            <Card className="border-none shadow-[0_2px_20px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden dark:bg-gray-900/50">
+            <Card className="border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden bg-white/70 backdrop-blur-xl dark:bg-gray-900/70 dark:border-gray-800/60 hover:shadow-xl transition-all duration-300">
               <CardHeader className="border-b border-gray-100/50 dark:border-gray-800/50 pb-5 bg-white/50 dark:bg-gray-900/50">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>

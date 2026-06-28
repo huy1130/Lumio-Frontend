@@ -36,20 +36,11 @@ const adminNav: NavSection[] = [
       { title: "Phân Quyền Tính Năng", href: "/plan-features", icon: Sparkles },
       { title: "vai trò", href: "/roles", icon: Shield },
       { title: "Danh sách tenants", href: "/tenants", icon: Building2 },
-      { title: "Quản lý user", href: "/users", icon: Users },
       { title: "Quản lý Admin", href: "/admins", icon: UserCog },
     ],
   },
 
-  {
-    title: "Analytics & AI",
-    items: [
-      { title: "Configure AI", href: "/ai/config", icon: BrainCircuit },
-      { title: "AI Statistics", href: "/ai/stats", icon: BarChart3 },
 
-      { title: "Export Data", href: "/export", icon: FileDown },
-    ],
-  },
   {
     title: "System",
     items: [{ title: "Settings", href: "/settings", icon: Settings }],
@@ -141,10 +132,7 @@ const cashierNav: NavSection[] = [
       { title: "Khách hàng", href: "/customers", icon: Users },
     ],
   },
-  {
-    title: "AI",
-    items: [{ title: "AI Chatbot", href: "/ai/chatbot", icon: BrainCircuit }],
-  },
+
   {
     title: "System",
     items: [
