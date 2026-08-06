@@ -34,7 +34,7 @@ const adminNav: NavSection[] = [
       { title: "Quản lý gói", href: "/subscriptions", icon: Tag, exact: true },
       { title: "Duyệt Thanh Toán", href: "/subscriptions/requests", icon: DollarSign },
       { title: "Phân Quyền Tính Năng", href: "/plan-features", icon: Sparkles },
-      { title: "vai trò", href: "/roles", icon: Shield },
+      { title: "Vai trò", href: "/roles", icon: Shield },
       { title: "Danh sách tenants", href: "/tenants", icon: Building2 },
       { title: "Quản lý Admin", href: "/admins", icon: UserCog },
     ],
