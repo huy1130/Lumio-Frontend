@@ -67,13 +67,8 @@ const shopOwnerNav: NavSection[] = [
     ],
   },
   {
-    title: "Khuyến mãi",
-    items: [{ title: "Quà Tặng", href: "/merchandises", icon: Store },
-    { title: "Chương Trình", href: "/programs", icon: Gift },
-    { title: "Khách hàng", href: "/customers", icon: Users },
-
-    ],
-
+    title: "Khách hàng",
+    items: [{ title: "Khách hàng", href: "/customers", icon: Users }],
   },
 
 
